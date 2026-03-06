@@ -1,42 +1,51 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+.app-root {
+  position: fixed;
+  inset: 0;
+  background: #000;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.page-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.92);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(77, 216, 230, 0.25) transparent;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.page-overlay::-webkit-scrollbar {
+  width: 6px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.page-overlay::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.card {
-  padding: 2em;
+.page-overlay::-webkit-scrollbar-thumb {
+  background: rgba(77, 216, 230, 0.25);
+  border-radius: 3px;
 }
 
-.read-the-docs {
-  color: #888;
+.page-overlay::-webkit-scrollbar-thumb:hover {
+  background: rgba(77, 216, 230, 0.45);
+}
+
+.page-overlay-close {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 60;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 22px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
