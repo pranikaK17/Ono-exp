@@ -18,17 +18,17 @@ export default function Map() {
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setSize(window.innerWidth, window.innerHeight)
-    renderer.shadowMap.enabled   = true
-    renderer.shadowMap.type      = THREE.PCFSoftShadowMap
-    renderer.outputColorSpace    = THREE.SRGBColorSpace
-    renderer.toneMapping         = THREE.ACESFilmicToneMapping
+    renderer.shadowMap.enabled = true
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap
+    renderer.outputColorSpace = THREE.SRGBColorSpace
+    renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 1.1
     mount.appendChild(renderer.domElement)
 
     // ── Scene ─────────────────────────────────────────────────────────────────
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(MAP_CONFIG.skyColor)
-    scene.fog        = new THREE.FogExp2(MAP_CONFIG.fogColor, MAP_CONFIG.fogDensity)
+    scene.fog = new THREE.FogExp2(MAP_CONFIG.fogColor, MAP_CONFIG.fogDensity)
 
     // ── Camera ────────────────────────────────────────────────────────────────
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -41,13 +41,13 @@ export default function Map() {
     sun.position.set(50, 100, 50)
     sun.castShadow = true
     sun.shadow.mapSize.set(MAP_CONFIG.shadowMapSize, MAP_CONFIG.shadowMapSize)
-    sun.shadow.camera.near   = 0.5
-    sun.shadow.camera.far    = 400
-    sun.shadow.camera.left   = -120
-    sun.shadow.camera.right  = 120
-    sun.shadow.camera.top    = 120
+    sun.shadow.camera.near = 0.5
+    sun.shadow.camera.far = 400
+    sun.shadow.camera.left = -120
+    sun.shadow.camera.right = 120
+    sun.shadow.camera.top = 120
     sun.shadow.camera.bottom = -120
-    sun.shadow.bias          = -0.0005
+    sun.shadow.bias = -0.0005
     scene.add(sun)
 
     const fillLight = new THREE.DirectionalLight(0xadd8ff, 0.3)
@@ -55,18 +55,18 @@ export default function Map() {
     scene.add(fillLight)
 
     // ── Progress helpers ──────────────────────────────────────────────────────
-    const barEl  = document.getElementById('map-bar')
+    const barEl = document.getElementById('map-bar')
     const textEl = document.getElementById('map-text')
     const setProg = (pct: number, msg?: string) => {
-      if (barEl)         barEl.style.width   = pct + '%'
-      if (msg && textEl) textEl.textContent  = msg
+      if (barEl) barEl.style.width = pct + '%'
+      if (msg && textEl) textEl.textContent = msg
     }
 
     const loader = new GLTFLoader()
     const loadGLTF = (url: string, from: number, to: number, label: string) =>
       new Promise<{ scene: THREE.Group; animations: THREE.AnimationClip[] }>((res, rej) =>
         loader.load(url,
-          g  => { setProg(to, `${label} loaded`); res(g) },
+          g => { setProg(to, `${label} loaded`); res(g) },
           xhr => { if (xhr.lengthComputable) setProg(from + (xhr.loaded / xhr.total) * (to - from)) },
           rej
         )
@@ -75,8 +75,8 @@ export default function Map() {
     // ── Runtime ───────────────────────────────────────────────────────────────
     let raf = 0
     let inputCtrl: InputController | null = null
-    let charCtrl:  CharacterController   | null = null
-    let joystick:  MobileJoystick        | null = null
+    let charCtrl: CharacterController | null = null
+    let joystick: MobileJoystick | null = null
     const clock = new THREE.Clock()
 
     const tick = () => {
@@ -88,151 +88,151 @@ export default function Map() {
       renderer.render(scene, camera)
     }
 
-    ;(async () => {
-      try {
-        // ── Load map ──────────────────────────────────────────────────────────
-        setProg(5, 'Loading map...')
-        const mapGLTF = await loadGLTF(MAP_CONFIG.mapModelPath, 5, 55, 'Map')
+      ; (async () => {
+        try {
+          // ── Load map ──────────────────────────────────────────────────────────
+          setProg(5, 'Loading map...')
+          const mapGLTF = await loadGLTF(MAP_CONFIG.mapModelPath, 5, 55, 'Map')
 
-        // ── Fix negative scales ───────────────────────────────────────────────
-        // Nodes like 'majorfloor' and 'building subpart' have negative scale
-        // components exported from Blender. Negative scale in Three.js causes
-        // inside-out normals, z-fighting, and objects appearing to float.
-        // Fix: flip each negative scale axis to positive and compensate by
-        // rotating the geometry 180° on that axis so it looks identical.
-        mapGLTF.scene.traverse(c => {
-          const obj = c as THREE.Mesh
-          const s   = obj.scale
+          // ── Fix negative scales ───────────────────────────────────────────────
+          // Nodes like 'majorfloor' and 'building subpart' have negative scale
+          // components exported from Blender. Negative scale in Three.js causes
+          // inside-out normals, z-fighting, and objects appearing to float.
+          // Fix: flip each negative scale axis to positive and compensate by
+          // rotating the geometry 180° on that axis so it looks identical.
+          mapGLTF.scene.traverse(c => {
+            const obj = c as THREE.Mesh
+            const s = obj.scale
 
-          // Fix each negative axis independently
-          if (s.x < 0 || s.y < 0 || s.z < 0) {
-            console.log(`[Map] fixing negative scale on '${obj.name}':`, s.x, s.y, s.z)
+            // Fix each negative axis independently
+            if (s.x < 0 || s.y < 0 || s.z < 0) {
+              console.log(`[Map] fixing negative scale on '${obj.name}':`, s.x, s.y, s.z)
 
-            // Absorb the negative scale into the geometry so the world matrix
-            // stays clean — apply scale to geometry positions directly
-            if (obj.isMesh && obj.geometry) {
-              // Clone geometry so we don't mutate shared resources
-              obj.geometry = obj.geometry.clone()
-              obj.geometry.applyMatrix4(
-                new THREE.Matrix4().makeScale(
-                  s.x < 0 ? -1 : 1,
-                  s.y < 0 ? -1 : 1,
-                  s.z < 0 ? -1 : 1
+              // Absorb the negative scale into the geometry so the world matrix
+              // stays clean — apply scale to geometry positions directly
+              if (obj.isMesh && obj.geometry) {
+                // Clone geometry so we don't mutate shared resources
+                obj.geometry = obj.geometry.clone()
+                obj.geometry.applyMatrix4(
+                  new THREE.Matrix4().makeScale(
+                    s.x < 0 ? -1 : 1,
+                    s.y < 0 ? -1 : 1,
+                    s.z < 0 ? -1 : 1
+                  )
                 )
-              )
-              // Flip normals so lighting is correct after the scale flip
-              const pos = obj.geometry.attributes.position
-              const nor = obj.geometry.attributes.normal
-              if (nor) {
-                for (let i = 0; i < nor.count; i++) {
-                  if (s.x < 0) nor.setX(i, -nor.getX(i))
-                  if (s.y < 0) nor.setY(i, -nor.getY(i))
-                  if (s.z < 0) nor.setZ(i, -nor.getZ(i))
+                // Flip normals so lighting is correct after the scale flip
+                const pos = obj.geometry.attributes.position
+                const nor = obj.geometry.attributes.normal
+                if (nor) {
+                  for (let i = 0; i < nor.count; i++) {
+                    if (s.x < 0) nor.setX(i, -nor.getX(i))
+                    if (s.y < 0) nor.setY(i, -nor.getY(i))
+                    if (s.z < 0) nor.setZ(i, -nor.getZ(i))
+                  }
+                  nor.needsUpdate = true
                 }
-                nor.needsUpdate  = true
+                if (pos) pos.needsUpdate = true
               }
-              if (pos) pos.needsUpdate = true
+
+              // Make scale positive
+              s.set(Math.abs(s.x), Math.abs(s.y), Math.abs(s.z))
             }
 
-            // Make scale positive
-            s.set(Math.abs(s.x), Math.abs(s.y), Math.abs(s.z))
-          }
+            if (obj.isMesh) {
+              obj.castShadow = true
+              obj.receiveShadow = true
+            }
+          })
 
-          if (obj.isMesh) {
-            obj.castShadow    = true
-            obj.receiveShadow = true
-          }
-        })
+          // Force full world matrix recompute AFTER fixing scales
+          mapGLTF.scene.updateMatrixWorld(true)
+          scene.add(mapGLTF.scene)
+          // Second update after adding to scene so all parent transforms are final
+          mapGLTF.scene.updateMatrixWorld(true)
 
-        // Force full world matrix recompute AFTER fixing scales
-        mapGLTF.scene.updateMatrixWorld(true)
-        scene.add(mapGLTF.scene)
-        // Second update after adding to scene so all parent transforms are final
-        mapGLTF.scene.updateMatrixWorld(true)
+          const mapBox = new THREE.Box3().setFromObject(mapGLTF.scene)
+          const mapSize = mapBox.getSize(new THREE.Vector3())
+          console.log('[Map] bounds:', mapBox.min, mapBox.max, 'size:', mapSize)
 
-        const mapBox  = new THREE.Box3().setFromObject(mapGLTF.scene)
-        const mapSize = mapBox.getSize(new THREE.Vector3())
-        console.log('[Map] bounds:', mapBox.min, mapBox.max, 'size:', mapSize)
+          // ── Load character ────────────────────────────────────────────────────
+          setProg(55, 'Loading character...')
+          const charGLTF = await loadGLTF(MAP_CONFIG.characterModelPath, 55, 90, 'Character')
 
-        // ── Load character ────────────────────────────────────────────────────
-        setProg(55, 'Loading character...')
-        const charGLTF = await loadGLTF(MAP_CONFIG.characterModelPath, 55, 90, 'Character')
+          charGLTF.scene.traverse(c => {
+            const m = c as THREE.Mesh
+            if (m.isMesh) { m.castShadow = true; m.receiveShadow = true }
+          })
+          charGLTF.scene.updateMatrixWorld(true)
 
-        charGLTF.scene.traverse(c => {
-          const m = c as THREE.Mesh
-          if (m.isMesh) { m.castShadow = true; m.receiveShadow = true }
-        })
-        charGLTF.scene.updateMatrixWorld(true)
+          const rawCharBox = new THREE.Box3().setFromObject(charGLTF.scene)
+          const rawCharSize = rawCharBox.getSize(new THREE.Vector3())
 
-        const rawCharBox  = new THREE.Box3().setFromObject(charGLTF.scene)
-        const rawCharSize = rawCharBox.getSize(new THREE.Vector3())
+          const targetHeight = Math.max(mapSize.x, mapSize.z) * 0.015
+          const rawHeight = rawCharSize.y > 0 ? rawCharSize.y : 1
+          const charScale = targetHeight / rawHeight
+          charGLTF.scene.scale.setScalar(charScale)
+          charGLTF.scene.updateMatrixWorld(true)
 
-        const targetHeight = Math.max(mapSize.x, mapSize.z) * 0.015
-        const rawHeight    = rawCharSize.y > 0 ? rawCharSize.y : 1
-        const charScale    = targetHeight / rawHeight
-        charGLTF.scene.scale.setScalar(charScale)
-        charGLTF.scene.updateMatrixWorld(true)
+          const scaledCharSize = new THREE.Box3().setFromObject(charGLTF.scene).getSize(new THREE.Vector3())
+          const charHeight = scaledCharSize.y
+          console.log(`[Char] scale=${charScale.toFixed(3)}, height=${charHeight.toFixed(2)}`)
 
-        const scaledCharSize = new THREE.Box3().setFromObject(charGLTF.scene).getSize(new THREE.Vector3())
-        const charHeight     = scaledCharSize.y
-        console.log(`[Char] scale=${charScale.toFixed(3)}, height=${charHeight.toFixed(2)}`)
+          scene.add(charGLTF.scene)
 
-        scene.add(charGLTF.scene)
+          // ── Build collision AFTER scene is fully added ────────────────────────
+          const collision = new CollisionSystem(mapGLTF.scene)
 
-        // ── Build collision AFTER scene is fully added ────────────────────────
-        const collision = new CollisionSystem(mapGLTF.scene)
+          // ── Spawn at Blender origin (0, 0) ───────────────────────────────────
+          // Raycast straight down at X=0, Z=0 to find the ground surface
+          // at the point you set as origin in Blender.
+          const originProbe = new THREE.Vector3(0, mapBox.max.y + 10, 0)
+          const originGY = collision.getGroundY(originProbe, charHeight) ?? mapBox.min.y
+          const spawnPos = new THREE.Vector3(0, originGY, 0)
+          console.log('[Spawn] origin ground Y:', originGY, '→', spawnPos)
 
-        // ── Spawn at Blender origin (0, 0) ───────────────────────────────────
-        // Raycast straight down at X=0, Z=0 to find the ground surface
-        // at the point you set as origin in Blender.
-        const originProbe = new THREE.Vector3(0, mapBox.max.y + 10, 0)
-        const originGY    = collision.getGroundY(originProbe, charHeight) ?? mapBox.min.y
-        const spawnPos    = new THREE.Vector3(0, originGY, 0)
-        console.log('[Spawn] origin ground Y:', originGY, '→', spawnPos)
+          // ── Controllers ───────────────────────────────────────────────────────
+          inputCtrl = new InputController()
 
-        // ── Controllers ───────────────────────────────────────────────────────
-        inputCtrl = new InputController()
-
-        const joyBase   = document.getElementById('joy-base')
-        const joyKnob   = document.getElementById('joy-knob')
-        const sprintBtn = document.getElementById('sprint-btn')
-        joystick = (joyBase && joyKnob && sprintBtn)
-          ? new MobileJoystick(joyBase, joyKnob, sprintBtn)
-          : new MobileJoystick(
+          const joyBase = document.getElementById('joy-base')
+          const joyKnob = document.getElementById('joy-knob')
+          const sprintBtn = document.getElementById('sprint-btn')
+          joystick = (joyBase && joyKnob && sprintBtn)
+            ? new MobileJoystick(joyBase, joyKnob, sprintBtn)
+            : new MobileJoystick(
               document.createElement('div'),
               document.createElement('div'),
               document.createElement('div')
             )
 
-        charCtrl = new CharacterController({
-          model:      charGLTF.scene,
-          mixer:      charGLTF.animations.length ? new THREE.AnimationMixer(charGLTF.scene) : null,
-          animations: charGLTF.animations,
-          camera,
-          collision,
-          mapBounds:  mapBox,
-          spawnPos,
-          charHeight,
-        })
+          charCtrl = new CharacterController({
+            model: charGLTF.scene,
+            mixer: charGLTF.animations.length ? new THREE.AnimationMixer(charGLTF.scene) : null,
+            animations: charGLTF.animations,
+            camera,
+            collision,
+            mapBounds: mapBox,
+            spawnPos,
+            charHeight,
+          })
 
-        // ── Hide loading ───────────────────────────────────────────────────────
-        setProg(100, 'Ready!')
-        const loadEl = document.getElementById('map-loading')
-        if (loadEl) setTimeout(() => {
-          loadEl.style.opacity = '0'
-          setTimeout(() => loadEl.remove(), 700)
-        }, 300)
+          // ── Hide loading ───────────────────────────────────────────────────────
+          setProg(100, 'Ready!')
+          const loadEl = document.getElementById('map-loading')
+          if (loadEl) setTimeout(() => {
+            loadEl.style.opacity = '0'
+            setTimeout(() => loadEl.remove(), 700)
+          }, 300)
 
-        const hint = document.getElementById('map-hint')
-        setTimeout(() => { if (hint) hint.style.opacity = '0' }, 6000)
+          const hint = document.getElementById('map-hint')
+          setTimeout(() => { if (hint) hint.style.opacity = '0' }, 6000)
 
-        tick()
+          tick()
 
-      } catch (err) {
-        console.error('[Map] load error:', err)
-        if (textEl) textEl.textContent = 'Error loading — see console.'
-      }
-    })()
+        } catch (err) {
+          console.error('[Map] load error:', err)
+          if (textEl) textEl.textContent = 'Error loading — see console.'
+        }
+      })()
 
     // ── Resize ────────────────────────────────────────────────────────────────
     const onResize = () => {
@@ -353,8 +353,8 @@ export default function Map() {
         }
       `}</style>
 
-      <div style={{ position:'fixed', inset:0, width:'100vw', height:'100vh' }}>
-        <div ref={mountRef} style={{ width:'100%', height:'100%' }} />
+      <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh' }}>
+        <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
 
         <div id="map-loading">
           <h1>World</h1>

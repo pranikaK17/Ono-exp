@@ -23,44 +23,45 @@ export class CharacterController {
   private verticalVel = 0
 
   // Camera orbit
-  private yaw:      number
-  private pitch:    number
+  private yaw: number
+  private pitch: number
   private distance: number
 
   // Drag state (mouse + touch)
-  private dragging     = false
-  private dragLastX    = 0
-  private dragLastY    = 0
+  private dragging = false
+  private dragLastX = 0
+  private dragLastY = 0
   private touchDragId: number | null = null
 
   // Smoothed velocity for fluid Roblox-like movement
   private smoothVel = new THREE.Vector3()
   // Track whether user is manually orbiting camera
   private isManuallyOrbiting = false
-  private orbitIdleTimer     = 0
+  private orbitIdleTimer = 0
   private speedEl: HTMLElement | null = null
 
   constructor(opts: {
-    model:      THREE.Object3D
-    mixer:      THREE.AnimationMixer | null
+    model: THREE.Object3D
+    mixer: THREE.AnimationMixer | null
     animations: THREE.AnimationClip[]
-    camera:     THREE.PerspectiveCamera
-    collision:  CollisionSystem
-    mapBounds:  THREE.Box3
-    spawnPos:   THREE.Vector3
+    camera: THREE.PerspectiveCamera
+    collision: CollisionSystem
+    mapBounds: THREE.Box3
+    spawnPos: THREE.Vector3
     charHeight: number
   }) {
-    this.model      = opts.model
-    this.mixer      = opts.mixer
-    this.camera     = opts.camera
-    this.collision  = opts.collision
-    this.mapBounds  = opts.mapBounds
-    this.position   = opts.spawnPos.clone()
+    this.model = opts.model
+    this.mixer = opts.mixer
+    this.camera = opts.camera
+    this.collision = opts.collision
+    this.mapBounds = opts.mapBounds
+    this.position = opts.spawnPos.clone()
     this.charHeight = opts.charHeight
 
-    this.yaw      = Math.PI
-    this.pitch    = MAP_CONFIG.cameraPitchDefault
-    this.distance = MAP_CONFIG.cameraDistance
+    this.yaw = 0 // Changed from Math.PI to 0 to show character's back
+    this.pitch = MAP_CONFIG.cameraPitchDefault
+    this.distance = Math.max(MAP_CONFIG.cameraDistance, opts.charHeight * 1.2)
+    this._smoothSafeDist = this.distance
 
     this.speedEl = document.getElementById('speed-indicator')
 
@@ -80,7 +81,7 @@ export class CharacterController {
     const map: Record<AnimKey, string[]> = {
       idle: ['idle', 'stand', 'rest', 'still_test', 'still'],
       walk: ['walking_test', 'walk', 'walking'],
-      run:  ['walking_test', 'walk', 'walking'],  // same clip, faster timeScale
+      run: ['walking_test', 'walk', 'walking'],  // same clip, faster timeScale
     }
 
     for (const clip of clips) {
@@ -96,8 +97,8 @@ export class CharacterController {
 
     // Fallbacks
     if (!this.actions.idle && clips[0]) this.actions.idle = this.mixer.clipAction(clips[0])
-    if (!this.actions.run  && this.actions.walk) this.actions.run  = this.actions.walk
-    if (!this.actions.walk && this.actions.run)  this.actions.walk = this.actions.run
+    if (!this.actions.run && this.actions.walk) this.actions.run = this.actions.walk
+    if (!this.actions.walk && this.actions.run) this.actions.walk = this.actions.run
 
     if (this.actions.idle) { this.actions.idle.play(); this.currentAction = 'idle' }
   }
@@ -119,9 +120,9 @@ export class CharacterController {
     // run clip plays at 1.6× — it's already a faster clip
     // If walk and run share the same clip, run gets 2.6× to look distinct
     if (name === 'walk') {
-      next.timeScale = 1.8
+      next.timeScale = 1.3
     } else if (name === 'run') {
-      next.timeScale = 3.0   // walking_test sped up hard for sprint feel
+      next.timeScale = 2.0   // Adjusted for sprint speed
     } else {
       next.timeScale = 1.0
     }
@@ -132,7 +133,7 @@ export class CharacterController {
   private _bindCameraControls() {
     window.addEventListener('mousedown', (e) => {
       if (e.button === 2 || e.button === 1 || (e.button === 0 && !document.pointerLockElement)) {
-        this.dragging  = true
+        this.dragging = true
         this.dragLastX = e.clientX
         this.dragLastY = e.clientY
         e.preventDefault()
@@ -144,7 +145,7 @@ export class CharacterController {
       this.dragLastX = e.clientX
       this.dragLastY = e.clientY
     })
-    window.addEventListener('mouseup',    () => { this.dragging = false })
+    window.addEventListener('mouseup', () => { this.dragging = false })
     window.addEventListener('mouseleave', () => { this.dragging = false })
     window.addEventListener('contextmenu', e => e.preventDefault())
 
@@ -159,8 +160,8 @@ export class CharacterController {
       // Trackpad pan fires WheelEvent with deltaX + deltaY and NO ctrlKey.
       // Pinch-to-zoom fires WheelEvent with ctrlKey = true.
       // A mouse scroll wheel has deltaX ≈ 0 and larger deltaY steps.
-      const isTrackpadPan  = !e.ctrlKey && Math.abs(e.deltaX) > 1
-      const isTrackpadZoom =  e.ctrlKey                              // pinch gesture
+      const isTrackpadPan = !e.ctrlKey && Math.abs(e.deltaX) > 1
+      const isTrackpadZoom = e.ctrlKey                              // pinch gesture
 
       if (isTrackpadZoom) {
         // Pinch: zoom in/out
@@ -172,8 +173,8 @@ export class CharacterController {
       } else if (isTrackpadPan) {
         // Two-finger swipe: orbit camera (pan sensitivity slightly higher than mouse)
         const panSensitivity = MAP_CONFIG.mouseSensitivity * 1.5
-        this.yaw   -= e.deltaX * panSensitivity
-        this.pitch  = Math.max(MAP_CONFIG.minPitch, Math.min(MAP_CONFIG.maxPitch,
+        this.yaw -= e.deltaX * panSensitivity
+        this.pitch = Math.max(MAP_CONFIG.minPitch, Math.min(MAP_CONFIG.maxPitch,
           this.pitch + e.deltaY * panSensitivity))
       } else {
         // Regular mouse scroll wheel: zoom only
@@ -190,12 +191,12 @@ export class CharacterController {
         const t = e.touches[0]
         if (t.clientX > window.innerWidth * 0.42) {
           this.touchDragId = t.identifier
-          this.dragLastX   = t.clientX
-          this.dragLastY   = t.clientY
+          this.dragLastX = t.clientX
+          this.dragLastY = t.clientY
         }
       }
       if (e.touches.length === 2) {
-        this._pinchStartDist    = Math.hypot(
+        this._pinchStartDist = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
           e.touches[0].clientY - e.touches[1].clientY
         )
@@ -233,16 +234,16 @@ export class CharacterController {
     }, { passive: true })
   }
 
-  private _pinchStartDist    = 0
+  private _pinchStartDist = 0
   private _pinchStartCamDist = 0
 
   private _orbitBy(dx: number, dy: number) {
-    this.yaw   -= dx * MAP_CONFIG.mouseSensitivity
-    this.pitch  = Math.max(MAP_CONFIG.minPitch, Math.min(MAP_CONFIG.maxPitch,
+    this.yaw -= dx * MAP_CONFIG.mouseSensitivity
+    this.pitch = Math.max(MAP_CONFIG.minPitch, Math.min(MAP_CONFIG.maxPitch,
       this.pitch + dy * MAP_CONFIG.mouseSensitivity))
     // User is manually controlling — suppress auto-follow briefly
     this.isManuallyOrbiting = true
-    this.orbitIdleTimer     = 0
+    this.orbitIdleTimer = 0
   }
 
   // ─── Main update ────────────────────────────────────────────────────────────
@@ -251,9 +252,7 @@ export class CharacterController {
     input.consumeMouseDelta()
 
     // ── Input ────────────────────────────────────────────────────────────────
-    const kb          = input.getMoveVector()
-    const isSprinting = input.isSprinting() || joystick.sprint
-    const speed       = isSprinting ? MAP_CONFIG.sprintSpeed * 1.8 : MAP_CONFIG.walkSpeed
+    const kb = input.getMoveVector()
 
     let mx = kb.x + joystick.x
     let mz = kb.z + joystick.y
@@ -261,14 +260,17 @@ export class CharacterController {
     if (inputLen > 1) { mx /= inputLen; mz /= inputLen }
     const moving = inputLen > 0.05
 
+    const isSprinting = (input.isSprinting() || joystick.sprint) && moving
+    const speed = isSprinting ? MAP_CONFIG.sprintSpeed : MAP_CONFIG.walkSpeed
+
     // ── Direction relative to camera yaw ─────────────────────────────────────
     const sinY = Math.sin(this.yaw)
     const cosY = Math.cos(this.yaw)
-    const fwd   = new THREE.Vector3(-sinY, 0, -cosY)
-    const right = new THREE.Vector3( cosY,  0, -sinY)
+    const fwd = new THREE.Vector3(-sinY, 0, -cosY)
+    const right = new THREE.Vector3(cosY, 0, -sinY)
 
     const rawDir = new THREE.Vector3()
-    rawDir.addScaledVector(fwd,  -mz)
+    rawDir.addScaledVector(fwd, -mz)
     rawDir.addScaledVector(right, mx)
 
     // ── Smooth velocity — Roblox-like fluid acceleration / deceleration ───────
@@ -277,7 +279,7 @@ export class CharacterController {
       ? rawDir.clone().normalize().multiplyScalar(speed)
       : new THREE.Vector3(0, 0, 0)
 
-    const accel     = moving ? 30 : 35   // higher = snappier, lower = floatier
+    const accel = moving ? 30 : 35   // higher = snappier, lower = floatier
     this.smoothVel.lerp(targetVel, Math.min(accel * delta, 1))
 
     const dir = this.smoothVel.clone().normalize()   // facing direction
@@ -286,8 +288,8 @@ export class CharacterController {
 
     // ── Horizontal movement + collision ──────────────────────────────────────
     const moveDelta = this.smoothVel.clone().multiplyScalar(delta)
-    moveDelta.y     = 0
-    const resolved  = this.collision.resolveXZ(
+    moveDelta.y = 0
+    const resolved = this.collision.resolveXZ(
       this.position, moveDelta, MAP_CONFIG.characterRadius, this.charHeight
     )
 
@@ -298,14 +300,14 @@ export class CharacterController {
 
     // ── Gravity & ground snapping ─────────────────────────────────────────────
     this.verticalVel += MAP_CONFIG.gravity * delta
-    resolved.y        = this.position.y + this.verticalVel * delta
+    resolved.y = this.position.y + this.verticalVel * delta
 
     const groundY = this.collision.getGroundY(resolved, this.charHeight)
     if (groundY !== null && resolved.y <= groundY + 0.05) {
-      resolved.y       = groundY
+      resolved.y = groundY
       this.verticalVel = 0
     } else if (resolved.y < this.mapBounds.min.y - 5) {
-      resolved.y       = this.mapBounds.min.y
+      resolved.y = this.mapBounds.min.y
       this.verticalVel = 0
     }
 
@@ -316,31 +318,21 @@ export class CharacterController {
     if (isActuallyMoving && dir.lengthSq() > 0.001) {
       const target = Math.atan2(dir.x, dir.z) + Math.PI
       let diff = target - this.model.rotation.y
-      while (diff >  Math.PI) diff -= 2 * Math.PI
+      while (diff > Math.PI) diff -= 2 * Math.PI
       while (diff < -Math.PI) diff += 2 * Math.PI
       // Smooth rotation — higher multiplier = snappier turn
       this.model.rotation.y += diff * Math.min(12 * delta, 1)
     }
 
     // ── Roblox-style camera auto-follow ───────────────────────────────────────
-    // When user manually orbits, respect that. After a short idle window
-    // (0.8 s), if the character starts moving, smoothly swing the camera
-    // back behind the character.
+    // When user manually orbits, respect that.
     if (this.isManuallyOrbiting) {
       this.orbitIdleTimer += delta
       if (this.orbitIdleTimer > 0.8) this.isManuallyOrbiting = false
     }
 
-    if (isActuallyMoving && !this.isManuallyOrbiting) {
-      // Target yaw = behind the character (model faces travel dir, camera is opposite)
-      const charFacing  = this.model.rotation.y - Math.PI   // where char is going
-      const targetYaw   = charFacing + Math.PI               // camera is behind = +PI
-      let   yawDiff     = targetYaw - this.yaw
-      while (yawDiff >  Math.PI) yawDiff -= 2 * Math.PI
-      while (yawDiff < -Math.PI) yawDiff += 2 * Math.PI
-      // Lazy follow — slow enough to feel organic, fast enough to catch up
-      this.yaw += yawDiff * Math.min(3.5 * delta, 1)
-    }
+    // Usually, strict Third-Person cameras don't drag the yaw automatically when walking.
+    // Removed the forced auto-follow when moving, to prevent the "circling" bug when holding A/D.
 
     // ── Animations ────────────────────────────────────────────────────────────
     if (this.mixer) {
@@ -351,40 +343,48 @@ export class CharacterController {
     // ── Camera ────────────────────────────────────────────────────────────────
     this._updateCamera(delta)
 
+    // Dynamic FOV for Sprinting to give a sense of speed
+    const targetFov = isSprinting ? 75 : 60
+    if (Math.abs(this.camera.fov - targetFov) > 0.1) {
+      this.camera.fov += (targetFov - this.camera.fov) * Math.min(8 * delta, 1)
+      this.camera.updateProjectionMatrix()
+    }
+
     // ── Sprint HUD ────────────────────────────────────────────────────────────
     if (this.speedEl) this.speedEl.classList.toggle('sprinting', isActuallyMoving && isSprinting)
   }
 
-  // Smoothed safe distance — prevents flicker when occlusion hits flap each frame
   private _smoothSafeDist: number = MAP_CONFIG.cameraDistance
 
   private _updateCamera(delta: number) {
-    const pivot = this.position.clone().add(new THREE.Vector3(0, MAP_CONFIG.cameraHeight, 0))
+    // Pivot camera around the chest/head area rather than the feet
+    const pivotHeight = this.charHeight * 0.75
+    const pivot = this.position.clone().add(new THREE.Vector3(0, pivotHeight, 0))
 
-    const ox = this.distance * Math.sin(this.yaw)   * Math.cos(this.pitch)
+    const ox = this.distance * Math.sin(this.yaw) * Math.cos(this.pitch)
     const oy = this.distance * Math.sin(this.pitch)
-    const oz = this.distance * Math.cos(this.yaw)   * Math.cos(this.pitch)
+    const oz = this.distance * Math.cos(this.yaw) * Math.cos(this.pitch)
     const desired = pivot.clone().add(new THREE.Vector3(ox, oy, oz))
 
     // ── Occlusion raycast — uses cameraCollidables (excludes dome/skybox) ─────
     const toDesired = desired.clone().sub(pivot)
-    const rayDir    = toDesired.clone().normalize()
-    const rayDist   = toDesired.length()
+    const rayDir = toDesired.clone().normalize()
+    const rayDist = toDesired.length()
 
     this.collision.rc.set(pivot, rayDir)
     this.collision.rc.near = 0.1
-    this.collision.rc.far  = rayDist
+    this.collision.rc.far = rayDist
 
     const hits = this.collision.rc.intersectObjects(this.collision.cameraCollidables, false)
 
     const targetSafeDist = hits.length > 0
       ? Math.max(MAP_CONFIG.cameraMinDistance,
-          hits.reduce((best, h) => h.distance < best.distance ? h : best, hits[0]).distance - 0.3)
+        hits.reduce((best, h) => h.distance < best.distance ? h : best, hits[0]).distance - 0.3)
       : rayDist
 
     // Smooth the safe distance — snap IN fast (avoid clipping), ease OUT slow
-    const inSpeed  = 1 - Math.pow(0.001, delta)   // ~very fast
-    const outSpeed = 1 - Math.pow(0.04,  delta)   // ~slow ease back
+    const inSpeed = 1 - Math.pow(0.001, delta)   // ~very fast
+    const outSpeed = 1 - Math.pow(0.04, delta)   // ~slow ease back
     this._smoothSafeDist = targetSafeDist < this._smoothSafeDist
       ? this._smoothSafeDist + (targetSafeDist - this._smoothSafeDist) * inSpeed
       : this._smoothSafeDist + (targetSafeDist - this._smoothSafeDist) * outSpeed
