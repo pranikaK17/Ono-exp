@@ -2,10 +2,10 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { InputController, MobileJoystick } from './input'
+import { InputController, MobileJoystick } from './Input'   // ← capital I
 import { CollisionSystem } from './collision'
 import { CharacterController } from './CharacterController'
-import { MAP_CONFIG } from './config'
+import { MAP_CONFIG } from './Config'
 
 export default function Map() {
   const mountRef = useRef<HTMLDivElement>(null)
@@ -18,10 +18,10 @@ export default function Map() {
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.setSize(window.innerWidth, window.innerHeight)
-    renderer.shadowMap.enabled  = true
-    renderer.shadowMap.type     = THREE.PCFSoftShadowMap
-    renderer.outputColorSpace   = THREE.SRGBColorSpace
-    renderer.toneMapping        = THREE.ACESFilmicToneMapping
+    renderer.shadowMap.enabled   = true
+    renderer.shadowMap.type      = THREE.PCFSoftShadowMap
+    renderer.outputColorSpace    = THREE.SRGBColorSpace
+    renderer.toneMapping         = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 1.1
     mount.appendChild(renderer.domElement)
 
@@ -49,14 +49,17 @@ export default function Map() {
     sun.shadow.camera.bottom = -120
     sun.shadow.bias          = -0.0005
     scene.add(sun)
-    scene.add(new THREE.DirectionalLight(0xadd8ff, 0.3).position.set(-50, 40, -50) && new THREE.DirectionalLight(0xadd8ff, 0.3))
+
+    const fillLight = new THREE.DirectionalLight(0xadd8ff, 0.3)
+    fillLight.position.set(-50, 40, -50)
+    scene.add(fillLight)
 
     // ── Progress helpers ──────────────────────────────────────────────────────
     const barEl  = document.getElementById('map-bar')
     const textEl = document.getElementById('map-text')
     const setProg = (pct: number, msg?: string) => {
-      if (barEl)        barEl.style.width   = pct + '%'
-      if (msg && textEl) textEl.textContent = msg
+      if (barEl)         barEl.style.width   = pct + '%'
+      if (msg && textEl) textEl.textContent  = msg
     }
 
     const loader = new GLTFLoader()
@@ -91,14 +94,61 @@ export default function Map() {
         setProg(5, 'Loading map...')
         const mapGLTF = await loadGLTF(MAP_CONFIG.mapModelPath, 5, 55, 'Map')
 
+        // ── Fix negative scales ───────────────────────────────────────────────
+        // Nodes like 'majorfloor' and 'building subpart' have negative scale
+        // components exported from Blender. Negative scale in Three.js causes
+        // inside-out normals, z-fighting, and objects appearing to float.
+        // Fix: flip each negative scale axis to positive and compensate by
+        // rotating the geometry 180° on that axis so it looks identical.
         mapGLTF.scene.traverse(c => {
-          const m = c as THREE.Mesh
-          if (m.isMesh) { m.castShadow = true; m.receiveShadow = true }
+          const obj = c as THREE.Mesh
+          const s   = obj.scale
+
+          // Fix each negative axis independently
+          if (s.x < 0 || s.y < 0 || s.z < 0) {
+            console.log(`[Map] fixing negative scale on '${obj.name}':`, s.x, s.y, s.z)
+
+            // Absorb the negative scale into the geometry so the world matrix
+            // stays clean — apply scale to geometry positions directly
+            if (obj.isMesh && obj.geometry) {
+              // Clone geometry so we don't mutate shared resources
+              obj.geometry = obj.geometry.clone()
+              obj.geometry.applyMatrix4(
+                new THREE.Matrix4().makeScale(
+                  s.x < 0 ? -1 : 1,
+                  s.y < 0 ? -1 : 1,
+                  s.z < 0 ? -1 : 1
+                )
+              )
+              // Flip normals so lighting is correct after the scale flip
+              const pos = obj.geometry.attributes.position
+              const nor = obj.geometry.attributes.normal
+              if (nor) {
+                for (let i = 0; i < nor.count; i++) {
+                  if (s.x < 0) nor.setX(i, -nor.getX(i))
+                  if (s.y < 0) nor.setY(i, -nor.getY(i))
+                  if (s.z < 0) nor.setZ(i, -nor.getZ(i))
+                }
+                nor.needsUpdate  = true
+              }
+              if (pos) pos.needsUpdate = true
+            }
+
+            // Make scale positive
+            s.set(Math.abs(s.x), Math.abs(s.y), Math.abs(s.z))
+          }
+
+          if (obj.isMesh) {
+            obj.castShadow    = true
+            obj.receiveShadow = true
+          }
         })
 
-        // Force world matrices before we measure / raycast
+        // Force full world matrix recompute AFTER fixing scales
         mapGLTF.scene.updateMatrixWorld(true)
         scene.add(mapGLTF.scene)
+        // Second update after adding to scene so all parent transforms are final
+        mapGLTF.scene.updateMatrixWorld(true)
 
         const mapBox  = new THREE.Box3().setFromObject(mapGLTF.scene)
         const mapSize = mapBox.getSize(new THREE.Vector3())
@@ -112,42 +162,33 @@ export default function Map() {
           const m = c as THREE.Mesh
           if (m.isMesh) { m.castShadow = true; m.receiveShadow = true }
         })
-
-        // Measure character BEFORE adding to scene or scaling
         charGLTF.scene.updateMatrixWorld(true)
+
         const rawCharBox  = new THREE.Box3().setFromObject(charGLTF.scene)
         const rawCharSize = rawCharBox.getSize(new THREE.Vector3())
-        console.log('[Char] raw size:', rawCharSize)
 
-        // Scale character so height ≈ 3% of map's largest horizontal dimension
-        // Map is ~77–112 units wide, so target ≈ 3 units tall
-        const targetHeight = Math.max(mapSize.x, mapSize.z) * 0.03
+        const targetHeight = Math.max(mapSize.x, mapSize.z) * 0.015
         const rawHeight    = rawCharSize.y > 0 ? rawCharSize.y : 1
         const charScale    = targetHeight / rawHeight
         charGLTF.scene.scale.setScalar(charScale)
         charGLTF.scene.updateMatrixWorld(true)
 
-        // Re-measure after scaling
-        const scaledCharBox  = new THREE.Box3().setFromObject(charGLTF.scene)
-        const scaledCharSize = scaledCharBox.getSize(new THREE.Vector3())
+        const scaledCharSize = new THREE.Box3().setFromObject(charGLTF.scene).getSize(new THREE.Vector3())
         const charHeight     = scaledCharSize.y
-        console.log(`[Char] scale=${charScale.toFixed(3)}, scaled height=${charHeight.toFixed(2)}`)
+        console.log(`[Char] scale=${charScale.toFixed(3)}, height=${charHeight.toFixed(2)}`)
 
         scene.add(charGLTF.scene)
 
-        // ── Spawn position ────────────────────────────────────────────────────
-        // Place at horizontal center of map, at map floor Y
-        const spawnX = (mapBox.min.x + mapBox.max.x) / 2
-        const spawnZ = (mapBox.min.z + mapBox.max.z) / 2
-
-        // Build collision system AFTER scene is added so world matrices are final
+        // ── Build collision AFTER scene is fully added ────────────────────────
         const collision = new CollisionSystem(mapGLTF.scene)
 
-        // Find exact ground Y at spawn point
-        const probePos  = new THREE.Vector3(spawnX, mapBox.max.y + 5, spawnZ)
-        const groundAtSpawn = collision.getGroundY(probePos, charHeight) ?? mapBox.min.y
-        const spawnPos  = new THREE.Vector3(spawnX, groundAtSpawn, spawnZ)
-        console.log('[Spawn] pos:', spawnPos)
+        // ── Spawn at Blender origin (0, 0) ───────────────────────────────────
+        // Raycast straight down at X=0, Z=0 to find the ground surface
+        // at the point you set as origin in Blender.
+        const originProbe = new THREE.Vector3(0, mapBox.max.y + 10, 0)
+        const originGY    = collision.getGroundY(originProbe, charHeight) ?? mapBox.min.y
+        const spawnPos    = new THREE.Vector3(0, originGY, 0)
+        console.log('[Spawn] origin ground Y:', originGY, '→', spawnPos)
 
         // ── Controllers ───────────────────────────────────────────────────────
         inputCtrl = new InputController()
@@ -157,7 +198,11 @@ export default function Map() {
         const sprintBtn = document.getElementById('sprint-btn')
         joystick = (joyBase && joyKnob && sprintBtn)
           ? new MobileJoystick(joyBase, joyKnob, sprintBtn)
-          : new MobileJoystick(document.createElement('div'), document.createElement('div'), document.createElement('div'))
+          : new MobileJoystick(
+              document.createElement('div'),
+              document.createElement('div'),
+              document.createElement('div')
+            )
 
         charCtrl = new CharacterController({
           model:      charGLTF.scene,
@@ -173,7 +218,10 @@ export default function Map() {
         // ── Hide loading ───────────────────────────────────────────────────────
         setProg(100, 'Ready!')
         const loadEl = document.getElementById('map-loading')
-        if (loadEl) setTimeout(() => { loadEl.style.opacity = '0'; setTimeout(() => loadEl.remove(), 700) }, 300)
+        if (loadEl) setTimeout(() => {
+          loadEl.style.opacity = '0'
+          setTimeout(() => loadEl.remove(), 700)
+        }, 300)
 
         const hint = document.getElementById('map-hint')
         setTimeout(() => { if (hint) hint.style.opacity = '0' }, 6000)
@@ -247,7 +295,6 @@ export default function Map() {
           font-family:system-ui,sans-serif; pointer-events:none;
           transition:opacity 1.2s ease; z-index:100; white-space:nowrap;
         }
-
         #speed-indicator {
           position:fixed; top:20px; right:20px;
           background:rgba(0,0,0,0.55); backdrop-filter:blur(8px);
@@ -307,27 +354,22 @@ export default function Map() {
       `}</style>
 
       <div style={{ position:'fixed', inset:0, width:'100vw', height:'100vh' }}>
-        {/* Three.js canvas */}
         <div ref={mountRef} style={{ width:'100%', height:'100%' }} />
 
-        {/* Loading */}
         <div id="map-loading">
           <h1>World</h1>
           <div id="map-bar-wrap"><div id="map-bar" /></div>
           <div id="map-text">Loading assets...</div>
         </div>
 
-        {/* Controls hint */}
         <div id="map-hint">
           WASD · Shift sprint · Right-click drag or scroll to orbit/zoom
         </div>
 
-        {/* Sprint indicator */}
         <div id="speed-indicator">
           <span className="spd-dot" /> Sprinting
         </div>
 
-        {/* Mobile joystick */}
         <div id="joy-zone">
           <div id="joy-base"><div id="joy-knob" /></div>
         </div>
