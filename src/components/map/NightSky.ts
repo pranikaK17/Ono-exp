@@ -1,32 +1,32 @@
+// src/components/map/NightSky.ts
 import * as THREE from 'three'
 
 export class NightSky {
-    private group: THREE.Group
-    private stars: THREE.Points
-    private clock: THREE.Clock
+  private group: THREE.Group
+  private stars: THREE.Points
+  private clock: THREE.Clock
 
-    constructor(scene: THREE.Scene) {
-        this.group = new THREE.Group()
-        this.clock = new THREE.Clock()
-        scene.add(this.group)
+  constructor(scene: THREE.Scene) {
+    this.group = new THREE.Group()
+    this.clock = new THREE.Clock()
+    scene.add(this.group)
 
-        // 1. Sky Dome Shader (Deep night gradient)
-        const domeGeo = new THREE.SphereGeometry(400, 32, 32)
-        const domeMat = new THREE.ShaderMaterial({
-            uniforms: {
-                topColor: { value: new THREE.Color(0x02020a) }, // Deep space black/purple
-                bottomColor: { value: new THREE.Color(0x1a1a3a) }, // Dark blue/purple horizon
-                offset: { value: 0 },
-                exponent: { value: 0.6 }
-            },
-            vertexShader: `
+    // ── Sky dome ──────────────────────────────────────────────────────────────
+    const domeGeo = new THREE.SphereGeometry(400, 32, 32)
+    const domeMat = new THREE.ShaderMaterial({
+      uniforms: {
+        topColor:    { value: new THREE.Color(0x02020a) },
+        bottomColor: { value: new THREE.Color(0x0a0a25) },
+        exponent:    { value: 0.5 },
+      },
+      vertexShader: `
         varying vec3 vPosition;
         void main() {
           vPosition = position;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
       `,
-            fragmentShader: `
+      fragmentShader: `
         uniform vec3 topColor;
         uniform vec3 bottomColor;
         uniform float exponent;
@@ -36,133 +36,123 @@ export class NightSky {
           gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(abs(h), exponent), 0.0)), 1.0);
         }
       `,
-            side: THREE.BackSide,
-            depthWrite: false,
-            fog: false
-        })
-        const domeMesh = new THREE.Mesh(domeGeo, domeMat)
-        // Make sure dome renders behind everything
-        domeMesh.frustumCulled = false
-        domeMesh.renderOrder = -1
-        this.group.add(domeMesh)
+      side: THREE.BackSide,
+      depthWrite: false,
+      fog: false,
+    })
+    const domeMesh = new THREE.Mesh(domeGeo, domeMat)
+    domeMesh.frustumCulled = false
+    domeMesh.renderOrder = -1
+    this.group.add(domeMesh)
 
-        // 2. Stars
-        const starsCount = 5000
-        const starGeo = new THREE.BufferGeometry()
-        const positions = new Float32Array(starsCount * 3)
-        const colors = new Float32Array(starsCount * 3)
-        const sizes = new Float32Array(starsCount)
+    // ── Stars ─────────────────────────────────────────────────────────────────
+    const starsCount = 8000   // more stars for denser sky
+    const starGeo = new THREE.BufferGeometry()
+    const positions = new Float32Array(starsCount * 3)
+    const colors    = new Float32Array(starsCount * 3)
+    const sizes     = new Float32Array(starsCount)
 
-        const color1 = new THREE.Color(0xffffff) // White
-        const color2 = new THREE.Color(0xcceeff) // Light blue
-        const color3 = new THREE.Color(0xfff0cc) // Warm white/yellow
+    // Brighter, more varied color palette
+    const colorPalette = [
+      new THREE.Color(1.0,  1.0,  1.0),   // pure white
+      new THREE.Color(0.8,  0.9,  1.0),   // cool blue-white
+      new THREE.Color(1.0,  0.95, 0.8),   // warm yellow-white
+      new THREE.Color(0.9,  0.8,  1.0),   // soft violet
+      new THREE.Color(0.7,  1.0,  1.0),   // cyan-white
+    ]
 
-        for (let i = 0; i < starsCount; i++) {
-            // distribute stars uniformly on a sphere
-            const r = 350 + Math.random() * 40
-            const theta = 2 * Math.PI * Math.random()
-            const phi = Math.acos(2 * Math.random() - 1) // 0 to PI
+    for (let i = 0; i < starsCount; i++) {
+      // Distribute only in the upper hemisphere + sides (not below horizon)
+      const r     = 350 + Math.random() * 40
+      const theta = 2 * Math.PI * Math.random()
+      // phi range: 0 (top) to ~2.0 rad (just below horizon) — avoids underground stars
+      const phi   = Math.acos(1 - Math.random() * 1.6)
 
-            // Correct Y-up calculation
-            const x = r * Math.sin(phi) * Math.cos(theta)
-            const y = r * Math.cos(phi)
-            const z = r * Math.sin(phi) * Math.sin(theta)
+      positions[i * 3]     = r * Math.sin(phi) * Math.cos(theta)
+      positions[i * 3 + 1] = r * Math.cos(phi)
+      positions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta)
 
-            positions[i * 3] = x
-            positions[i * 3 + 1] = y
-            positions[i * 3 + 2] = z
+      const c = colorPalette[Math.floor(Math.random() * colorPalette.length)]
+      colors[i * 3]     = c.r
+      colors[i * 3 + 1] = c.g
+      colors[i * 3 + 2] = c.b
 
-            // varied star colors
-            const randColor = Math.random()
-            let c = color1
-            if (randColor > 0.8) c = color2
-            else if (randColor > 0.6) c = color3
+      // Bigger size range — some stars are noticeably large
+      sizes[i] = Math.random() < 0.05
+        ? 4.0 + Math.random() * 3.0   // 5% are bright prominent stars
+        : 1.5 + Math.random() * 2.5   // rest are normal
+    }
 
-            colors[i * 3] = c.r
-            colors[i * 3 + 1] = c.g
-            colors[i * 3 + 2] = c.b
+    starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    starGeo.setAttribute('color',    new THREE.BufferAttribute(colors,    3))
+    starGeo.setAttribute('size',     new THREE.BufferAttribute(sizes,     1))
 
-            // varied sizes
-            sizes[i] = Math.random() * 2.5 + 1.0 // Slightly bumped minimum size so they don't vanish
-        }
-
-        starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-        starGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3))
-        starGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1))
-
-        // A shader material to allow varied sizes, colors, and a slight twinkle effect
-        const starMat = new THREE.ShaderMaterial({
-            uniforms: {
-                time: { value: 0 }
-            },
-            vertexShader: `
+    const starMat = new THREE.ShaderMaterial({
+      uniforms: { time: { value: 0 } },
+      vertexShader: `
         attribute float size;
-        attribute vec3 color;
-        varying vec3 vColor;
-        varying float vOpacity;
-        uniform float time;
+        attribute vec3  color;
+        varying vec3    vColor;
+        varying float   vOpacity;
+        uniform float   time;
+
         void main() {
           vColor = color;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
           gl_Position = projectionMatrix * mvPosition;
-          
-          // Twinkle effect based on position and time
-          float twinkle = sin(time * 1.5 + position.x * 100.0) * 0.5 + 0.5;
-          vOpacity = 0.4 + twinkle * 0.6; // opacity oscillates between 0.4 and 1.0
-          
-          gl_PointSize = size * (300.0 / -mvPosition.z) * vOpacity;
+
+          // Twinkle: oscillate between 0.6 and 1.0 (brighter floor than before)
+          float twinkle = sin(time * 1.8 + position.x * 73.1 + position.z * 31.7) * 0.5 + 0.5;
+          vOpacity = 0.6 + twinkle * 0.4;
+
+          gl_PointSize = size * (350.0 / -mvPosition.z) * (0.8 + twinkle * 0.4);
         }
       `,
-            fragmentShader: `
-        varying vec3 vColor;
+      fragmentShader: `
+        varying vec3  vColor;
         varying float vOpacity;
+
         void main() {
-          // Circular particles
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
-          
-          // Soft edge for glow
-          float alpha = (0.5 - dist) * 2.0 * vOpacity;
-          gl_FragColor = vec4(vColor, alpha);
+
+          // Soft glow: brighter core, fade at edge
+          float core = 1.0 - smoothstep(0.0, 0.25, dist);
+          float halo = 1.0 - smoothstep(0.1, 0.5, dist);
+          float alpha = (core * 0.9 + halo * 0.4) * vOpacity;
+
+          gl_FragColor = vec4(vColor * (1.0 + core * 0.6), alpha);
         }
       `,
-            transparent: true,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending,
-            fog: false
-        })
+      transparent: true,
+      depthWrite:  false,
+      blending:    THREE.AdditiveBlending,
+      fog:         false,
+    })
 
-        this.stars = new THREE.Points(starGeo, starMat)
-        this.stars.frustumCulled = false
-        this.stars.renderOrder = 0 // render after dome
-        this.group.add(this.stars)
-    }
+    this.stars = new THREE.Points(starGeo, starMat)
+    this.stars.frustumCulled = false
+    this.stars.renderOrder = 0
+    this.group.add(this.stars)
+  }
 
-    public update(delta: number, cameraPos?: THREE.Vector3) {
-        if (cameraPos) {
-            // Snap the sky to the camera so the player can never walk "out" of the sky dome
-            this.group.position.copy(cameraPos)
-        }
+  public update(delta: number, cameraPos?: THREE.Vector3) {
+    if (cameraPos) this.group.position.copy(cameraPos)
 
-        // Rotate stars slowly to simulate Earth's rotation
-        this.stars.rotation.y -= delta * 0.005
-        this.stars.rotation.x += delta * 0.001
+    this.stars.rotation.y -= delta * 0.005
+    this.stars.rotation.x += delta * 0.001
 
-        // Update twinkle time
-        const time = this.clock.getElapsedTime()
-            ; (this.stars.material as THREE.ShaderMaterial).uniforms.time.value = time
-    }
+    const time = this.clock.getElapsedTime()
+    ;(this.stars.material as THREE.ShaderMaterial).uniforms.time.value = time
+  }
 
-    public destroy() {
-        this.group.parent?.remove(this.group)
-        // Clean up
-        this.stars.geometry.dispose()
-            ; (this.stars.material as THREE.Material).dispose()
-        this.group.children.forEach(c => {
-            if ((c as THREE.Mesh).geometry) {
-                ; (c as THREE.Mesh).geometry.dispose()
-                    ; ((c as THREE.Mesh).material as THREE.Material).dispose()
-            }
-        })
-    }
+  public destroy() {
+    this.group.parent?.remove(this.group)
+    this.stars.geometry.dispose()
+    ;(this.stars.material as THREE.Material).dispose()
+    this.group.children.forEach(c => {
+      const m = c as THREE.Mesh
+      if (m.geometry) { m.geometry.dispose(); (m.material as THREE.Material).dispose() }
+    })
+  }
 }

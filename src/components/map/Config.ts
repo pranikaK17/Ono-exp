@@ -1,30 +1,25 @@
-// src/components/map/config.ts
+// src/components/map/Config.ts
 export const MAP_CONFIG = {
-  mapModelPath: '/map.glb',
+  mapModelPath:       '/map.glb',
   characterModelPath: '/character.glb',
 
-  // Movement — tuned for map ~90×109 units
-  walkSpeed: 22,
-  sprintSpeed: 42,
-  rotationSpeed: 10,
-  gravity: -30,
+  walkSpeed:    22,
+  sprintSpeed:  42,
+  jumpSpeed:    14,
+  gravity:     -30,
 
-  // Camera
-  cameraDistance: 35,
-  cameraMinDistance: 3,
-  cameraMaxDistance: 60,
-  cameraHeight: 2,
-  cameraPitchDefault: 0,
-  minPitch: -0.05,
-  maxPitch: 1.15,
+  cameraDistance:    18,
+  cameraMinDistance:  3,
+  cameraMaxDistance: 55,
+  cameraPitchDefault: 0.28,
+  minPitch:   -0.05,
+  maxPitch:    1.15,
   mouseSensitivity: 0.003,
-  zoomSpeed: 1.15,
+  zoomSpeed:   1.15,
 
-  // Collision
   characterRadius: 0.4,
-
-  fogColor: 0x02020b,
-  fogDensity: 0.004,   // slightly less fog on larger map
-  skyColor: 0x02020b,
+  fogColor:      0x02020b,
+  fogDensity:    0.004,
+  skyColor:      0x02020b,
   shadowMapSize: 2048,
 } as const
