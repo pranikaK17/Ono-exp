@@ -23,8 +23,8 @@ export const MAP_CONFIG = {
   // Collision
   characterRadius: 0.4,
 
-  fogColor: 0x87ceeb,
+  fogColor: 0x02020b,
   fogDensity: 0.004,   // slightly less fog on larger map
-  skyColor: 0x87ceeb,
+  skyColor: 0x02020b,
   shadowMapSize: 2048,
 } as const

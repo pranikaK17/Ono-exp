@@ -2,7 +2,7 @@
 import * as THREE from 'three'
 
 export class CollisionSystem {
-  collidables:     THREE.Mesh[] = []  // used for movement + wall collision
+  collidables: THREE.Mesh[] = []  // used for movement + wall collision
   cameraCollidables: THREE.Mesh[] = [] // smaller set — excludes large domes/skies
   rc = new THREE.Raycaster()
 
@@ -46,9 +46,9 @@ export class CollisionSystem {
    */
   getGroundY(pos: THREE.Vector3, charHeight: number): number | null {
     const castHeight = 60
-    const castFrom   = new THREE.Vector3(pos.x, pos.y + castHeight, pos.z)
+    const castFrom = new THREE.Vector3(pos.x, pos.y + castHeight, pos.z)
     this.rc.set(castFrom, new THREE.Vector3(0, -1, 0))
-    this.rc.far  = castHeight + charHeight + 40
+    this.rc.far = castHeight + charHeight + 40
     this.rc.near = 0
 
     const hits = this.rc.intersectObjects(this.collidables, false)
@@ -80,7 +80,7 @@ export class CollisionSystem {
     for (const h of heights) {
       const o = new THREE.Vector3(pos.x, pos.y + h, pos.z)
       this.rc.set(o, d)
-      this.rc.far  = probeRadius
+      this.rc.far = probeRadius
       this.rc.near = 0
       if (this.rc.intersectObjects(this.collidables, false).length > 0) return true
     }

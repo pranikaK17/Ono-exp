@@ -6,6 +6,7 @@ import { InputController, MobileJoystick } from './Input'   // ← capital I
 import { CollisionSystem } from './collision'
 import { CharacterController } from './CharacterController'
 import { MAP_CONFIG } from './Config'
+import { NightSky } from './NightSky'
 
 export default function Map() {
   const mountRef = useRef<HTMLDivElement>(null)
@@ -35,9 +36,9 @@ export default function Map() {
     camera.position.set(0, 10, 20)
 
     // ── Lights ────────────────────────────────────────────────────────────────
-    scene.add(new THREE.AmbientLight(0xffeedd, 0.7))
+    scene.add(new THREE.AmbientLight(0x404060, 0.8))
 
-    const sun = new THREE.DirectionalLight(0xfff5e0, 1.8)
+    const sun = new THREE.DirectionalLight(0x88bbff, 1.0)
     sun.position.set(50, 100, 50)
     sun.castShadow = true
     sun.shadow.mapSize.set(MAP_CONFIG.shadowMapSize, MAP_CONFIG.shadowMapSize)
@@ -50,7 +51,7 @@ export default function Map() {
     sun.shadow.bias = -0.0005
     scene.add(sun)
 
-    const fillLight = new THREE.DirectionalLight(0xadd8ff, 0.3)
+    const fillLight = new THREE.DirectionalLight(0x2a2a45, 0.5)
     fillLight.position.set(-50, 40, -50)
     scene.add(fillLight)
 
@@ -78,6 +79,7 @@ export default function Map() {
     let charCtrl: CharacterController | null = null
     let joystick: MobileJoystick | null = null
     const clock = new THREE.Clock()
+    const nightSky = new NightSky(scene)
 
     const tick = () => {
       raf = requestAnimationFrame(tick)
@@ -85,6 +87,7 @@ export default function Map() {
       if (charCtrl && inputCtrl && joystick) {
         charCtrl.update(delta, inputCtrl, joystick.getInput())
       }
+      nightSky.update(delta, camera.position)
       renderer.render(scene, camera)
     }
 
@@ -246,6 +249,7 @@ export default function Map() {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', onResize)
       inputCtrl?.destroy()
+      nightSky.destroy()
       renderer.dispose()
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement)
     }
