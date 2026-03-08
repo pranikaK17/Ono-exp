@@ -36,9 +36,9 @@ export default function Map() {
     camera.position.set(0, 10, 20)
 
     // ── Lights ────────────────────────────────────────────────────────────────
-    scene.add(new THREE.AmbientLight(0x404060, 0.8))
+    scene.add(new THREE.AmbientLight(0xddeeff, 0.7))
 
-    const sun = new THREE.DirectionalLight(0x88bbff, 1.0)
+    const sun = new THREE.DirectionalLight(0xe0f0ff, 1.8)
     sun.position.set(50, 100, 50)
     sun.castShadow = true
     sun.shadow.mapSize.set(MAP_CONFIG.shadowMapSize, MAP_CONFIG.shadowMapSize)
@@ -51,7 +51,7 @@ export default function Map() {
     sun.shadow.bias = -0.0005
     scene.add(sun)
 
-    const fillLight = new THREE.DirectionalLight(0x2a2a45, 0.5)
+    const fillLight = new THREE.DirectionalLight(0xadd8ff, 0.6)
     fillLight.position.set(-50, 40, -50)
     scene.add(fillLight)
 
