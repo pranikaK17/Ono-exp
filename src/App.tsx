@@ -1,6 +1,19 @@
 // src/App.tsx
+import { useState } from 'react'
 import Map from './components/map/Map'
+import AB1 from './components/pages/AB1'
 
 export default function App() {
-  return <Map />
+  const [page, setPage] = useState<string | null>(null)
+
+  const handlePinClick = (name: string) => {
+    setPage(prev => prev === name ? null : name)
+  }
+
+  return (
+    <>
+      <Map onPinClick={handlePinClick} activePage={page} />
+      {page === 'AB1' && <AB1 onClose={() => setPage(null)} />}
+    </>
+  )
 }

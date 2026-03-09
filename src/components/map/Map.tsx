@@ -12,6 +12,11 @@ import { createNeonGridMaterial } from './Neon'
 // ── Exact node names from map.glb (verified by parsing binary) ───────────────
 const PIN_NAMES = ['Pin008','Pin007','Pin004','Pin002','Pin005','Pin006','Pin01','Pin003']
 
+// Pin → building/page mapping (update as you wire more pages)
+const PIN_TO_PAGE: Record<string, string> = {
+  'Pin004': 'AB1',
+}
+
 // Buildings to draw ground outlines around (exact node names)
 const OUTLINE_TARGETS = ['AB1','AB2','AB3','LHCnew','Mess']
 
@@ -381,8 +386,10 @@ function createPinGroundRings(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-export default function Map() {
+export default function Map({ onPinClick, activePage }: { onPinClick?: (page: string) => void; activePage?: string | null }) {
   const mountRef = useRef<HTMLDivElement>(null)
+  const activePageRef = useRef(activePage)
+  activePageRef.current = activePage
 
   useEffect(() => {
     const mount = mountRef.current; if (!mount) return
@@ -457,11 +464,35 @@ export default function Map() {
     const nightSky = new NightSky(scene)
 
     type Sparkle = ReturnType<typeof createPinSparkles>
-    type PinEntry = { obj: THREE.Object3D; baseY: number; phase: number }
+    type PinEntry = { obj: THREE.Object3D; baseY: number; phase: number; name: string }
     const pins:     PinEntry[]     = []
     const sparkles: Sparkle[]      = []
     const outlines: (() => void)[] = []
     const pinRings: (() => void)[] = []
+
+    // ── Pin proximity interaction ──────────────────────────────────────────
+    const INTERACT_RADIUS = 12  // world units — show prompt
+    const AUTO_CLOSE_RADIUS = 20  // world units — auto-close page
+    const pinWorldPositions: { name: string; pos: THREE.Vector3 }[] = []
+    let nearbyPin: string | null = null
+    const promptEl = document.getElementById('pin-prompt')
+
+    const pinKeyHandler = (e: KeyboardEvent) => {
+      if (e.code === 'KeyE' || e.key === 'e' || e.key === 'E') {
+        if (!onPinClick) return
+        // If a page is currently open, close it
+        if (activePageRef.current) {
+          onPinClick(activePageRef.current)
+          return
+        }
+        // Otherwise open the nearby pin's page
+        if (nearbyPin) {
+          const page = PIN_TO_PAGE[nearbyPin]
+          if (page) onPinClick(page)
+        }
+      }
+    }
+    window.addEventListener('keydown', pinKeyHandler)
 
     // Create bokeh lights immediately — they fill the whole scene
     const bokeh = createBokehLights(scene)
@@ -491,6 +522,44 @@ export default function Map() {
 
       if (charCtrl && inputCtrl && joystick)
         charCtrl.update(dt, inputCtrl, joystick.getInput())
+
+      // ── Pin proximity check ──────────────────────────────────────────────
+      if (charCtrl && promptEl) {
+        let closest: string | null = null
+        let closestDist = Infinity
+        for (const pw of pinWorldPositions) {
+          const dx = charCtrl.position.x - pw.pos.x
+          const dz = charCtrl.position.z - pw.pos.z
+          const dist = Math.sqrt(dx * dx + dz * dz)
+          if (dist < INTERACT_RADIUS && dist < closestDist && PIN_TO_PAGE[pw.name]) {
+            closest = pw.name
+            closestDist = dist
+          }
+        }
+        nearbyPin = closest
+        if (nearbyPin) {
+          promptEl.style.opacity = '1'
+          promptEl.style.transform = 'translate(-50%, 0) scale(1)'
+        } else {
+          promptEl.style.opacity = '0'
+          promptEl.style.transform = 'translate(-50%, 8px) scale(0.95)'
+        }
+
+        // Auto-close page if character walks too far from the active pin
+        if (activePageRef.current && onPinClick) {
+          let stillNear = false
+          for (const pw of pinWorldPositions) {
+            if (PIN_TO_PAGE[pw.name] !== activePageRef.current) continue
+            const dx2 = charCtrl.position.x - pw.pos.x
+            const dz2 = charCtrl.position.z - pw.pos.z
+            if (Math.sqrt(dx2 * dx2 + dz2 * dz2) < AUTO_CLOSE_RADIUS) {
+              stillNear = true
+              break
+            }
+          }
+          if (!stillNear) onPinClick(activePageRef.current)
+        }
+      }
 
       nightSky.update(dt, camera.position)
       renderer.render(scene, camera)
@@ -570,7 +639,8 @@ export default function Map() {
           if (!PIN_NAMES.includes(c.name)) return
           c.updateWorldMatrix(true, false)
           const wp = new THREE.Vector3(); c.getWorldPosition(wp)
-          pins.push({ obj: c, baseY: c.position.y, phase: Math.random()*Math.PI*2 })
+          pins.push({ obj: c, baseY: c.position.y, phase: Math.random()*Math.PI*2, name: c.name })
+          pinWorldPositions.push({ name: c.name, pos: wp.clone() })
           sparkles.push(createPinSparkles(scene, wp))
           pinRings.push(createPinGroundRings(scene, wp, sharedTime))
           console.log(`[Pin] '${c.name}' at`, wp.toArray().map((v: number) => v.toFixed(1)))
@@ -660,6 +730,7 @@ export default function Map() {
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', onResize)
+      window.removeEventListener('keydown', pinKeyHandler)
       inputCtrl?.destroy()
       nightSky.destroy()
       neonMat.dispose(); floorGeo.dispose()
@@ -774,6 +845,25 @@ export default function Map() {
           }
         }
         #sprint-btn, #jump-btn { display: none !important }
+
+        /* ── Pin interaction prompt ── */
+        #pin-prompt{
+          position:fixed;bottom:80px;left:50%;transform:translate(-50%, 8px) scale(0.95);
+          background:rgba(0,0,0,.7);backdrop-filter:blur(12px);
+          border:1px solid rgba(77,216,230,.35);border-radius:10px;
+          padding:10px 28px;color:rgba(255,255,255,.85);
+          font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;
+          font-family:'Orbitron',system-ui,sans-serif;pointer-events:none;
+          opacity:0;transition:opacity .3s ease, transform .3s ease;
+          z-index:100;white-space:nowrap;
+          box-shadow:0 0 20px rgba(77,216,230,.12);
+        }
+        #pin-prompt kbd{
+          display:inline-block;padding:2px 10px;margin:0 4px;
+          background:rgba(77,216,230,.18);border:1px solid rgba(77,216,230,.45);
+          border-radius:5px;color:#4dd8e6;font-weight:700;
+          font-family:'Orbitron',monospace;font-size:.9rem;
+        }
       `}</style>
 
       <div style={{position:'fixed',inset:0,width:'100vw',height:'100vh'}}>
@@ -790,6 +880,9 @@ export default function Map() {
 
         <div id="map-hint">WASD · Space jump · Shift sprint · Drag to orbit</div>
         <div id="speed-indicator"><span className="spd-dot" />Sprinting</div>
+
+        {/* Pin interaction prompt */}
+        <div id="pin-prompt">Press <kbd>E</kbd> to interact</div>
 
         {/* Joystick — CSS hides on non-touch via @media(hover:hover)and(pointer:fine) */}
         <div id="joy-zone"><div id="joy-base"><div id="joy-knob" /></div></div>
