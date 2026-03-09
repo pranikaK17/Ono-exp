@@ -15,6 +15,9 @@ const PIN_NAMES = ['Pin008','Pin007','Pin004','Pin002','Pin005','Pin006','Pin01'
 // Pin → building/page mapping (update as you wire more pages)
 const PIN_TO_PAGE: Record<string, string> = {
   'Pin004': 'AB1',
+  'Pin007': 'FootballGround',
+  'Pin01': 'GrandStairs',
+  'Pin008': 'CricketGround',
 }
 
 // Buildings to draw ground outlines around (exact node names)
