@@ -251,7 +251,7 @@ export class CharacterController {
     // So joystick.y is already correct sign for mz — but the original had a
     // sign error causing forward to move backward. Fix: subtract joystick.y.
     let mx = kb.x + joystick.x
-    let mz = kb.z - joystick.y  // ← THE ONLY CHANGE: was `+ joystick.y`
+    let mz = kb.z + joystick.y  // stick-up = negative rawY = forward (character faces -Z)
 
     const len = Math.sqrt(mx * mx + mz * mz)
     if (len > 1) { mx /= len; mz /= len }
