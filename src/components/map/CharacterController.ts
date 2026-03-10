@@ -6,62 +6,83 @@ import { MAP_CONFIG } from './Config'
 
 type AnimKey = 'idle' | 'walk' | 'run' | 'jump'
 
-// ── Separate sensitivity for touch vs mouse ───────────────────────────────────
+const MOUSE_SENSITIVITY = MAP_CONFIG.mouseSensitivity ?? 0.003
 const TOUCH_SENSITIVITY = 0.013
-const MOUSE_SENSITIVITY  = MAP_CONFIG.mouseSensitivity   // 0.003
 
+// ─────────────────────────────────────────────────────────────────────────────
+// CharacterController
+//
+// Movement follows Code 1's proven pattern exactly:
+//   1. Read raw joystick x/y (screen-space axes)
+//   2. Merge with keyboard input
+//   3. Build camera-forward and camera-right vectors from camYaw
+//   4. Move = forward*inputY + right*inputX  (normalised)
+//   5. Position updated, then camera orbits around new position
+//
+// This is the same math as Code 1's tick() and it definitely works.
+// ─────────────────────────────────────────────────────────────────────────────
 export class CharacterController {
-  private model:   THREE.Object3D
-  private mixer:   THREE.AnimationMixer | null
-  private actions: Partial<Record<AnimKey, THREE.AnimationAction>> = {}
-  private currentAction: AnimKey | null = null
+  // ── Public position — read by Map for trail, proximity checks, etc. ────────
+  position: THREE.Vector3
 
-  private camera:    THREE.PerspectiveCamera
-  private collision: CollisionSystem
+  private model:      THREE.Object3D
+  private mixer:      THREE.AnimationMixer | null
+  private actions:    Partial<Record<AnimKey, THREE.AnimationAction>> = {}
+  private curAnim:    AnimKey | null = null
 
-  position:           THREE.Vector3
+  private camera:     THREE.PerspectiveCamera
+  private collision:  CollisionSystem
+
   private charHeight: number
+
+  // ── Gravity / jump ─────────────────────────────────────────────────────────
   private verticalVel = 0
   private isGrounded  = true
   private jumpBuffer  = false
 
-  private yaw:      number
-  private pitch:    number
-  private distance: number
-  private _smoothSafeDist: number
+  // ── Camera orbit state (yaw/pitch/distance) ────────────────────────────────
+  private camYaw:   number   // horizontal angle around character
+  private camPitch: number   // vertical angle
+  private camDist:  number   // current distance (lerped)
+  private _targetDist: number
 
-  // ── Mouse drag ───────────────────────────────────────────────────────────────
-  private dragging    = false
-  private dragLastX   = 0
-  private dragLastY   = 0
+  // smooth safe distance for occlusion
+  private _safeDist: number
 
-  // ── Touch look ───────────────────────────────────────────────────────────────
-  private _lookTouchId:  number | null = null
-  private _lookLastX     = 0
-  private _lookLastY     = 0
+  // ── Mouse drag ─────────────────────────────────────────────────────────────
+  private _dragging  = false
+  private _dragLastX = 0
+  private _dragLastY = 0
 
-  // ── Pinch zoom ───────────────────────────────────────────────────────────────
-  private _pinchActive    = false
-  private _pinchStart     = 0
-  private _pinchCamDist   = 0
-  private _pinchTargetDist = 0
+  // ── Touch look (right half of screen) ─────────────────────────────────────
+  private _lookId:   number | null = null
+  private _lookLastX = 0
+  private _lookLastY = 0
 
-  private smoothVel = new THREE.Vector3()
+  // ── Pinch zoom ─────────────────────────────────────────────────────────────
+  private _pinchActive = false
+  private _pinchStart  = 0
+  private _pinchBase   = 0
 
-  // ── Camera auto-follow ────────────────────────────────────────────────────────
-  private isManualOrbit   = false
-  private orbitTimer      = 0
-  private readonly ORBIT_RESUME_DELAY = 2.0   // seconds before follow resumes
-  private readonly FOLLOW_SPEED       = 1.8   // yaw lerp speed when re-following
-  private lastMoveYaw: number | null  = null
+  // ── Scratch vectors — allocated once, reused every frame ──────────────────
+  private _fwd   = new THREE.Vector3()
+  private _right = new THREE.Vector3()
+  private _moveDir = new THREE.Vector3()
+  private _UP    = new THREE.Vector3(0, 1, 0)
+  private _camTarget = new THREE.Vector3()
+  private _camDesired = new THREE.Vector3()
 
-  private speedEl: HTMLElement | null = null
+  private speedEl: HTMLElement | null
 
   constructor(opts: {
-    model: THREE.Object3D; mixer: THREE.AnimationMixer | null
-    animations: THREE.AnimationClip[]; camera: THREE.PerspectiveCamera
-    collision: CollisionSystem; mapBounds: THREE.Box3
-    spawnPos: THREE.Vector3; charHeight: number
+    model:      THREE.Object3D
+    mixer:      THREE.AnimationMixer | null
+    animations: THREE.AnimationClip[]
+    camera:     THREE.PerspectiveCamera
+    collision:  CollisionSystem
+    mapBounds:  THREE.Box3
+    spawnPos:   THREE.Vector3
+    charHeight: number
   }) {
     this.model      = opts.model
     this.mixer      = opts.mixer
@@ -69,18 +90,16 @@ export class CharacterController {
     this.collision  = opts.collision
     this.position   = opts.spawnPos.clone()
     this.charHeight = opts.charHeight
-    void opts.mapBounds
 
-    this.yaw      = Math.PI
-    this.pitch    = MAP_CONFIG.cameraPitchDefault
-    this.distance = Math.max(MAP_CONFIG.cameraDistance, opts.charHeight * 1.2)
-    this._smoothSafeDist  = this.distance
-    this._pinchTargetDist = this.distance
+    this.camYaw   = Math.PI   // start looking at character from behind
+    this.camPitch = MAP_CONFIG.cameraPitchDefault ?? 0.35
+    this.camDist  = MAP_CONFIG.cameraDistance ?? 18
+    this._targetDist = this.camDist
+    this._safeDist   = this.camDist
 
     this.speedEl = document.getElementById('speed-indicator')
     this._setupAnimations(opts.animations)
     this.model.position.copy(this.position)
-    this.model.rotation.y = 0
     this._bindControls()
 
     window.addEventListener('keydown', e => {
@@ -88,14 +107,14 @@ export class CharacterController {
     })
   }
 
-  // ── Animation setup ──────────────────────────────────────────────────────────
+  // ── Animation setup ────────────────────────────────────────────────────────
   private _setupAnimations(clips: THREE.AnimationClip[]) {
     if (!this.mixer || !clips.length) return
     const map: Record<AnimKey, string[]> = {
-      idle: ['idle','stand','rest','still_test','still'],
-      walk: ['walking_test','walk','walking'],
-      run:  ['walking_test','walk','walking'],
-      jump: ['jump','leap','air'],
+      idle: ['idle', 'stand', 'rest', 'still_test', 'still'],
+      walk: ['walking_test', 'walk', 'walking'],
+      run:  ['walking_test', 'walk', 'walking'],
+      jump: ['jump', 'leap', 'air'],
     }
     for (const clip of clips) {
       const l = clip.name.toLowerCase()
@@ -110,315 +129,259 @@ export class CharacterController {
     if (!this.actions.run  && this.actions.walk) this.actions.run  = this.actions.walk
     if (!this.actions.walk && this.actions.run)  this.actions.walk = this.actions.run
     this.actions.idle?.play()
-    this.currentAction = 'idle'
+    this.curAnim = 'idle'
   }
 
   private _play(name: AnimKey) {
-    if (!this.mixer) return
+    if (!this.mixer || this.curAnim === name) return
     const next = this.actions[name]; if (!next) return
-    if (this.currentAction !== name) {
-      const cur = this.currentAction ? this.actions[this.currentAction] : null
-      if (cur && cur !== next) cur.fadeOut(0.12)
-      next.reset().fadeIn(0.12).play()
-      this.currentAction = name
-    }
-    next.timeScale = name === 'walk' ? 1.3 : name === 'run' ? 2.0 : 1.0
+    const cur  = this.curAnim ? this.actions[this.curAnim] : null
+    if (cur && cur !== next) cur.fadeOut(0.12)
+    next.reset().fadeIn(0.12).play()
+    next.timeScale = name === 'run' ? 2.0 : name === 'walk' ? 1.3 : 1.0
+    this.curAnim = name
   }
 
-  private _orbitBy(dx: number, dy: number, sensitivity: number) {
-    this.yaw  -= dx * sensitivity
-    this.pitch = Math.max(MAP_CONFIG.minPitch,
-      Math.min(MAP_CONFIG.maxPitch, this.pitch + dy * sensitivity))
-    this.isManualOrbit = true
-    this.orbitTimer    = 0
+  // ── Camera orbit helper ────────────────────────────────────────────────────
+  private _orbitBy(dx: number, dy: number, sens: number) {
+    this.camYaw  -= dx * sens
+    this.camPitch = Math.max(
+      MAP_CONFIG.minPitch ?? 0.05,
+      Math.min(MAP_CONFIG.maxPitch ?? 1.2, this.camPitch + dy * sens)
+    )
   }
 
-  // ── Input binding ─────────────────────────────────────────────────────────────
+  // ── Input binding ──────────────────────────────────────────────────────────
   private _bindControls() {
-    // ── Mouse ────────────────────────────────────────────────────────────────────
+    // Mouse drag
     window.addEventListener('mousedown', e => {
-      if (e.button === 0 || e.button === 1 || e.button === 2) {
-        this.dragging = true
-        this.dragLastX = e.clientX
-        this.dragLastY = e.clientY
+      if (e.button === 0 || e.button === 2) {
+        this._dragging = true; this._dragLastX = e.clientX; this._dragLastY = e.clientY
         e.preventDefault()
       }
     })
     window.addEventListener('mousemove', e => {
-      if (this.dragging) {
-        this._orbitBy(e.clientX - this.dragLastX, e.clientY - this.dragLastY, MOUSE_SENSITIVITY)
-        this.dragLastX = e.clientX
-        this.dragLastY = e.clientY
-      }
-      if (document.pointerLockElement) {
-        this._orbitBy(e.movementX, e.movementY, MOUSE_SENSITIVITY)
-      }
+      if (this._dragging)
+        this._orbitBy(e.clientX - this._dragLastX, e.clientY - this._dragLastY, MOUSE_SENSITIVITY)
+      this._dragLastX = e.clientX; this._dragLastY = e.clientY
     })
-    window.addEventListener('mouseup',    () => { this.dragging = false })
-    window.addEventListener('mouseleave', () => { this.dragging = false })
+    window.addEventListener('mouseup',    () => { this._dragging = false })
+    window.addEventListener('mouseleave', () => { this._dragging = false })
     window.addEventListener('contextmenu', e => e.preventDefault())
 
-    // ── Mouse wheel zoom ──────────────────────────────────────────────────────────
+    // Scroll zoom
     window.addEventListener('wheel', e => {
       e.preventDefault()
-      const zoom = (f: number) => {
-        this.distance = Math.max(MAP_CONFIG.cameraMinDistance,
-          Math.min(MAP_CONFIG.cameraMaxDistance, this.distance * f))
-        this._pinchTargetDist = this.distance
-      }
-      if (e.ctrlKey) {
-        zoom(e.deltaY > 0 ? MAP_CONFIG.zoomSpeed : 1 / MAP_CONFIG.zoomSpeed)
-      } else if (!e.ctrlKey && Math.abs(e.deltaX) > 1) {
-        const s = MOUSE_SENSITIVITY * 1.5
-        this.yaw  -= e.deltaX * s
-        this.pitch = Math.max(MAP_CONFIG.minPitch,
-          Math.min(MAP_CONFIG.maxPitch, this.pitch + e.deltaY * s))
-        this.isManualOrbit = true; this.orbitTimer = 0
-      } else {
-        zoom(e.deltaY > 0 ? MAP_CONFIG.zoomSpeed : 1 / MAP_CONFIG.zoomSpeed)
-      }
+      const factor = e.deltaY > 0 ? (MAP_CONFIG.zoomSpeed ?? 1.1) : 1 / (MAP_CONFIG.zoomSpeed ?? 1.1)
+      this._targetDist = Math.max(
+        MAP_CONFIG.cameraMinDistance ?? 4,
+        Math.min(MAP_CONFIG.cameraMaxDistance ?? 60, this._targetDist * factor)
+      )
     }, { passive: false })
 
-    // ── Touch ─────────────────────────────────────────────────────────────────────
-    // Right half of screen = look (camera orbit)
-    // Left half            = joystick (handled by MobileJoystick)
-    // Two fingers anywhere = pinch zoom
-
+    // Touch: right-half = look, pinch = zoom
     window.addEventListener('touchstart', e => {
       const touches = Array.from(e.touches)
-
-      // ── Pinch: two fingers ──────────────────────────────────────────────────────
       if (touches.length >= 2) {
-        this._lookTouchId = null
+        this._lookId = null
         this._pinchActive = true
-        this._pinchStart    = Math.hypot(
+        this._pinchStart  = Math.hypot(
           touches[0].clientX - touches[1].clientX,
           touches[0].clientY - touches[1].clientY
         )
-        this._pinchCamDist    = this.distance
-        this._pinchTargetDist = this.distance
+        this._pinchBase = this._targetDist
         return
       }
-
-      // ── Single finger on RIGHT side = look ──────────────────────────────────────
       const t = e.changedTouches[0]
-      if (this._lookTouchId === null && t.clientX > window.innerWidth * 0.42) {
-        this._lookTouchId = t.identifier
-        this._lookLastX   = t.clientX
-        this._lookLastY   = t.clientY
+      if (this._lookId === null && t.clientX > window.innerWidth * 0.42) {
+        this._lookId    = t.identifier
+        this._lookLastX = t.clientX
+        this._lookLastY = t.clientY
       }
     }, { passive: true })
 
     window.addEventListener('touchmove', e => {
-      const touches = Array.from(e.touches)
-
-      // ── Pinch zoom ──────────────────────────────────────────────────────────────
-      if (this._pinchActive && touches.length >= 2) {
+      if (this._pinchActive && e.touches.length >= 2) {
         const cur = Math.hypot(
-          touches[0].clientX - touches[1].clientX,
-          touches[0].clientY - touches[1].clientY
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
         )
         if (this._pinchStart > 0) {
-          const ratio = this._pinchStart / cur
-          this._pinchTargetDist = Math.max(
-            MAP_CONFIG.cameraMinDistance,
-            Math.min(MAP_CONFIG.cameraMaxDistance, this._pinchCamDist * ratio)
+          this._targetDist = Math.max(
+            MAP_CONFIG.cameraMinDistance ?? 4,
+            Math.min(MAP_CONFIG.cameraMaxDistance ?? 60, this._pinchBase * (this._pinchStart / cur))
           )
         }
         return
       }
-
-      // ── Single-finger look ──────────────────────────────────────────────────────
-      if (this._lookTouchId !== null) {
+      if (this._lookId !== null) {
         for (const t of Array.from(e.changedTouches)) {
-          if (t.identifier === this._lookTouchId) {
-            this._orbitBy(
-              t.clientX - this._lookLastX,
-              t.clientY - this._lookLastY,
-              TOUCH_SENSITIVITY
-            )
-            this._lookLastX = t.clientX
-            this._lookLastY = t.clientY
+          if (t.identifier === this._lookId) {
+            this._orbitBy(t.clientX - this._lookLastX, t.clientY - this._lookLastY, TOUCH_SENSITIVITY)
+            this._lookLastX = t.clientX; this._lookLastY = t.clientY
           }
         }
       }
     }, { passive: true })
 
     window.addEventListener('touchend', e => {
-      const remaining = Array.from(e.touches)
-
-      if (remaining.length < 2) {
-        this._pinchActive = false
-        this._pinchStart  = 0
-      }
-
+      if (Array.from(e.touches).length < 2) { this._pinchActive = false; this._pinchStart = 0 }
       for (const t of Array.from(e.changedTouches)) {
-        if (t.identifier === this._lookTouchId) {
-          this._lookTouchId = null
-        }
+        if (t.identifier === this._lookId) this._lookId = null
       }
     }, { passive: true })
   }
 
-  // ── Main update ───────────────────────────────────────────────────────────────
+  // ── Main update — called every frame ──────────────────────────────────────
   update(delta: number, input: InputController, joystick: JoystickInput) {
     input.consumeMouseDelta()
 
-    // ── Smooth pinch zoom toward target ──────────────────────────────────────────
-    if (Math.abs(this.distance - this._pinchTargetDist) > 0.01) {
-      this.distance += (this._pinchTargetDist - this.distance) *
-        Math.min(12 * delta, 1)
+    // ── Smooth camera distance toward pinch/scroll target ─────────────────
+    if (Math.abs(this.camDist - this._targetDist) > 0.01)
+      this.camDist += (this._targetDist - this.camDist) * Math.min(12 * delta, 1)
+
+    // ── Gather raw input ───────────────────────────────────────────────────
+    // Keyboard
+    const kb = input.getMoveVector()
+
+    // Joystick: joyX = strafe (right=+), joyY = screen-down (+), so negate Y for forward
+    // This matches Code 1 exactly:  inputY = kbY !== 0 ? kbY : -joyVec.y
+    const inputX = kb.x !== 0 ? kb.x : joystick.x
+    const inputY = kb.z !== 0 ? -kb.z : -joystick.y   // forward = negative Z = negative screen Y
+
+    const moving = (inputX * inputX + inputY * inputY) > 0.01
+    const isSprinting = moving && (input.isSprinting() || joystick.sprint)
+    const speed = isSprinting ? (MAP_CONFIG.sprintSpeed ?? 14) : (MAP_CONFIG.walkSpeed ?? 6)
+
+    // ── Camera-relative movement (identical to Code 1) ────────────────────
+    if (moving) {
+      // Forward = direction camera is pointing (XZ plane)
+      this._fwd.set(-Math.sin(this.camYaw), 0, -Math.cos(this.camYaw)).normalize()
+      // Right = cross(fwd, up)
+      this._right.crossVectors(this._fwd, this._UP).normalize()
+
+      // World-space move direction from camera-relative input
+      this._moveDir
+        .set(0, 0, 0)
+        .addScaledVector(this._fwd,   inputY)
+        .addScaledVector(this._right, inputX)
+
+      if (this._moveDir.lengthSq() > 0.0001) this._moveDir.normalize()
+
+      // Try to move; collision resolves XZ
+      const moveDelta = this._moveDir.clone().multiplyScalar(speed * delta)
+      moveDelta.y = 0
+      const resolved = this.collision.resolveXZ(
+        this.position, moveDelta,
+        MAP_CONFIG.characterRadius ?? 0.5, this.charHeight
+      )
+
+      // Face direction of travel
+      const targetYaw = Math.atan2(this._moveDir.x, this._moveDir.z)
+      let diff = targetYaw - this.model.rotation.y
+      while (diff >  Math.PI) diff -= Math.PI * 2
+      while (diff < -Math.PI) diff += Math.PI * 2
+      this.model.rotation.y += diff * Math.min(10 * delta, 1)
+
+      this.position.x = resolved.x
+      this.position.z = resolved.z
     }
 
-    // ── Input ─────────────────────────────────────────────────────────────────────
-    // joystick.y is already inverted in MobileJoystick.getInput() so +y = forward
-    const kb = input.getMoveVector()
-    let mx = kb.x + joystick.x
-    let mz = kb.z + joystick.y   // joystick.y already inverted: push up = negative screen Y = forward
-    const len = Math.sqrt(mx * mx + mz * mz)
-    if (len > 1) { mx /= len; mz /= len }
-
-    const moving      = len > 0.05
-    // Sprint: keyboard Shift OR joystick pushed past threshold OR external sprint button
-    const isSprinting = (input.isSprinting() || joystick.sprint) && moving
-    const speed       = isSprinting ? MAP_CONFIG.sprintSpeed : MAP_CONFIG.walkSpeed
-
-    const sinY   = Math.sin(this.yaw)
-    const cosY   = Math.cos(this.yaw)
-    const rawDir = new THREE.Vector3(
-      -mz * (-sinY) + mx * cosY,
-      0,
-      -mz * (-cosY) + mx * (-sinY)
-    )
-
-    const targetVel = moving
-      ? rawDir.clone().normalize().multiplyScalar(speed)
-      : new THREE.Vector3()
-    this.smoothVel.lerp(targetVel, Math.min((moving ? 30 : 35) * delta, 1))
-
-    const dir        = this.smoothVel.clone().normalize()
-    const actualSpeed = this.smoothVel.length()
-    const isMoving   = actualSpeed > 0.5
-
-    // ── XZ movement ───────────────────────────────────────────────────────────────
-    const moveDelta = this.smoothVel.clone().multiplyScalar(delta)
-    moveDelta.y = 0
-    const resolved = this.collision.resolveXZ(
-      this.position, moveDelta, MAP_CONFIG.characterRadius, this.charHeight
-    )
-
-    // ── Jump ──────────────────────────────────────────────────────────────────────
+    // ── Jump ───────────────────────────────────────────────────────────────
     if (this.jumpBuffer && this.isGrounded) {
       this.verticalVel = MAP_CONFIG.jumpSpeed ?? 14
       this.isGrounded  = false
     }
     this.jumpBuffer = false
 
-    // ── Gravity ───────────────────────────────────────────────────────────────────
-    this.verticalVel += MAP_CONFIG.gravity * delta
-    resolved.y = this.position.y + this.verticalVel * delta
-
-    const gY = this.collision.getGroundY(resolved, this.charHeight)
-    if (resolved.y <= gY + 0.05) {
-      resolved.y = gY; this.verticalVel = 0; this.isGrounded = true
+    // ── Gravity ────────────────────────────────────────────────────────────
+    this.verticalVel += (MAP_CONFIG.gravity ?? -28) * delta
+    const nextY = this.position.y + this.verticalVel * delta
+    const gY    = this.collision.getGroundY(this.position, this.charHeight)
+    if (nextY <= gY + 0.05) {
+      this.position.y = gY; this.verticalVel = 0; this.isGrounded = true
     } else {
-      this.isGrounded = false
+      this.position.y = Math.max(nextY, 0)
+      this.isGrounded  = nextY <= 0.05
     }
 
-    if (resolved.y < 0) { resolved.y = 0; this.verticalVel = 0; this.isGrounded = true }
-
-    this.position.copy(resolved)
     this.model.position.copy(this.position)
 
-    // ── Character rotation faces movement direction ────────────────────────────────
-    if (isMoving && dir.lengthSq() > 0.001) {
-      const target = Math.atan2(dir.x, dir.z) + Math.PI
-      let diff = target - this.model.rotation.y
-      while (diff >  Math.PI) diff -= 2 * Math.PI
-      while (diff < -Math.PI) diff += 2 * Math.PI
-      this.model.rotation.y += diff * Math.min(12 * delta, 1)
-      this.lastMoveYaw = Math.atan2(dir.x, dir.z)
-    }
-
-    // ── Camera auto-follow ────────────────────────────────────────────────────────
-    if (this.isManualOrbit) {
-      this.orbitTimer += delta
-      if (this.orbitTimer > this.ORBIT_RESUME_DELAY) {
-        this.isManualOrbit = false
-        this.orbitTimer    = 0
-      }
-    }
-    if (!this.isManualOrbit && isMoving && this.lastMoveYaw !== null) {
-      const targetYaw = this.lastMoveYaw + Math.PI
-      let diff = targetYaw - this.yaw
-      while (diff >  Math.PI) diff -= 2 * Math.PI
-      while (diff < -Math.PI) diff += 2 * Math.PI
-      this.yaw += diff * Math.min(this.FOLLOW_SPEED * delta, 1)
-    }
-
-    // ── Animations ────────────────────────────────────────────────────────────────
+    // ── Animations ─────────────────────────────────────────────────────────
     if (this.mixer) {
-      this._play(!this.isGrounded ? 'jump' : isMoving ? (isSprinting ? 'run' : 'walk') : 'idle')
+      this._play(!this.isGrounded ? 'jump' : moving ? (isSprinting ? 'run' : 'walk') : 'idle')
       this.mixer.update(delta)
     }
 
+    // ── Camera update ──────────────────────────────────────────────────────
     this._updateCamera(delta)
 
-    // Dynamic FOV for sprint feel
-    const fov = isSprinting ? 75 : 60
-    if (Math.abs(this.camera.fov - fov) > 0.1) {
-      this.camera.fov += (fov - this.camera.fov) * Math.min(8 * delta, 1)
+    // ── Dynamic FOV ────────────────────────────────────────────────────────
+    const targetFov = isSprinting ? 75 : 60
+    if (Math.abs(this.camera.fov - targetFov) > 0.1) {
+      this.camera.fov += (targetFov - this.camera.fov) * Math.min(8 * delta, 1)
       this.camera.updateProjectionMatrix()
     }
 
-    this.speedEl?.classList.toggle('sprinting', isMoving && isSprinting)
+    this.speedEl?.classList.toggle('sprinting', moving && isSprinting)
   }
 
-  // ── Camera update ─────────────────────────────────────────────────────────────
+  // ── Camera orbit + occlusion ───────────────────────────────────────────────
   private _updateCamera(delta: number) {
-    const pivot = this.position.clone()
-      .add(new THREE.Vector3(0, this.charHeight * 0.75, 0))
+    // Pivot at character head height
+    this._camTarget.set(
+      this.position.x,
+      this.position.y + this.charHeight * 0.75,
+      this.position.z
+    )
 
-    const ox = this.distance * Math.sin(this.yaw)   * Math.cos(this.pitch)
-    const oy = this.distance * Math.sin(this.pitch)
-    const oz = this.distance * Math.cos(this.yaw)   * Math.cos(this.pitch)
-    const desired   = pivot.clone().add(new THREE.Vector3(ox, oy, oz))
-    const toDesired = desired.clone().sub(pivot)
+    // Desired camera position from yaw/pitch/distance
+    const cosP = Math.cos(this.camPitch)
+    this._camDesired.set(
+      this._camTarget.x + Math.sin(this.camYaw) * this.camDist * cosP,
+      this._camTarget.y + Math.sin(this.camPitch) * this.camDist,
+      this._camTarget.z + Math.cos(this.camYaw) * this.camDist * cosP
+    )
+
+    const toDesired = this._camDesired.clone().sub(this._camTarget)
     const rayDir    = toDesired.clone().normalize()
     const rayDist   = toDesired.length()
 
-    // ── Sphere-sweep camera occlusion ─────────────────────────────────────────────
-    const SPHERE_R = 0.5
-    const offsets = [
-      new THREE.Vector3(0,         0,        0),
-      new THREE.Vector3( SPHERE_R, 0,        0),
-      new THREE.Vector3(-SPHERE_R, 0,        0),
-      new THREE.Vector3(0,         SPHERE_R, 0),
-      new THREE.Vector3(0,        -SPHERE_R, 0),
+    // Occlusion: sphere-sweep from pivot toward desired position
+    const SPHERE_R = 0.45
+    const offsets  = [
+      new THREE.Vector3(0,         0, 0),
+      new THREE.Vector3( SPHERE_R, 0, 0),
+      new THREE.Vector3(-SPHERE_R, 0, 0),
+      new THREE.Vector3(0,  SPHERE_R, 0),
+      new THREE.Vector3(0, -SPHERE_R, 0),
     ]
-
     let minDist = rayDist
     for (const off of offsets) {
-      this.collision.rc.set(pivot.clone().add(off), rayDir)
+      this.collision.rc.set(this._camTarget.clone().add(off), rayDir)
       this.collision.rc.near = 0.1
       this.collision.rc.far  = rayDist + 1.0
       const hits = this.collision.rc.intersectObjects(this.collision.cameraCollidables, false)
       if (hits.length) {
-        const closest = hits.reduce((b, h) => h.distance < b.distance ? h : b, hits[0])
-        minDist = Math.min(minDist,
-          Math.max(MAP_CONFIG.cameraMinDistance, closest.distance - SPHERE_R - 0.2))
+        const nearest = hits.reduce((b, h) => h.distance < b.distance ? h : b, hits[0])
+        minDist = Math.min(minDist, Math.max(
+          MAP_CONFIG.cameraMinDistance ?? 4,
+          nearest.distance - SPHERE_R - 0.2
+        ))
       }
     }
 
-    // Snap in instantly when blocked, ease out slowly when clearing
-    const inS  = 1 - Math.pow(0.0001, delta)
-    const outS = 1 - Math.pow(0.05,   delta)
-    this._smoothSafeDist += (minDist - this._smoothSafeDist) *
-      (minDist < this._smoothSafeDist ? inS : outS)
+    // Snap in fast, ease out slowly
+    this._safeDist += (minDist - this._safeDist) *
+      (minDist < this._safeDist
+        ? (1 - Math.pow(0.0001, delta))   // instant snap inward
+        : (1 - Math.pow(0.05,   delta)))  // slow ease outward
 
-    const safe = pivot.clone().add(rayDir.multiplyScalar(this._smoothSafeDist))
-    safe.y = Math.max(safe.y, 0.5)
-    this.camera.position.lerp(safe, 1 - Math.pow(0.01, delta))
-    this.camera.lookAt(pivot)
+    const safePos = this._camTarget.clone()
+      .add(rayDir.multiplyScalar(this._safeDist))
+    safePos.y = Math.max(safePos.y, 0.5)
+
+    this.camera.position.lerp(safePos, 1 - Math.pow(0.01, delta))
+    this.camera.lookAt(this._camTarget)
   }
 }
