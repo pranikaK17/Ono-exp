@@ -18,6 +18,10 @@ const PIN_TO_PAGE: Record<string, string> = {
   'Pin007': 'FootballGround',
   'Pin01': 'GrandStairs',
   'Pin008': 'CricketGround',
+  'Pin002': 'AB2',
+  'Pin005': 'AB3',
+  'Pin006': 'LHC',
+  'Pin003': 'OldMess',
 }
 
 // Buildings to draw ground outlines around (exact node names)
@@ -479,6 +483,26 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     const pinWorldPositions: { name: string; pos: THREE.Vector3 }[] = []
     let nearbyPin: string | null = null
     const promptEl = document.getElementById('pin-prompt')
+    const isTouch = window.matchMedia('(pointer: coarse)').matches
+
+    const handlePromptClick = () => {
+      if (!onPinClick) return
+      if (activePageRef.current) {
+        onPinClick(activePageRef.current)
+        return
+      }
+      if (nearbyPin) {
+        const page = PIN_TO_PAGE[nearbyPin]
+        if (page) onPinClick(page)
+      }
+    }
+
+    if (promptEl) {
+      promptEl.addEventListener('click', handlePromptClick)
+      if (isTouch) {
+        promptEl.innerHTML = 'Tap here to interact'
+      }
+    }
 
     const pinKeyHandler = (e: KeyboardEvent) => {
       if (e.code === 'KeyE' || e.key === 'e' || e.key === 'E') {
@@ -542,10 +566,18 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         nearbyPin = closest
         if (nearbyPin) {
           promptEl.style.opacity = '1'
-          promptEl.style.transform = 'translate(-50%, 0) scale(1)'
+          if (isTouch) {
+            promptEl.style.transform = 'translate(-50%, -50%) scale(1)'
+          } else {
+            promptEl.style.transform = 'translate(-50%, 0) scale(1)'
+          }
         } else {
           promptEl.style.opacity = '0'
-          promptEl.style.transform = 'translate(-50%, 8px) scale(0.95)'
+          if (isTouch) {
+            promptEl.style.transform = 'translate(-50%, calc(-50% + 8px)) scale(0.95)'
+          } else {
+            promptEl.style.transform = 'translate(-50%, 8px) scale(0.95)'
+          }
         }
 
         // Auto-close page if character walks too far from the active pin
@@ -694,10 +726,9 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         const joyBase   = document.getElementById('joy-base')
         const joyKnob   = document.getElementById('joy-knob')
         if (isTouchDevice && joyBase && joyKnob) {
-          joystick = new MobileJoystick(joyBase, joyKnob, document.createElement('div'))
+          joystick = new MobileJoystick(joyBase, joyKnob)
         } else {
           joystick = new MobileJoystick(
-            document.createElement('div'),
             document.createElement('div'),
             document.createElement('div'),
           )
@@ -734,6 +765,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', onResize)
       window.removeEventListener('keydown', pinKeyHandler)
+      promptEl?.removeEventListener('click', handlePromptClick)
       inputCtrl?.destroy()
       nightSky.destroy()
       neonMat.dispose(); floorGeo.dispose()
@@ -856,10 +888,23 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           border:1px solid rgba(77,216,230,.35);border-radius:10px;
           padding:10px 28px;color:rgba(255,255,255,.85);
           font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;
-          font-family:'Orbitron',system-ui,sans-serif;pointer-events:none;
-          opacity:0;transition:opacity .3s ease, transform .3s ease;
+          font-family:'Orbitron',system-ui,sans-serif;
+          opacity:0;transition:opacity .3s ease, transform .3s ease, background .2s ease;
           z-index:100;white-space:nowrap;
           box-shadow:0 0 20px rgba(77,216,230,.12);
+          cursor: pointer;
+          pointer-events: auto;
+          user-select: none;
+        }
+        @media (max-width: 768px) {
+          #pin-prompt {
+            bottom: unset;
+            bottom: 20%;
+          }
+        }
+        #pin-prompt:active {
+          background: rgba(77,216,230,.25);
+          transform: translate(-50%, 0) scale(0.98) !important;
         }
         #pin-prompt kbd{
           display:inline-block;padding:2px 10px;margin:0 4px;

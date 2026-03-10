@@ -1,4 +1,3 @@
-// src/components/map/NightSky.ts
 import * as THREE from 'three'
 
 export class NightSky {

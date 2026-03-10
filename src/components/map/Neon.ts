@@ -1,4 +1,3 @@
-// src/components/map/Neon.ts
 import * as THREE from 'three'
 
 export const createNeonGridMaterial = () => new THREE.ShaderMaterial({
