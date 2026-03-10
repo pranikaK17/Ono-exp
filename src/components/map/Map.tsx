@@ -556,7 +556,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     let inputCtrl: InputController | null = null
     let charCtrl:  CharacterController   | null = null
     let joystick:  MobileJoystick        | null = null
-    let mobileSprint = false                      // set by RUN button on mobile
     const clock    = new THREE.Clock()
     const nightSky = new NightSky(scene)
 
@@ -643,17 +642,8 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
       for (const sp of sparkles) sp.update(t)
       bokeh.update(t)
 
-      if (charCtrl && inputCtrl && joystick) {
-        const jInput = joystick.getInput()
-        // Merge hardware sprint button with joystick push-sprint
-        charCtrl.update(dt, inputCtrl, { ...jInput, sprint: jInput.sprint || mobileSprint })
-      }
-
-      // ── Speed indicator ───────────────────────────────────────────────────
-      const speedEl = document.getElementById('speed-indicator')
-      if (speedEl && inputCtrl) {
-        speedEl.classList.toggle('sprinting', inputCtrl.isSprinting() || mobileSprint)
-      }
+      if (charCtrl && inputCtrl && joystick)
+        charCtrl.update(dt, inputCtrl, joystick.getInput())
 
       // ── Trail: stamp when character moves, skip when still ────────────────
       if (charCtrl) {
@@ -845,24 +835,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
         const joyBase   = document.getElementById('joy-base')
         const joyKnob   = document.getElementById('joy-knob')
-        const sprintBtn = document.getElementById('joy-sprint')
-
-        // Sprint button: hold to sprint on mobile
-        // We route mobile sprint through a closure flag read by joystick.getInput()
-        if (isTouchDevice && sprintBtn) {
-          sprintBtn.addEventListener('touchstart', e => {
-            e.preventDefault()
-            mobileSprint = true
-            sprintBtn.classList.add('active')
-          }, { passive: false })
-          const stopSprint = () => {
-            mobileSprint = false
-            sprintBtn.classList.remove('active')
-          }
-          sprintBtn.addEventListener('touchend',    stopSprint, { passive: true })
-          sprintBtn.addEventListener('touchcancel', stopSprint, { passive: true })
-        }
-
         if (isTouchDevice && joyBase && joyKnob) {
           joystick = new MobileJoystick(joyBase, joyKnob)
         } else {
@@ -883,7 +855,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         const loadEl = document.getElementById('map-loading')
         if (loadEl) setTimeout(()=>{ loadEl.style.opacity='0'; setTimeout(()=>loadEl.remove(),700) },300)
         const hint = document.getElementById('map-hint')
-        if (hint && isTouch) hint.textContent = 'Drag joystick · Hold RUN to sprint · Tap to interact'
         setTimeout(()=>{ if(hint) hint.style.opacity='0' },6000)
 
         tick()
@@ -995,112 +966,31 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           animation:sdp .6s ease-in-out infinite alternate}
         @keyframes sdp{from{transform:scale(1);opacity:1}to{transform:scale(1.6);opacity:.4}}
 
-        /* ── Mobile joystick — cosmic redesign ── */
+        /* ── Mobile joystick — hidden by default, shown only on touch devices ── */
         #joy-zone { display: none }
         @media (pointer: coarse) {
           #joy-zone {
             display: block;
-            position: fixed; bottom: 0; left: 0; width: 240px; height: 240px;
-            pointer-events: all; z-index: 200;
+            position: fixed; bottom: 0; left: 0; width: 200px; height: 200px;
+            pointer-events: all; z-index: 100;
           }
-
-          /* Outer ring — rotating starfield conic */
           #joy-base {
-            position: absolute; bottom: 28px; left: 28px;
-            width: 130px; height: 130px; border-radius: 50%;
-            background:
-              radial-gradient(circle at 50% 50%,
-                rgba(10,0,30,.82) 0%,
-                rgba(20,5,55,.75) 55%,
-                rgba(80,0,160,.18) 100%);
-            border: 1.5px solid transparent;
-            background-clip: padding-box;
-            box-shadow:
-              0 0 0 1.5px rgba(140,80,255,.55),
-              0 0 22px rgba(100,40,255,.35),
-              0 0 55px rgba(60,0,180,.22),
-              inset 0 0 20px rgba(180,100,255,.08);
-            backdrop-filter: blur(6px);
-            touch-action: none;
+            position: absolute; bottom: 30px; left: 30px;
+            width: 110px; height: 110px; border-radius: 50%;
+            background: rgba(255,255,255,.07); border: 2px solid rgba(255,255,255,.18);
+            backdrop-filter: blur(4px);
           }
-          /* Dashed orbit ring via pseudo */
-          #joy-base::before {
-            content: '';
-            position: absolute; inset: 6px;
-            border-radius: 50%;
-            border: 1px dashed rgba(160,100,255,.30);
-            animation: joyOrbit 8s linear infinite;
-          }
-          /* Inner glow ring */
-          #joy-base::after {
-            content: '';
-            position: absolute; inset: 18px;
-            border-radius: 50%;
-            border: 1px solid rgba(100,200,255,.15);
-            box-shadow: inset 0 0 12px rgba(80,160,255,.12);
-          }
-          @keyframes joyOrbit {
-            from { transform: rotate(0deg) }
-            to   { transform: rotate(360deg) }
-          }
-
-          /* Knob — cosmic nebula orb */
           #joy-knob {
-            width: 50px; height: 50px; border-radius: 50%;
-            background: radial-gradient(circle at 35% 35%,
-              #c084fc 0%, #7c3aed 40%, #4c1d95 75%, #1e0a3c 100%);
-            border: 1.5px solid rgba(200,160,255,.70);
+            width: 44px; height: 44px; border-radius: 50%;
+            background: rgba(255,107,53,.82);
+            border: 2px solid rgba(255,200,150,.55);
             position: absolute; left: 50%; top: 50%;
             transform: translate(-50%,-50%);
-            box-shadow:
-              0 0 12px rgba(168,85,247,.80),
-              0 0 30px rgba(124,58,237,.50),
-              0 0 55px rgba(88,28,135,.30),
-              inset 0 0 10px rgba(255,255,255,.15);
+            box-shadow: 0 0 18px rgba(255,107,53,.35);
             cursor: grab; touch-action: none;
-            transition: box-shadow .15s ease;
-          }
-          #joy-knob:active {
-            box-shadow:
-              0 0 20px rgba(216,180,254,1),
-              0 0 50px rgba(168,85,247,.80),
-              0 0 90px rgba(124,58,237,.45);
-          }
-
-          /* Sprint button — cosmic pulse */
-          #joy-sprint {
-            display: flex; align-items: center; justify-content: center;
-            position: absolute; bottom: 36px; right: 20px;
-            width: 62px; height: 62px; border-radius: 50%;
-            background: radial-gradient(circle at 40% 35%,
-              #f472b6 0%, #db2777 45%, #831843 100%);
-            border: 1.5px solid rgba(251,182,206,.65);
-            box-shadow:
-              0 0 14px rgba(236,72,153,.70),
-              0 0 32px rgba(190,24,93,.40),
-              inset 0 0 10px rgba(255,255,255,.12);
-            color: rgba(255,220,235,.95);
-            font-size: .58rem; font-weight: 800;
-            letter-spacing: .10em; text-transform: uppercase;
-            font-family: system-ui, sans-serif;
-            cursor: pointer; touch-action: none;
-            user-select: none;
-            transition: box-shadow .12s ease, transform .12s ease;
-          }
-          #joy-sprint.active {
-            box-shadow:
-              0 0 24px rgba(251,113,133,1),
-              0 0 60px rgba(236,72,153,.80),
-              0 0 100px rgba(190,24,93,.40);
-            transform: scale(0.93);
-            animation: sprintPulse .35s ease-in-out infinite alternate;
-          }
-          @keyframes sprintPulse {
-            from { box-shadow: 0 0 18px rgba(251,113,133,.9), 0 0 45px rgba(236,72,153,.6) }
-            to   { box-shadow: 0 0 30px rgba(253,164,175,1),  0 0 80px rgba(251,113,133,.8) }
           }
         }
-        #jump-btn { display: none !important }
+        #sprint-btn, #jump-btn { display: none !important }
 
         /* ── Pin interaction prompt ── */
         #pin-prompt{
@@ -1153,11 +1043,8 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         {/* Pin interaction prompt */}
         <div id="pin-prompt">Press <kbd>E</kbd> to interact</div>
 
-        {/* Joystick — CSS hides on non-touch via @media(pointer:coarse) */}
-        <div id="joy-zone">
-          <div id="joy-base"><div id="joy-knob" /></div>
-          <div id="joy-sprint">RUN</div>
-        </div>
+        {/* Joystick — CSS hides on non-touch via @media(hover:hover)and(pointer:fine) */}
+        <div id="joy-zone"><div id="joy-base"><div id="joy-knob" /></div></div>
       </div>
     </>
   )
