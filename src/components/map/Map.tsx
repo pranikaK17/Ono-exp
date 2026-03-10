@@ -2,6 +2,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
 import { InputController, MobileJoystick } from './Input'
 import { CollisionSystem } from './collision'
 import { CharacterController } from './CharacterController'
@@ -159,8 +160,10 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
   useEffect(() => {
     const mount = mountRef.current; if (!mount) return
 
+    const isTouch = window.matchMedia('(pointer: coarse)').matches
+
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' })
-    renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
+    renderer.setPixelRatio(isTouch ? 1 : Math.min(devicePixelRatio, 2))
     renderer.setSize(innerWidth, innerHeight)
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -184,7 +187,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     scene.add(new THREE.AmbientLight(0xddeeff, 0.75))
     const sun = new THREE.DirectionalLight(0xe0f0ff, 1.9)
     sun.position.set(60, 120, 60); sun.castShadow = true
-    sun.shadow.mapSize.set(MAP_CONFIG.shadowMapSize, MAP_CONFIG.shadowMapSize)
+    sun.shadow.mapSize.set(isTouch ? 1024 : MAP_CONFIG.shadowMapSize, isTouch ? 1024 : MAP_CONFIG.shadowMapSize)
     sun.shadow.camera.near = 0.5; sun.shadow.camera.far = 500
     sun.shadow.camera.left = sun.shadow.camera.bottom = -150
     sun.shadow.camera.right = sun.shadow.camera.top = 150
@@ -201,6 +204,9 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     const barEl = document.getElementById('map-bar'), textEl = document.getElementById('map-text')
     const setProg = (p: number, msg?: string) => { if (barEl) barEl.style.width = p + '%'; if (msg && textEl) textEl.textContent = msg }
     const gltfLoader = new GLTFLoader()
+    const dracoLoader = new DRACOLoader()
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/')
+    gltfLoader.setDRACOLoader(dracoLoader)
     const loadGLTF = (url: string, a: number, b: number, label: string) =>
       new Promise<{ scene: THREE.Group; animations: THREE.AnimationClip[] }>((res, rej) =>
         gltfLoader.load(url, g => { setProg(b, label + ' loaded'); res(g) }, xhr => { if (xhr.lengthComputable) setProg(a + (xhr.loaded / xhr.total) * (b - a)) }, rej))
@@ -210,7 +216,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     let charCtrl: CharacterController | null = null
     let joystick: MobileJoystick | null = null
     const clock = new THREE.Clock(), nightSky = new NightSky(scene)
-    const isTouch = window.matchMedia('(pointer: coarse)').matches
     type Sparkle = ReturnType<typeof createPinSparkles>
     type PinEntry = { obj: THREE.Object3D; baseY: number; phase: number; name: string }
     const pins: PinEntry[] = [], sparkles: Sparkle[] = [], outlines: (() => void)[] = [], pinRings: (() => void)[] = []
@@ -402,6 +407,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
             mixer: charGLTF.animations.length ? new THREE.AnimationMixer(charGLTF.scene) : null,
             animations: charGLTF.animations,
             camera, collision, mapBounds: mapBox, spawnPos, charHeight,
+            isMobile: isTouch,
           })
           setProg(100, 'Ready!')
           const loadEl = document.getElementById('map-loading')
@@ -441,7 +447,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;400;700&display=swap');
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
         html,body,#root{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;font-family:'Outfit',system-ui,sans-serif;}
         #screentone{

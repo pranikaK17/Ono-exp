@@ -94,11 +94,11 @@ export class MobileJoystick {
     this._delta = { x: kx / this.RADIUS, y: ky / this.RADIUS }
 
     if (this._mag > this.SPRINT_THRESHOLD) {
-      this.knob.style.background = 'rgba(255,107,53,0.95)'
-      this.knob.style.boxShadow  = '0 0 24px rgba(255,107,53,0.6)'
+      this.knob.style.background = 'linear-gradient(135deg, #ff00ff, #4dd8e6)'
+      this.knob.style.boxShadow  = '0 0 24px rgba(255,0,255,0.6), 0 0 40px rgba(77,216,230,0.4)'
     } else {
-      this.knob.style.background = 'rgba(255,107,53,0.82)'
-      this.knob.style.boxShadow  = '0 0 18px rgba(255,107,53,0.35)'
+      this.knob.style.background = 'linear-gradient(135deg, #ff00ff, #4dd8e6)'
+      this.knob.style.boxShadow  = '0 0 18px rgba(255,0,255,0.4)'
     }
   }
 
@@ -130,8 +130,8 @@ export class MobileJoystick {
           this._delta   = { x: 0, y: 0 }
           this._mag     = 0
           this.knob.style.transform  = 'translate(-50%, -50%)'
-          this.knob.style.background = 'rgba(255,107,53,0.82)'
-          this.knob.style.boxShadow  = '0 0 18px rgba(255,107,53,0.35)'
+          this.knob.style.background = 'linear-gradient(135deg, #ff00ff, #4dd8e6)'
+          this.knob.style.boxShadow  = '0 0 18px rgba(255,0,255,0.4)'
         }
       }
     })
@@ -144,8 +144,8 @@ export class MobileJoystick {
           this._delta   = { x: 0, y: 0 }
           this._mag     = 0
           this.knob.style.transform  = 'translate(-50%, -50%)'
-          this.knob.style.background = 'rgba(255,107,53,0.82)'
-          this.knob.style.boxShadow  = '0 0 18px rgba(255,107,53,0.35)'
+          this.knob.style.background = 'linear-gradient(135deg, #ff00ff, #4dd8e6)'
+          this.knob.style.boxShadow  = '0 0 18px rgba(255,0,255,0.4)'
         }
       }
     })
