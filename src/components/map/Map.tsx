@@ -167,6 +167,15 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1
     mount.appendChild(renderer.domElement)
 
+    const instructionsEl = document.getElementById('instructions-overlay')
+    const letsGoBtn = document.getElementById('lets-go-btn')
+    if (letsGoBtn && instructionsEl) {
+      letsGoBtn.onclick = () => {
+        instructionsEl.style.opacity = '0'
+        setTimeout(() => instructionsEl.style.display = 'none', 500)
+      }
+    }
+
     const scene = new THREE.Scene()
     scene.background = new THREE.Color(MAP_CONFIG.skyColor)
     scene.fog = new THREE.FogExp2(MAP_CONFIG.fogColor, MAP_CONFIG.fogDensity * 0.55)
@@ -466,22 +475,23 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
             position: fixed; bottom: 0; left: 0; width: 200px; height: 200px;
             pointer-events: all; z-index: 100;
           }
-          #joy-base {
-            position: absolute; bottom: 30px; left: 30px;
-            width: 110px; height: 110px; border-radius: 50%;
-            background: rgba(255,107,53,0.12);
-            border: 2px solid rgba(255,107,53,0.45);
-            backdrop-filter: blur(4px);
-          }
-          #joy-knob {
-            width: 44px; height: 44px; border-radius: 50%;
-            background: rgba(255,107,53,0.82);
-            border: 2px solid rgba(255,200,150,0.55);
-            position: absolute; left: 50%; top: 50%;
-            transform: translate(-50%,-50%);
-            box-shadow: 0 0 18px rgba(255,107,53,0.35);
-            cursor: grab; touch-action: none;
-          }
+      #joy-base {
+        position: absolute; bottom: 30px; left: 30px;
+        width: 110px; height: 110px; border-radius: 50%;
+        background: rgba(77,216,230,0.08);
+        border: 2px solid rgba(77,216,230,0.3);
+        backdrop-filter: blur(4px);
+        box-shadow: 0 0 20px rgba(77,216,230,0.1);
+      }
+      #joy-knob {
+        width: 44px; height: 44px; border-radius: 50%;
+        background: linear-gradient(135deg, #ff00ff, #4dd8e6);
+        border: 2px solid rgba(255,255,255,0.6);
+        position: absolute; left: 50%; top: 50%;
+        transform: translate(-50%,-50%);
+        box-shadow: 0 0 20px rgba(255,0,255,0.5), 0 0 40px rgba(77,216,230,0.3);
+        cursor: grab; touch-action: none;
+      }
         }
 
         #pin-prompt{position:fixed;bottom:80px;left:50%;transform:translate(-50%,8px) scale(0.95);background:rgba(0,0,0,.7);backdrop-filter:blur(12px);border:1px solid rgba(77,216,230,.35);border-radius:10px;padding:10px 28px;color:rgba(255,255,255,.85);font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;font-family:'Orbitron',system-ui,sans-serif;opacity:0;transition:opacity .3s ease,transform .3s ease,background .2s ease;z-index:100;white-space:nowrap;box-shadow:0 0 20px rgba(77,216,230,.12);cursor:pointer;pointer-events:auto;user-select:none;}
@@ -525,6 +535,46 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
             transform: translateX(-50%) scale(1.05);
           }
         }
+
+        #instructions-overlay {
+          position: fixed; inset: 0; background: rgba(2, 2, 8, 0.85);
+          backdrop-filter: blur(12px); z-index: 10000;
+          display: flex; align-items: center; justify-content: center;
+          transition: opacity 0.5s ease;
+        }
+        #instructions-card {
+          background: rgba(20, 20, 35, 0.6);
+          border: 1px solid rgba(255, 0, 255, 0.3);
+          border-radius: 24px; padding: 40px;
+          max-width: 500px; width: 90%;
+          text-align: center; box-shadow: 0 0 50px rgba(255, 0, 255, 0.15);
+        }
+        #instructions-grid {
+          display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+          margin: 32px 0;
+        }
+        .inst-item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .inst-icon { 
+          font-size: 1.8rem; color: #fff; 
+          text-shadow: 0 0 15px rgba(255,255,255,0.5), 0 0 30px rgba(77,216,230,0.4);
+          margin-bottom: 5px;
+        }
+        .inst-label { color: rgba(255,255,255,0.6); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; }
+        #lets-go-btn {
+          margin-top: 20px; padding: 16px 48px;
+          background: linear-gradient(90deg, #ff00ff, #4dd8e6);
+          border: none; border-radius: 50px; color: #fff;
+          font-size: 1rem; font-weight: 700; text-transform: uppercase;
+          letter-spacing: 0.2em; cursor: pointer;
+          transition: all 0.3s ease; box-shadow: 0 0 30px rgba(255,0,255,0.4);
+        }
+        #lets-go-btn:hover { transform: scale(1.08); box-shadow: 0 0 50px rgba(77,216,230,0.6); }
+
+        .key-sq { display: inline-flex; width: 32px; height: 32px; border: 1px solid rgba(255,255,255,0.4); border-radius: 4px; align-items: center; justify-content: center; font-size: 0.8rem; }
+        .mouse-icon { width: 30px; height: 45px; border: 2px solid #fff; border-radius: 15px; position: relative; }
+        .mouse-icon::after { content: ''; position: absolute; top: 8px; left: 50%; transform: translateX(-50%); width: 4px; height: 8px; background: #fff; border-radius: 2px; animation: scroll-anim 1.5s infinite; }
+        @keyframes scroll-anim { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, 15px); } }
+      
       `}</style>
 
       <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh' }}>
@@ -541,8 +591,45 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         </div>
         <div id="map-hint">WASD · Space jump · Shift sprint · Drag to orbit</div>
         <div id="speed-indicator"><span className="spd-dot" />Sprinting</div>
-        <div id="pin-prompt">Press <kbd>E</kbd> to interact</div>
-        {/* Joystick only — no sprint/run button */}
+        <div id="instructions-overlay">
+          <div id="instructions-card">
+            <h2 style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 200, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px' }}>Controls</h2>
+            <p style={{ color: '#4dd8e6', fontSize: '0.7rem', letterSpacing: '0.4em', textTransform: 'uppercase', opacity: 0.8 }}>How to navigate the nebula</p>
+            
+            <div id="instructions-grid">
+              <div className="inst-item">
+                <div className="inst-icon">
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+                    <div /> <div className="key-sq">W</div> <div />
+                    <div className="key-sq">A</div> <div className="key-sq">S</div> <div className="key-sq">D</div>
+                  </div>
+                </div>
+                <div className="inst-label">Move</div>
+              </div>
+              <div className="inst-item">
+                <div className="inst-icon">
+                  <div className="mouse-icon" />
+                </div>
+                <div className="inst-label">Look Orbit</div>
+              </div>
+              <div className="inst-item">
+                <div className="inst-icon">
+                  <div className="key-sq" style={{ width: '80px' }}>SPACE</div>
+                </div>
+                <div className="inst-label">Jump</div>
+              </div>
+              <div className="inst-item">
+                <div className="inst-icon">
+                  <div className="key-sq" style={{ width: '80px' }}>SHIFT</div>
+                </div>
+                <div className="inst-label">Sprint</div>
+              </div>
+            </div>
+
+            <button id="lets-go-btn">Let's Go</button>
+          </div>
+        </div>
+
         <div id="joy-zone"><div id="joy-base"><div id="joy-knob" /></div></div>
       </div>
     </>
