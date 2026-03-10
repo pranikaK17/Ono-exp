@@ -432,8 +432,9 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
   return (
     <>
       <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;400;700&display=swap');
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-        html,body,#root{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none}
+        html,body,#root{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;font-family:'Outfit',system-ui,sans-serif;}
         #screentone{
           position:fixed;inset:0;pointer-events:none;z-index:50;
           background-image:radial-gradient(circle, rgba(0,0,0,0.22) 1px, transparent 1px);
@@ -444,11 +445,13 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           mix-blend-mode:multiply;}
         #screentone::before{content:'';position:absolute;inset:0;
           background:radial-gradient(ellipse at 50% 40%,transparent 35%,rgba(0,0,0,0.62) 100%);}
-        #map-loading{position:fixed;inset:0;background:#08080f;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .7s ease;}
-        #map-loading h1{color:#e4ddd4;font-size:1.9rem;font-weight:300;letter-spacing:.45em;text-transform:uppercase;font-family:system-ui,sans-serif;margin-bottom:2rem;}
-        #map-bar-wrap{width:260px;height:2px;background:#1a1a2a;border-radius:2px;overflow:hidden}
-        #map-bar{height:100%;width:0%;background:linear-gradient(90deg,#00ffec,#ff00ff);border-radius:2px;transition:width .25s ease}
-        #map-text{margin-top:1rem;color:#44445a;font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;font-family:system-ui,sans-serif}
+        #map-loading{position:fixed;inset:0;background:#020205;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1.2s cubic-bezier(0.4,0,0.2,1);}
+        #loader-content{text-align:center;width:100%;max-width:800px;display:flex;flex-direction:column;align-items:center;padding:0 20px;}
+        #loader-title{color:#fff;font-size:clamp(1rem, 5vw, 2.2rem);font-weight:200;letter-spacing:0.22em;text-transform:uppercase;margin-bottom:0.6rem;background:linear-gradient(180deg,#fff 0%,rgba(255,255,255,0.4) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2;white-space:nowrap;}
+        #loader-subtitle{color:#4dd8e6;font-size:0.65rem;letter-spacing:0.5em;text-transform:uppercase;margin-bottom:3.5rem;opacity:0.8;font-weight:400;}
+        #map-bar-wrap{width:220px;height:1px;background:rgba(255,255,255,0.06);position:relative;overflow:hidden;}
+        #map-bar{height:100%;width:0%;background:linear-gradient(90deg,#4dd8e6,#ff00ff);box-shadow:0 0 12px rgba(77,216,230,0.35);transition:width 0.5s cubic-bezier(0.1,0.8,0.2,1);}
+        #map-text{margin-top:1.4rem;color:rgba(255,255,255,0.22);font-size:0.58rem;letter-spacing:0.3em;text-transform:uppercase;font-weight:300;}
         #map-hint{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.10);border-radius:8px;padding:8px 22px;color:rgba(255,255,255,.72);font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;font-family:system-ui,sans-serif;pointer-events:none;transition:opacity 1.2s ease;z-index:100;white-space:nowrap;}
         #speed-indicator{position:fixed;top:20px;right:20px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.10);border-radius:8px;padding:8px 14px;color:rgba(255,255,255,.6);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-family:system-ui,sans-serif;pointer-events:none;display:flex;align-items:center;gap:8px;opacity:0;transition:opacity .3s,color .3s,border-color .3s;z-index:100;}
         #speed-indicator.sprinting{opacity:1;color:#ff6b35;border-color:rgba(255,107,53,.35)}
@@ -484,16 +487,57 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         #pin-prompt{position:fixed;bottom:80px;left:50%;transform:translate(-50%,8px) scale(0.95);background:rgba(0,0,0,.7);backdrop-filter:blur(12px);border:1px solid rgba(77,216,230,.35);border-radius:10px;padding:10px 28px;color:rgba(255,255,255,.85);font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;font-family:'Orbitron',system-ui,sans-serif;opacity:0;transition:opacity .3s ease,transform .3s ease,background .2s ease;z-index:100;white-space:nowrap;box-shadow:0 0 20px rgba(77,216,230,.12);cursor:pointer;pointer-events:auto;user-select:none;}
         @media (max-width:768px){#pin-prompt{bottom:unset;bottom:20%;}}
         #pin-prompt:active{background:rgba(77,216,230,.25);transform:translate(-50%,0) scale(0.98) !important;}
-        #pin-prompt kbd{display:inline-block;padding:2px 10px;margin:0 4px;background:rgba(77,216,230,.18);border:1px solid rgba(77,216,230,.45);border-radius:5px;color:#4dd8e6;font-weight:700;font-family:'Orbitron',monospace;font-size:.9rem;}
+         #pin-prompt kbd{display:inline-block;padding:2px 10px;margin:0 4px;background:rgba(77,216,230,.18);border:1px solid rgba(77,216,230,.45);border-radius:5px;color:#4dd8e6;font-weight:700;font-family:'Orbitron',monospace;font-size:.9rem;}
+        
+        #exit-btn {
+          position: fixed; top: 30px; left: 30px; z-index: 100;
+          padding: 14px 36px; background: rgba(0, 0, 0, 0.45);
+          border: 1px solid rgba(255, 0, 255, 0.45); border-radius: 50px;
+          color: #fff; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.15em;
+          text-transform: uppercase; text-decoration: none;
+          backdrop-filter: blur(10px); display: flex; align-items: center; gap: 14px;
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+          box-shadow: 0 0 20px rgba(255, 0, 255, 0.1);
+        }
+        #exit-btn:hover {
+          background: rgba(255, 0, 255, 0.2);
+          border-color: #ff00ff;
+          box-shadow: 0 0 40px rgba(255, 0, 255, 0.5);
+          transform: scale(1.05);
+        }
+        #exit-btn::before {
+          content: ''; width: 8px; height: 8px; background: #ff00ff; border-radius: 50%;
+          box-shadow: 0 0 12px #ff00ff; animation: pulse-exit 1.5s infinite;
+        }
+        @keyframes pulse-exit {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.6); opacity: 0.5; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+
+        @media (pointer: coarse) {
+          #map-hint, #speed-indicator { display: none !important; }
+          #exit-btn { 
+            left: 50%; transform: translateX(-50%); 
+            top: 40px; width: fit-content; white-space: nowrap;
+          }
+          #exit-btn:hover {
+            transform: translateX(-50%) scale(1.05);
+          }
+        }
       `}</style>
 
       <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh' }}>
+        <a href="https://mujoneiros.in" id="exit-btn">Exit Ono-experience</a>
         <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
         <div id="screentone" />
         <div id="map-loading">
-          <h1>World</h1>
-          <div id="map-bar-wrap"><div id="map-bar" /></div>
-          <div id="map-text">Loading assets…</div>
+          <div id="loader-content">
+            <h1 id="loader-title">Oneiros-experience</h1>
+            <p id="loader-subtitle">Experience it online!</p>
+            <div id="map-bar-wrap"><div id="map-bar" /></div>
+            <div id="map-text">Awakening Nebula...</div>
+          </div>
         </div>
         <div id="map-hint">WASD · Space jump · Shift sprint · Drag to orbit</div>
         <div id="speed-indicator"><span className="spd-dot" />Sprinting</div>
