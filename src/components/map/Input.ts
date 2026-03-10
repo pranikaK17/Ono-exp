@@ -57,24 +57,19 @@ export class InputController {
 // ─────────────────────────────────────────────────────────────────────────────
 // Sprint behaviour (mobile-game standard):
 //   • Push joystick past SPRINT_THRESHOLD (85% of radius) → auto sprint
-//   • This removes the need for a separate sprint button entirely
-//   • Visual feedback: knob turns orange and the ring pulses when sprinting
+//   • Visual feedback: knob changes colour when sprinting
 // ─────────────────────────────────────────────────────────────────────────────
 export class MobileJoystick {
   private _active   = false
   private _touchId: number | null = null
   private _origin   = { x: 0, y: 0 }
-  private _delta    = { x: 0, y: 0 }
-  private _mag      = 0          // 0–1 normalised joystick magnitude
-  private RADIUS    = 60         // slightly larger than before for easier reach
-  private SPRINT_THRESHOLD = 0.82  // >82% push = sprint
+  private _delta    = { x: 0, y: 0 }   // raw normalised -1..1 per axis
+  private _mag      = 0                 // 0–1 normalised joystick magnitude
+  private RADIUS    = 60
+  private SPRINT_THRESHOLD = 0.82       // >82% push = sprint
 
   private base: HTMLElement
   private knob: HTMLElement
-
-  // Smooth the delta so tiny jitters don't cause stuttering
-  private _smoothDelta = { x: 0, y: 0 }
-  private readonly SMOOTH = 0.18   // lerp factor per frame (~60fps assumed)
 
   constructor(base: HTMLElement, knob: HTMLElement) {
     this.base = base
@@ -97,16 +92,16 @@ export class MobileJoystick {
     const ky = Math.sin(a) * c
 
     this.knob.style.transform = `translate(calc(-50% + ${kx}px), calc(-50% + ${ky}px))`
-    this._mag    = c / this.RADIUS           // 0–1
-    this._delta  = { x: kx / this.RADIUS, y: ky / this.RADIUS }
+    this._mag   = c / this.RADIUS           // 0–1
+    this._delta = { x: kx / this.RADIUS, y: ky / this.RADIUS }
 
-    // Visual sprint feedback on the knob
+    // Visual sprint feedback
     if (this._mag > this.SPRINT_THRESHOLD) {
       this.knob.style.background = 'rgba(255,107,53,0.95)'
       this.knob.style.boxShadow  = '0 0 24px rgba(255,107,53,0.6)'
     } else {
-      this.knob.style.background = 'rgba(255,107,53,0.82)'
-      this.knob.style.boxShadow  = '0 0 18px rgba(255,107,53,0.35)'
+      this.knob.style.background = ''
+      this.knob.style.boxShadow  = ''
     }
   }
 
@@ -138,24 +133,34 @@ export class MobileJoystick {
           this._delta   = { x: 0, y: 0 }
           this._mag     = 0
           this.knob.style.transform  = 'translate(-50%, -50%)'
-          this.knob.style.background = 'rgba(255,107,53,0.82)'
-          this.knob.style.boxShadow  = '0 0 18px rgba(255,107,53,0.35)'
+          this.knob.style.background = ''
+          this.knob.style.boxShadow  = ''
+        }
+      }
+    })
+
+    window.addEventListener('touchcancel', e => {
+      for (const t of Array.from(e.changedTouches)) {
+        if (t.identifier === this._touchId) {
+          this._active  = false
+          this._touchId = null
+          this._delta   = { x: 0, y: 0 }
+          this._mag     = 0
+          this.knob.style.transform  = 'translate(-50%, -50%)'
+          this.knob.style.background = ''
+          this.knob.style.boxShadow  = ''
         }
       }
     })
   }
 
-  // Call once per frame with delta time to smooth the output
-  tick(dt: number) {
-    const s = Math.min(this.SMOOTH * dt * 60, 1)   // frame-rate independent
-    this._smoothDelta.x += (this._delta.x - this._smoothDelta.x) * s
-    this._smoothDelta.y += (this._delta.y - this._smoothDelta.y) * s
-  }
-
+  // Returns the current joystick input — _delta is updated directly on touch
+  // move events so no per-frame tick() call is needed.
   getInput(): JoystickInput {
     return {
-      x:      this._active ? this._smoothDelta.x : 0,
-      y:      this._active ? this._smoothDelta.y : 0,
+      x:      this._active ? this._delta.x : 0,
+      // Invert Y: screen-down (+y) should map to moving backward (-z)
+      y:      this._active ? -this._delta.y : 0,
       sprint: this._active && this._mag > this.SPRINT_THRESHOLD,
     }
   }

@@ -35,7 +35,7 @@ export class CharacterController {
   private dragLastX   = 0
   private dragLastY   = 0
 
-  // ── Touch look─────────────────────────
+  // ── Touch look ───────────────────────────────────────────────────────────────
   private _lookTouchId:  number | null = null
   private _lookLastX     = 0
   private _lookLastY     = 0
@@ -189,7 +189,6 @@ export class CharacterController {
 
       // ── Pinch: two fingers ──────────────────────────────────────────────────────
       if (touches.length >= 2) {
-        // Cancel any single-finger look if a second finger lands
         this._lookTouchId = null
         this._pinchActive = true
         this._pinchStart    = Math.hypot(
@@ -220,7 +219,6 @@ export class CharacterController {
           touches[0].clientY - touches[1].clientY
         )
         if (this._pinchStart > 0) {
-          // Calculate target distance — we'll lerp toward it in _updateCamera
           const ratio = this._pinchStart / cur
           this._pinchTargetDist = Math.max(
             MAP_CONFIG.cameraMinDistance,
@@ -267,21 +265,21 @@ export class CharacterController {
     input.consumeMouseDelta()
 
     // ── Smooth pinch zoom toward target ──────────────────────────────────────────
-    // Lerp distance toward pinch target every frame for buttery zoom
     if (Math.abs(this.distance - this._pinchTargetDist) > 0.01) {
       this.distance += (this._pinchTargetDist - this.distance) *
         Math.min(12 * delta, 1)
     }
 
     // ── Input ─────────────────────────────────────────────────────────────────────
+    // joystick.y is already inverted in MobileJoystick.getInput() so +y = forward
     const kb = input.getMoveVector()
     let mx = kb.x + joystick.x
-    let mz = kb.z + joystick.y
+    let mz = kb.z + joystick.y   // joystick.y already inverted: push up = negative screen Y = forward
     const len = Math.sqrt(mx * mx + mz * mz)
     if (len > 1) { mx /= len; mz /= len }
 
     const moving      = len > 0.05
-    // Sprint: keyboard Shift OR joystick pushed past threshold (joystick.sprint)
+    // Sprint: keyboard Shift OR joystick pushed past threshold OR external sprint button
     const isSprinting = (input.isSprinting() || joystick.sprint) && moving
     const speed       = isSprinting ? MAP_CONFIG.sprintSpeed : MAP_CONFIG.walkSpeed
 
@@ -343,8 +341,6 @@ export class CharacterController {
     }
 
     // ── Camera auto-follow ────────────────────────────────────────────────────────
-    // Count up while in manual orbit mode; once timer exceeds ORBIT_RESUME_DELAY
-    // start gently nudging yaw back behind the character.
     if (this.isManualOrbit) {
       this.orbitTimer += delta
       if (this.orbitTimer > this.ORBIT_RESUME_DELAY) {

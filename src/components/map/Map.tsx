@@ -34,9 +34,8 @@ const HIDE_NAMES = ['majorfloor','base_plane','ground_plane']
 const NOCOLLIDE_NAMES = new Set(PIN_NAMES)
 
 // ── Neon bokeh floating lights — one Points draw call, fully GPU animated ──────
-// 60 particles, all motion in vertex shader — zero CPU per frame after init
 function createBokehLights(scene: THREE.Scene): { update(t: number): void; dispose(): void } {
-  const N        = 60          // reduced from 80 — enough visual density
+  const N        = 60
   const SPREAD_R = 260
   const HEIGHT_LO = 4
   const HEIGHT_HI = 55
@@ -45,8 +44,8 @@ function createBokehLights(scene: THREE.Scene): { update(t: number): void; dispo
   const phases    = new Float32Array(N)
   const speeds    = new Float32Array(N)
   const sizes     = new Float32Array(N)
-  const colorIdx  = new Float32Array(N)   // 0=blue, 1=purple, 2=teal, 3=pink, 4=white
-  const starFlag  = new Float32Array(N)   // 1 = render as sparkle star, 0 = soft disc
+  const colorIdx  = new Float32Array(N)
+  const starFlag  = new Float32Array(N)
 
   for (let i = 0; i < N; i++) {
     const angle = Math.random() * Math.PI * 2
@@ -56,11 +55,10 @@ function createBokehLights(scene: THREE.Scene): { update(t: number): void; dispo
     positions[i*3+2] = Math.sin(angle) * r
     phases[i]   = Math.random() * Math.PI * 2
     speeds[i]   = 0.08 + Math.random() * 0.16
-    // Mix large discs and small stars
     starFlag[i] = Math.random() < 0.35 ? 1.0 : 0.0
     sizes[i]    = starFlag[i] > 0.5
-      ? 14 + Math.random() * 22    // stars: small & sharp
-      : 130 + Math.random() * 200  // discs: large & soft
+      ? 14 + Math.random() * 22
+      : 130 + Math.random() * 200
     colorIdx[i] = Math.floor(Math.random() * 5)
   }
 
@@ -80,20 +78,15 @@ function createBokehLights(scene: THREE.Scene): { update(t: number): void; dispo
       varying float vAlpha, vCIdx, vStar;
       void main() {
         vec3 p = position;
-        // Float up and down — main vertical drift
         p.y += sin(time * spd + phase) * 5.5;
-        // Gentle horizontal wander
         p.x += cos(time * spd * 0.35 + phase * 1.2) * 2.5;
         p.z += sin(time * spd * 0.28 + phase * 0.9) * 2.5;
-
-        // Twinkle for stars, slow pulse for discs
         float twinkle = isStar > 0.5
           ? pow(max(0.0, sin(time * spd * 4.0 + phase)), 4.0)
           : 0.4 + 0.6 * (0.5 + 0.5 * sin(time * spd * 1.3 + phase));
         vAlpha = twinkle;
         vCIdx  = cIdx;
         vStar  = isStar;
-
         vec4 mv = modelViewMatrix * vec4(p, 1.0);
         gl_Position  = projectionMatrix * mv;
         gl_PointSize = sz * (160.0 / -mv.z);
@@ -101,37 +94,30 @@ function createBokehLights(scene: THREE.Scene): { update(t: number): void; dispo
     `,
     fragmentShader: /* glsl */`
       varying float vAlpha, vCIdx, vStar;
-
       vec3 neonColor(int ci) {
-        if      (ci == 0) return vec3(0.20, 0.45, 1.00);  // blue
-        else if (ci == 1) return vec3(0.65, 0.15, 1.00);  // purple
-        else if (ci == 2) return vec3(0.00, 0.88, 0.82);  // teal
-        else if (ci == 3) return vec3(1.00, 0.25, 0.70);  // pink
-        else              return vec3(0.90, 0.95, 1.00);  // cool white
+        if      (ci == 0) return vec3(0.20, 0.45, 1.00);
+        else if (ci == 1) return vec3(0.65, 0.15, 1.00);
+        else if (ci == 2) return vec3(0.00, 0.88, 0.82);
+        else if (ci == 3) return vec3(1.00, 0.25, 0.70);
+        else              return vec3(0.90, 0.95, 1.00);
       }
-
       void main() {
         vec2  uv = gl_PointCoord - 0.5;
         float d  = length(uv);
         if (d > 0.5) discard;
-
         vec3 col = neonColor(int(vCIdx));
         float a;
-
         if (vStar > 0.5) {
-          // 4-point sparkle star
           float star = max(
             smoothstep(0.06, 0.0, abs(uv.x)) * smoothstep(0.5, 0.0, abs(uv.y)),
             smoothstep(0.06, 0.0, abs(uv.y)) * smoothstep(0.5, 0.0, abs(uv.x)));
           float core = 1.0 - smoothstep(0.0, 0.12, d);
           a = (core * 0.7 + star * 0.9) * vAlpha;
         } else {
-          // Soft bokeh disc
           float core = 1.0 - smoothstep(0.0, 0.14, d);
           float halo = 1.0 - smoothstep(0.0, 0.50, d);
           a = (core * 0.55 + halo * 0.32) * vAlpha * 0.48;
         }
-
         gl_FragColor = vec4(col, a);
       }
     `,
@@ -155,7 +141,7 @@ function createBuildingOutline(
   box:     THREE.Box3,
   timeRef: { value: number }
 ): () => void {
-  const pad = 3.0                        // generous padding around footprint
+  const pad = 3.0
   const cx  = (box.min.x + box.max.x) / 2
   const cz  = (box.min.z + box.max.z) / 2
   const w   = (box.max.x - box.min.x) + pad * 2
@@ -178,32 +164,23 @@ function createBuildingOutline(
       uniform vec2  sz;
       varying vec2  vUv;
       void main() {
-        // Thick bold border — fixed world-space width relative to plane size
-        float lw = 0.048 + 0.008 * sin(time * 1.6);   // ~4-5% of UV = thick
+        float lw = 0.048 + 0.008 * sin(time * 1.6);
         float bx = min(vUv.x, 1.-vUv.x);
         float by = min(vUv.y, 1.-vUv.y);
         float bd = min(bx, by);
         if (bd > lw) discard;
-
-        // Marching-ants arc length
         float arc;
         if (bx < by)
           arc = vUv.x < .5 ? vUv.y*sz.y : sz.x+sz.y+(1.-vUv.y)*sz.y;
         else
           arc = vUv.y < .5 ? sz.y+(1.-vUv.x)*sz.x : sz.y+sz.x+sz.y+vUv.x*sz.x;
-
-        // Slower, spaced dashes
         float dash = fract(arc * 0.08 - time * 1.6);
         if (dash < 0.30) discard;
-
         float pulse = .75 + .25*sin(time*2.0);
-        // Sharp inner edge, soft outer glow
         float edge  = smoothstep(lw, lw*0.05, bd);
         float glow  = smoothstep(lw, 0.0, bd) * 0.5;
-
-        // Bright neon white-cyan
         vec3 col = mix(vec3(0.5, 1.0, 1.0), vec3(1.0, 1.0, 1.0), 0.6);
-        col *= 2.2 + pulse * 0.8;          // overbright for bloom-like look
+        col *= 2.2 + pulse * 0.8;
         gl_FragColor = vec4(col, (edge + glow) * pulse);
       }
     `,
@@ -220,18 +197,17 @@ function createBuildingOutline(
   return () => { scene.remove(mesh); geo.dispose(); mat.dispose() }
 }
 
-// ── Sparkle particles that orbit a fixed world position — fully GPU driven ────
+// ── Sparkle particles that orbit a fixed world position ───────────────────────
 function createPinSparkles(
   scene:    THREE.Scene,
   worldPos: THREE.Vector3
 ): { update(t: number): void; dispose(): void } {
-  const N  = 40   // reduced from 55 — GPU handles motion, no CPU loop needed
+  const N  = 40
   const ph = new Float32Array(N)
   const sp = new Float32Array(N)
   const r  = new Float32Array(N)
   const bh = new Float32Array(N)
   const tw = new Float32Array(N)
-  // Bake world position into per-particle base so GPU can offset directly
   const base = new Float32Array(N * 3)
 
   for (let i = 0; i < N; i++) {
@@ -246,7 +222,7 @@ function createPinSparkles(
   }
 
   const geo = new THREE.BufferGeometry()
-  geo.setAttribute('position', new THREE.BufferAttribute(base, 3))   // static base pos
+  geo.setAttribute('position', new THREE.BufferAttribute(base, 3))
   geo.setAttribute('phase',    new THREE.BufferAttribute(ph, 1))
   geo.setAttribute('spd',      new THREE.BufferAttribute(sp, 1))
   geo.setAttribute('orb',      new THREE.BufferAttribute(r,  1))
@@ -264,7 +240,6 @@ function createPinSparkles(
         float dr  = mod(time * 0.22 + phase * 0.5, 3.2);
         float twk = pow(max(0.0, sin(time * 3.1 + tw)), 5.0);
         vA = twk * (1.0 - dr / 3.2) * 0.95 + 0.04;
-        // Orbit around baked world-space base position
         vec3 p = vec3(
           position.x + cos(t) * orb,
           position.y - bh + dr,
@@ -298,20 +273,17 @@ function createPinSparkles(
   scene.add(pts)
 
   return {
-    update(t: number) { mat.uniforms.time.value = t },   // one uniform write — no CPU loop
+    update(t: number) { mat.uniforms.time.value = t },
     dispose() { scene.remove(pts); geo.dispose(); mat.dispose() }
   }
 }
 
 // ── Neon ground donut rings below each pin ────────────────────────────────────
-// Flat RingGeometry on the ground. Fragment uses world-space radius to produce
-// a clean filled outer band (neon white) with an empty hole in the centre.
 function createPinGroundRings(
   scene:    THREE.Scene,
   worldPos: THREE.Vector3,
   timeRef:  { value: number }
 ): () => void {
-  // Each donut: inner hole radius, outer filled-band radius
   const RINGS = [
     { inner: 1.4, outer: 2.6 },
     { inner: 3.6, outer: 4.6 },
@@ -321,7 +293,6 @@ function createPinGroundRings(
   const mats:   THREE.ShaderMaterial[] = []
 
   for (const ring of RINGS) {
-    // Extra geometry segments so the circular edges are smooth
     const geo  = new THREE.RingGeometry(ring.inner, ring.outer, 80, 1)
 
     const mat = new THREE.ShaderMaterial({
@@ -343,30 +314,18 @@ function createPinGroundRings(
         uniform float time, innerR, outerR;
         uniform vec2  centre;
         varying vec2  vWorld;
-
         void main() {
-          float d     = length(vWorld - centre);          // world-space radius
+          float d     = length(vWorld - centre);
           float band  = outerR - innerR;
-
-          // Hard discard outside the ring
           if (d < innerR || d > outerR) discard;
-
-          // Radial gradient: 0 at inner edge → 1 at outer edge
           float t = (d - innerR) / band;
-
-          // Filled solid band, brightest at outer rim, fades slightly inward
-          float fill = smoothstep(0.0, 0.25, t);          // sharp inner cutoff
-          float rim  = 1.0 - smoothstep(0.72, 1.0, t);   // soft outer glow falloff
-
-          // Rotating dash pattern (circumferential)
+          float fill = smoothstep(0.0, 0.25, t);
+          float rim  = 1.0 - smoothstep(0.72, 1.0, t);
           float angle  = atan(vWorld.y - centre.y, vWorld.x - centre.x);
           float dashes = fract(angle / (3.14159 * 2.0) * 12.0 - time * 0.4);
-          float dash   = smoothstep(0.20, 0.32, dashes);  // soft dash edges
-
+          float dash   = smoothstep(0.20, 0.32, dashes);
           float pulse = 0.70 + 0.30 * sin(time * 1.8);
           float alpha = fill * rim * dash * pulse * 0.95;
-
-          // Neon white, very slightly blue-tinted
           vec3 col = vec3(0.92, 0.97, 1.00) * (2.0 + pulse * 0.4);
           gl_FragColor = vec4(col, alpha);
         }
@@ -393,8 +352,6 @@ function createPinGroundRings(
 }
 
 // ── Character ground trail ────────────────────────────────────────────────────
-// Each stamp fires a burst of 10 mixed shapes (diamonds, triangles, small rings,
-// thin crosses) that drift outward, shrink and fade — giving a speed-blur look.
 function createCharacterTrail(scene: THREE.Scene): {
   stamp(x: number, z: number): void
   update(dt: number): void
@@ -407,19 +364,15 @@ function createCharacterTrail(scene: THREE.Scene): {
   let   colourIdx  = 0
 
   const makeGeos = (): THREE.BufferGeometry[] => {
-    // diamond (rotated square)
     const diamond = new THREE.PlaneGeometry(0.32, 0.32)
     diamond.rotateX(-Math.PI / 2)
     diamond.rotateZ(Math.PI / 4)
-    // triangle
     const triPts = [new THREE.Vector2(0,.22), new THREE.Vector2(.19,-.12), new THREE.Vector2(-.19,-.12)]
     const triShape = new THREE.Shape(triPts)
     const triangle = new THREE.ShapeGeometry(triShape)
     triangle.rotateX(-Math.PI / 2)
-    // thin ring
     const ring = new THREE.RingGeometry(0.12, 0.22, 6)
     ring.rotateX(-Math.PI / 2)
-    // small square
     const square = new THREE.PlaneGeometry(0.20, 0.20)
     square.rotateX(-Math.PI / 2)
     return [diamond, triangle, ring, square]
@@ -469,7 +422,7 @@ function createCharacterTrail(scene: THREE.Scene): {
         if (prog >= 1) { p.active = false; p.mesh.visible = false; continue }
         p.mesh.position.x += p.vx * dt * 2.2
         p.mesh.position.z += p.vz * dt * 2.2
-        p.mesh.rotation.y += dt * 1.5   // spin as they fade
+        p.mesh.rotation.y += dt * 1.5
         p.mat.opacity = Math.pow(1 - prog, 1.4)
         p.mesh.scale.setScalar((0.5 + (1 - prog) * 1.1) * (1 - prog * 0.5))
       }
@@ -523,14 +476,13 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     const fill = new THREE.DirectionalLight(0xadd8ff, 0.55)
     fill.position.set(-60, 50, -60); scene.add(fill)
 
-    // ── Neon grid floor — 2000×2000 so it looks infinite ─────────────────────
+    // ── Neon grid floor ───────────────────────────────────────────────────────
     const neonMat = createNeonGridMaterial()
     const floorGeo = new THREE.PlaneGeometry(2000, 2000, 1, 1)
     const floorMesh = new THREE.Mesh(floorGeo, neonMat)
     floorMesh.rotation.x = -Math.PI / 2
     floorMesh.position.y = 0
     scene.add(floorMesh)
-    // Shared time uniform so building outlines pulse in sync with the floor
     const sharedTime = neonMat.uniforms.time as { value: number }
 
     // ── Loading helpers ───────────────────────────────────────────────────────
@@ -551,13 +503,14 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         )
       )
 
-    // ── Runtime ───────────────────────────────────────────────────────────────
+    // ── Runtime state ─────────────────────────────────────────────────────────
     let raf = 0
     let inputCtrl: InputController | null = null
     let charCtrl:  CharacterController   | null = null
-    let joystick:  MobileJoystick        | null = null
+    let mobileSprint = false
     const clock    = new THREE.Clock()
     const nightSky = new NightSky(scene)
+    const isTouch  = window.matchMedia('(pointer: coarse)').matches
 
     type Sparkle = ReturnType<typeof createPinSparkles>
     type PinEntry = { obj: THREE.Object3D; baseY: number; phase: number; name: string }
@@ -569,16 +522,15 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     // ── Character trail ───────────────────────────────────────────────────────
     const trail          = createCharacterTrail(scene)
     let   trailTimer     = 0
-    const TRAIL_INTERVAL = 0.09        // seconds between stamp bursts
+    const TRAIL_INTERVAL = 0.09
     let   lastTrailPos   = new THREE.Vector3()
 
-    // ── Pin proximity interaction ──────────────────────────────────────────
-    const INTERACT_RADIUS = 12  // world units — show prompt
-    const AUTO_CLOSE_RADIUS = 20  // world units — auto-close page
+    // ── Pin proximity ──────────────────────────────────────────────────────────
+    const INTERACT_RADIUS  = 12
+    const AUTO_CLOSE_RADIUS = 20
     const pinWorldPositions: { name: string; pos: THREE.Vector3 }[] = []
     let nearbyPin: string | null = null
     const promptEl = document.getElementById('pin-prompt')
-    const isTouch = window.matchMedia('(pointer: coarse)').matches
 
     const handlePromptClick = () => {
       if (!onPinClick) return
@@ -602,12 +554,10 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     const pinKeyHandler = (e: KeyboardEvent) => {
       if (e.code === 'KeyE' || e.key === 'e' || e.key === 'E') {
         if (!onPinClick) return
-        // If a page is currently open, close it
         if (activePageRef.current) {
           onPinClick(activePageRef.current)
           return
         }
-        // Otherwise open the nearby pin's page
         if (nearbyPin) {
           const page = PIN_TO_PAGE[nearbyPin]
           if (page) onPinClick(page)
@@ -616,24 +566,54 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     }
     window.addEventListener('keydown', pinKeyHandler)
 
-    // Create bokeh lights immediately — they fill the whole scene
     const bokeh = createBokehLights(scene)
-
-    // World Y axis — reused every frame for pin spin
     const WORLD_Y = new THREE.Vector3(0, 1, 0)
+
+    // ── JOYSTICK: created immediately so it's ready before async load ─────────
+    // This is the critical fix — joystick must exist from frame 1, not after
+    // the async GLTF load completes (which can take several seconds).
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
+    const joyBase   = document.getElementById('joy-base')
+    const joyKnob   = document.getElementById('joy-knob')
+    const sprintBtn = document.getElementById('joy-sprint')
+
+    let joystick: MobileJoystick
+    if (isTouchDevice && joyBase && joyKnob) {
+      joystick = new MobileJoystick(joyBase, joyKnob)
+    } else {
+      // Fallback stub for non-touch — uses disconnected elements
+      joystick = new MobileJoystick(
+        document.createElement('div'),
+        document.createElement('div'),
+      )
+    }
+
+    // Sprint button: hold to sprint on mobile
+    if (isTouchDevice && sprintBtn) {
+      sprintBtn.addEventListener('touchstart', e => {
+        e.preventDefault()
+        mobileSprint = true
+        sprintBtn.classList.add('active')
+      }, { passive: false })
+      const stopSprint = () => {
+        mobileSprint = false
+        sprintBtn.classList.remove('active')
+      }
+      sprintBtn.addEventListener('touchend',    stopSprint, { passive: true })
+      sprintBtn.addEventListener('touchcancel', stopSprint, { passive: true })
+    }
+
+    // ── inputCtrl: created immediately too ───────────────────────────────────
+    inputCtrl = new InputController()
 
     const tick = () => {
       raf = requestAnimationFrame(tick)
       const dt = Math.min(clock.getDelta(), 0.05)
       const t  = clock.getElapsedTime()
 
-      // Advance neon floor time
       sharedTime.value += dt
-      // Push character position into floor shader for proximity glow
       if (charCtrl) (neonMat.uniforms.charPos as { value: THREE.Vector3 }).value.copy(charCtrl.position)
 
-      // ── Pins: churn-spin around WORLD Y (like a planet rotating on its axis)
-      // rotateOnWorldAxis ignores the baked quaternion — always spins around world Y
       for (const p of pins) {
         p.obj.rotateOnWorldAxis(WORLD_Y, dt * 0.28)
         p.obj.position.y = p.baseY + Math.sin(t * 1.1 + p.phase) * 0.09
@@ -642,10 +622,24 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
       for (const sp of sparkles) sp.update(t)
       bokeh.update(t)
 
-      if (charCtrl && inputCtrl && joystick)
-        charCtrl.update(dt, inputCtrl, joystick.getInput())
+      // ── Character update — joystick is always available now ───────────────
+      if (charCtrl && inputCtrl) {
+        const jInput = joystick.getInput()
+        // Merge joystick sprint with the dedicated sprint button
+        charCtrl.update(dt, inputCtrl, {
+          x:      jInput.x,
+          y:      jInput.y,
+          sprint: jInput.sprint || mobileSprint,
+        })
+      }
 
-      // ── Trail: stamp when character moves, skip when still ────────────────
+      // ── Speed indicator ───────────────────────────────────────────────────
+      const speedEl = document.getElementById('speed-indicator')
+      if (speedEl && inputCtrl) {
+        speedEl.classList.toggle('sprinting', inputCtrl.isSprinting() || mobileSprint)
+      }
+
+      // ── Trail ─────────────────────────────────────────────────────────────
       if (charCtrl) {
         trailTimer += dt
         const moved = charCtrl.position.distanceTo(lastTrailPos)
@@ -657,7 +651,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
       }
       trail.update(dt)
 
-      // ── Pin proximity check ──────────────────────────────────────────────
+      // ── Pin proximity ──────────────────────────────────────────────────────
       if (charCtrl && promptEl) {
         let closest: string | null = null
         let closestDist = Infinity
@@ -712,7 +706,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         setProg(5, 'Loading map…')
         const mapGLTF = await loadGLTF(MAP_CONFIG.mapModelPath, 5, 55, 'Map')
 
-        // Per-building world-space bounding boxes accumulated during traverse
         const bldBoxMap: Record<string, THREE.Box3> = {}
 
         mapGLTF.scene.traverse(c => {
@@ -720,14 +713,12 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           const name = obj.name
           const nl   = name.toLowerCase()
 
-          // ── Hide unwanted meshes ────────────────────────────────────────────
           if (HIDE_NAMES.some(n => name === n || nl.includes(n.toLowerCase()))) {
             obj.visible = false
             console.log(`[Map] hidden '${name}'`)
             return
           }
 
-          // ── Fix negative scales from Blender ───────────────────────────────
           const s = obj.scale
           if (s.x < 0 || s.y < 0 || s.z < 0) {
             if (obj.isMesh && obj.geometry) {
@@ -749,8 +740,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
 
           if (obj.isMesh) {
             obj.castShadow = obj.receiveShadow = true
-
-            // Accumulate outline boxes for named buildings
             for (const bn of OUTLINE_TARGETS) {
               if (name === bn || nl === bn.toLowerCase()) {
                 obj.updateWorldMatrix(true, false)
@@ -766,7 +755,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         scene.add(mapGLTF.scene)
         mapGLTF.scene.updateMatrixWorld(true)
 
-        // ── Building outlines ─────────────────────────────────────────────────
         for (const [bn, box] of Object.entries(bldBoxMap)) {
           outlines.push(createBuildingOutline(scene, box, sharedTime))
           console.log(`[Outline] '${bn}'`, box.min.toArray().map((v: number) => v.toFixed(1)), '→', box.max.toArray().map((v: number) => v.toFixed(1)))
@@ -776,7 +764,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         const mapSize = mapBox.getSize(new THREE.Vector3())
         console.log('[Map] size', mapSize)
 
-        // ── Pins — matched by exact node name ─────────────────────────────────
         mapGLTF.scene.traverse(c => {
           if (!PIN_NAMES.includes(c.name)) return
           c.updateWorldMatrix(true, false)
@@ -805,45 +792,26 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         scene.add(charGLTF.scene)
         console.log(`[Char] height=${charHeight.toFixed(2)}`)
 
-        // ── Collision — exclude only pins (they float freely) ────────────────
-        // Mess is now fully solid for both character AND camera
         const collision = new CollisionSystem(
           mapGLTF.scene,
-          name => !NOCOLLIDE_NAMES.has(name),   // character: blocks all except pins
-          name => !NOCOLLIDE_NAMES.has(name)    // camera:    blocks all except pins
+          name => !NOCOLLIDE_NAMES.has(name),
+          name => !NOCOLLIDE_NAMES.has(name)
         )
 
-        // ── World boundary — tight to map extents ─────────────────────────────
         const INSET = 2
         collision.setBoundary(
           new THREE.Vector2(mapBox.min.x + INSET, mapBox.min.z + INSET),
           new THREE.Vector2(mapBox.max.x - INSET, mapBox.max.z - INSET)
         )
-        console.log('[Boundary]', mapBox.min.x+INSET, mapBox.min.z+INSET, '→', mapBox.max.x-INSET, mapBox.max.z-INSET)
 
-        // Spawn: raycast from sky at origin, land on whatever is there
         const spawnProbe = new THREE.Vector3(0, 50, 0)
         const groundY    = collision.getGroundY(spawnProbe, charHeight)
         const spawnPos   = new THREE.Vector3(0, groundY, 0)
         console.log('[Spawn] groundY=', groundY)
 
-        // Seed trail position so the first movement delta is correct
         lastTrailPos.copy(spawnPos)
 
-        inputCtrl = new InputController()
-        // Only create joystick on touch devices — pointer:coarse = touchscreen
-        const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
-        const joyBase   = document.getElementById('joy-base')
-        const joyKnob   = document.getElementById('joy-knob')
-        if (isTouchDevice && joyBase && joyKnob) {
-          joystick = new MobileJoystick(joyBase, joyKnob)
-        } else {
-          joystick = new MobileJoystick(
-            document.createElement('div'),
-            document.createElement('div'),
-          )
-        }
-
+        // ── CharacterController — inputCtrl already exists, joystick too ─────
         charCtrl = new CharacterController({
           model:      charGLTF.scene,
           mixer:      charGLTF.animations.length ? new THREE.AnimationMixer(charGLTF.scene) : null,
@@ -855,14 +823,17 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         const loadEl = document.getElementById('map-loading')
         if (loadEl) setTimeout(()=>{ loadEl.style.opacity='0'; setTimeout(()=>loadEl.remove(),700) },300)
         const hint = document.getElementById('map-hint')
+        if (hint && isTouch) hint.textContent = 'Drag joystick · Hold RUN to sprint · Tap to interact'
         setTimeout(()=>{ if(hint) hint.style.opacity='0' },6000)
 
-        tick()
       } catch(err) {
         console.error('[Map] load error:', err)
         if (textEl) textEl.textContent = 'Error loading — see console.'
       }
     })()
+
+    // Start the render loop immediately — character will appear once loaded
+    tick()
 
     const onResize = () => {
       camera.aspect = innerWidth/innerHeight
@@ -895,22 +866,12 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
         html,body,#root{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none}
 
-        /* ════════════════════════════════════════════════════════════════
-           SCREENTONE — three layered CSS effects:
-           1. Halftone dot grid        (radial-gradient repeat)
-           2. Diagonal hatch lines     (repeating-linear-gradient)
-           3. Radial vignette          (::before pseudo)
-           All use mix-blend-mode:multiply so they darken without washing out
-           the neon colours beneath.
-        ════════════════════════════════════════════════════════════════ */
         #screentone{
           position:fixed;inset:0;pointer-events:none;z-index:50;
-          /* dot grid */
           background-image:radial-gradient(circle, rgba(0,0,0,0.22) 1px, transparent 1px);
           background-size:4px 4px;
           mix-blend-mode:multiply;
         }
-        /* diagonal hatch */
         #screentone::after{
           content:'';position:absolute;inset:0;
           background-image:repeating-linear-gradient(
@@ -919,13 +880,11 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           );
           mix-blend-mode:multiply;
         }
-        /* vignette */
         #screentone::before{
           content:'';position:absolute;inset:0;
           background:radial-gradient(ellipse at 50% 40%, transparent 35%, rgba(0,0,0,0.62) 100%);
         }
 
-        /* ── Loading ── */
         #map-loading{
           position:fixed;inset:0;background:#08080f;
           display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -941,7 +900,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         #map-text{margin-top:1rem;color:#44445a;font-size:.72rem;letter-spacing:.22em;
           text-transform:uppercase;font-family:system-ui,sans-serif}
 
-        /* ── HUD ── */
         #map-hint{
           position:fixed;top:20px;left:50%;transform:translateX(-50%);
           background:rgba(0,0,0,.55);backdrop-filter:blur(8px);
@@ -966,33 +924,104 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           animation:sdp .6s ease-in-out infinite alternate}
         @keyframes sdp{from{transform:scale(1);opacity:1}to{transform:scale(1.6);opacity:.4}}
 
-        /* ── Mobile joystick — hidden by default, shown only on touch devices ── */
         #joy-zone { display: none }
         @media (pointer: coarse) {
           #joy-zone {
             display: block;
-            position: fixed; bottom: 0; left: 0; width: 200px; height: 200px;
-            pointer-events: all; z-index: 100;
+            position: fixed; bottom: 0; left: 0; width: 240px; height: 240px;
+            pointer-events: all; z-index: 200;
           }
           #joy-base {
-            position: absolute; bottom: 30px; left: 30px;
-            width: 110px; height: 110px; border-radius: 50%;
-            background: rgba(255,255,255,.07); border: 2px solid rgba(255,255,255,.18);
-            backdrop-filter: blur(4px);
+            position: absolute; bottom: 28px; left: 28px;
+            width: 130px; height: 130px; border-radius: 50%;
+            background:
+              radial-gradient(circle at 50% 50%,
+                rgba(10,0,30,.82) 0%,
+                rgba(20,5,55,.75) 55%,
+                rgba(80,0,160,.18) 100%);
+            border: 1.5px solid transparent;
+            background-clip: padding-box;
+            box-shadow:
+              0 0 0 1.5px rgba(140,80,255,.55),
+              0 0 22px rgba(100,40,255,.35),
+              0 0 55px rgba(60,0,180,.22),
+              inset 0 0 20px rgba(180,100,255,.08);
+            backdrop-filter: blur(6px);
+            touch-action: none;
+          }
+          #joy-base::before {
+            content: '';
+            position: absolute; inset: 6px;
+            border-radius: 50%;
+            border: 1px dashed rgba(160,100,255,.30);
+            animation: joyOrbit 8s linear infinite;
+          }
+          #joy-base::after {
+            content: '';
+            position: absolute; inset: 18px;
+            border-radius: 50%;
+            border: 1px solid rgba(100,200,255,.15);
+            box-shadow: inset 0 0 12px rgba(80,160,255,.12);
+          }
+          @keyframes joyOrbit {
+            from { transform: rotate(0deg) }
+            to   { transform: rotate(360deg) }
           }
           #joy-knob {
-            width: 44px; height: 44px; border-radius: 50%;
-            background: rgba(255,107,53,.82);
-            border: 2px solid rgba(255,200,150,.55);
+            width: 50px; height: 50px; border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%,
+              #c084fc 0%, #7c3aed 40%, #4c1d95 75%, #1e0a3c 100%);
+            border: 1.5px solid rgba(200,160,255,.70);
             position: absolute; left: 50%; top: 50%;
             transform: translate(-50%,-50%);
-            box-shadow: 0 0 18px rgba(255,107,53,.35);
+            box-shadow:
+              0 0 12px rgba(168,85,247,.80),
+              0 0 30px rgba(124,58,237,.50),
+              0 0 55px rgba(88,28,135,.30),
+              inset 0 0 10px rgba(255,255,255,.15);
             cursor: grab; touch-action: none;
+            transition: box-shadow .15s ease;
+          }
+          #joy-knob:active {
+            box-shadow:
+              0 0 20px rgba(216,180,254,1),
+              0 0 50px rgba(168,85,247,.80),
+              0 0 90px rgba(124,58,237,.45);
+          }
+          #joy-sprint {
+            display: flex; align-items: center; justify-content: center;
+            position: absolute; bottom: 36px; right: 20px;
+            width: 62px; height: 62px; border-radius: 50%;
+            background: radial-gradient(circle at 40% 35%,
+              #f472b6 0%, #db2777 45%, #831843 100%);
+            border: 1.5px solid rgba(251,182,206,.65);
+            box-shadow:
+              0 0 14px rgba(236,72,153,.70),
+              0 0 32px rgba(190,24,93,.40),
+              inset 0 0 10px rgba(255,255,255,.12);
+            color: rgba(255,220,235,.95);
+            font-size: .58rem; font-weight: 800;
+            letter-spacing: .10em; text-transform: uppercase;
+            font-family: system-ui, sans-serif;
+            cursor: pointer; touch-action: none;
+            user-select: none;
+            transition: box-shadow .12s ease, transform .12s ease;
+          }
+          #joy-sprint.active {
+            box-shadow:
+              0 0 24px rgba(251,113,133,1),
+              0 0 60px rgba(236,72,153,.80),
+              0 0 100px rgba(190,24,93,.40);
+            transform: scale(0.93);
+            animation: sprintPulse .35s ease-in-out infinite alternate;
+          }
+          @keyframes sprintPulse {
+            from { box-shadow: 0 0 18px rgba(251,113,133,.9), 0 0 45px rgba(236,72,153,.6) }
+            to   { box-shadow: 0 0 30px rgba(253,164,175,1),  0 0 80px rgba(251,113,133,.8) }
           }
         }
-        #sprint-btn, #jump-btn { display: none !important }
+        #jump-btn { display: none !important }
 
-        /* ── Pin interaction prompt ── */
         #pin-prompt{
           position:fixed;bottom:80px;left:50%;transform:translate(-50%, 8px) scale(0.95);
           background:rgba(0,0,0,.7);backdrop-filter:blur(12px);
@@ -1028,7 +1057,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
       <div style={{position:'fixed',inset:0,width:'100vw',height:'100vh'}}>
         <div ref={mountRef} style={{width:'100%',height:'100%'}} />
 
-        {/* Screentone — manga halftone + diagonal hatch + vignette */}
         <div id="screentone" />
 
         <div id="map-loading">
@@ -1040,11 +1068,12 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         <div id="map-hint">WASD · Space jump · Shift sprint · Drag to orbit</div>
         <div id="speed-indicator"><span className="spd-dot" />Sprinting</div>
 
-        {/* Pin interaction prompt */}
         <div id="pin-prompt">Press <kbd>E</kbd> to interact</div>
 
-        {/* Joystick — CSS hides on non-touch via @media(hover:hover)and(pointer:fine) */}
-        <div id="joy-zone"><div id="joy-base"><div id="joy-knob" /></div></div>
+        <div id="joy-zone">
+          <div id="joy-base"><div id="joy-knob" /></div>
+          <div id="joy-sprint">RUN</div>
+        </div>
       </div>
     </>
   )
