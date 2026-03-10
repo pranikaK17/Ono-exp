@@ -230,6 +230,47 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     }
     window.addEventListener('keydown',pinKeyHandler)
 
+    const raycaster = new THREE.Raycaster()
+    const mouse = new THREE.Vector2()
+    let pointerDownPos = { x: 0, y: 0 }
+    
+    const onPointerDown = (e: PointerEvent) => {
+      pointerDownPos = { x: e.clientX, y: e.clientY }
+    }
+    
+    const onPointerUp = (e: PointerEvent) => {
+      const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y)
+      if (dist > 10) return // Was likely a drag, not a tap
+      if ((e.target as HTMLElement).closest?.('#joy-zone, #speed-indicator, #pin-prompt, #map-loading')) return
+      
+      mouse.x = (e.clientX / innerWidth) * 2 - 1
+      mouse.y = -(e.clientY / innerHeight) * 2 + 1
+      raycaster.setFromCamera(mouse, camera)
+      
+      const pinObjects = pins.map(p => p.obj)
+      if (!pinObjects.length) return
+      
+      const intersects = raycaster.intersectObjects(pinObjects, true)
+      if (intersects.length > 0) {
+        let object: THREE.Object3D | null = intersects[0].object
+        let pinName = ''
+        while (object) {
+          if (PIN_NAMES.includes(object.name)) {
+            pinName = object.name
+            break
+          }
+          object = object.parent
+        }
+        
+        if (pinName && PIN_TO_PAGE[pinName] && onPinClick) {
+          onPinClick(PIN_TO_PAGE[pinName])
+        }
+      }
+    }
+    
+    window.addEventListener('pointerdown', onPointerDown)
+    window.addEventListener('pointerup', onPointerUp)
+
     const tick=()=>{
       raf=requestAnimationFrame(tick)
       const dt=Math.min(clock.getDelta(),.05), t=clock.getElapsedTime()
@@ -373,6 +414,8 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
       window.removeEventListener('resize',onResize)
       window.removeEventListener('keydown',pinKeyHandler)
       promptEl?.removeEventListener('click',handlePromptClick)
+      window.removeEventListener('pointerdown', onPointerDown)
+      window.removeEventListener('pointerup', onPointerUp)
       inputCtrl?.destroy()
       nightSky.destroy()
       neonMat.dispose(); floorGeo.dispose()

@@ -257,13 +257,15 @@ export class CharacterController {
 
     const kb = input.getMoveVector()
 
-    // Pushing joystick UP gives negative Y, pulling DOWN gives positive Y.
-    // If pushing UP should move character forward (-Z), joystick.y is correctly signed.
     // The user requested that pulling the joystick back (DOWN) moves the character FORWARD,
     // and pushing the joystick up (UP) moves the character BACKWARD.
-    // So we subtract joystick.y to invert the Y-axis.
-    let mx = kb.x + joystick.x
+    // So we subtract the joystick input and then flip it so forward is backwards but Math.atan2 correctly
+    // produces the correct rotation angle.
+    // Pushing Up -> negative joystick.y -> we want positive mz (move backward)
+    // Pulling Down -> positive joystick.y -> we want negative mz (move forward)
+    let mx = kb.x - joystick.x
     let mz = kb.z - joystick.y
+
 
     const len = Math.sqrt(mx * mx + mz * mz)
     if (len > 1) { mx /= len; mz /= len }
@@ -280,9 +282,7 @@ export class CharacterController {
       -mz * (-cosY) + mx * (-sinY)
     )
 
-    // For rotation logic, we only want the character to actually face the direction of movement.
-    // If mz > 0, it means we are moving backward.
-    const isMovingBackward = mz > 0.1 && Math.abs(mx) < 0.2
+
 
     const targetVel = moving
       ? rawDir.clone().normalize().multiplyScalar(speed)
@@ -321,12 +321,8 @@ export class CharacterController {
     this.model.position.copy(this.position)
 
     if (isMoving && dir.lengthSq() > 0.001) {
-      // If moving straight back, don't flip the character around 180 degrees.
-      // This stops the character from turning around and spinning when simply backing up.
+      // Always just rotate to the direction we are moving towards
       let target = Math.atan2(dir.x, dir.z) + Math.PI
-      if (isMovingBackward) {
-        target += Math.PI
-      }
 
       let diff = target - this.model.rotation.y
       while (diff >  Math.PI) diff -= 2 * Math.PI
@@ -353,6 +349,8 @@ export class CharacterController {
     
     // Always follow when moving (camera fixed at back)
     if (!this.isManualOrbit && isMoving && this.lastMoveYaw !== null) {
+      // Camera should sit behind the character's current movement direction, unless they are backing up.
+      // But since we just inverted the joystick input completely, the "forward" direction is already handled.
       const targetYaw = this.lastMoveYaw + Math.PI
       let diff = targetYaw - this.yaw
       while (diff >  Math.PI) diff -= 2 * Math.PI
