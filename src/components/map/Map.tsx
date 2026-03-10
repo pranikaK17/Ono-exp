@@ -392,6 +392,95 @@ function createPinGroundRings(
   }
 }
 
+// ── Character ground trail ────────────────────────────────────────────────────
+// Each stamp fires a burst of 10 mixed shapes (diamonds, triangles, small rings,
+// thin crosses) that drift outward, shrink and fade — giving a speed-blur look.
+function createCharacterTrail(scene: THREE.Scene): {
+  stamp(x: number, z: number): void
+  update(dt: number): void
+  dispose(): void
+} {
+  const POOL       = 300
+  const BURST      = 10
+  const TRAIL_LIFE = 1.1
+  const COLOURS    = [0x00ffec, 0xff00cc, 0xaa44ff, 0x00cfff, 0xffffff, 0xff44aa]
+  let   colourIdx  = 0
+
+  const makeGeos = (): THREE.BufferGeometry[] => {
+    // diamond (rotated square)
+    const diamond = new THREE.PlaneGeometry(0.32, 0.32)
+    diamond.rotateX(-Math.PI / 2)
+    diamond.rotateZ(Math.PI / 4)
+    // triangle
+    const triPts = [new THREE.Vector2(0,.22), new THREE.Vector2(.19,-.12), new THREE.Vector2(-.19,-.12)]
+    const triShape = new THREE.Shape(triPts)
+    const triangle = new THREE.ShapeGeometry(triShape)
+    triangle.rotateX(-Math.PI / 2)
+    // thin ring
+    const ring = new THREE.RingGeometry(0.12, 0.22, 6)
+    ring.rotateX(-Math.PI / 2)
+    // small square
+    const square = new THREE.PlaneGeometry(0.20, 0.20)
+    square.rotateX(-Math.PI / 2)
+    return [diamond, triangle, ring, square]
+  }
+  const geoTemplates = makeGeos()
+
+  type Particle = { mesh: THREE.Mesh; mat: THREE.MeshBasicMaterial; age: number; active: boolean; vx: number; vz: number }
+  const pool: Particle[] = []
+
+  for (let i = 0; i < POOL; i++) {
+    const geo = geoTemplates[i % geoTemplates.length].clone()
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0x00ffec, transparent: true, opacity: 0,
+      depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    })
+    const mesh = new THREE.Mesh(geo, mat)
+    mesh.renderOrder = 3
+    mesh.visible = false
+    scene.add(mesh)
+    pool.push({ mesh, mat, age: 0, active: false, vx: 0, vz: 0 })
+  }
+
+  let head = 0
+
+  return {
+    stamp(x, z) {
+      for (let b = 0; b < BURST; b++) {
+        const p     = pool[head % POOL]; head++
+        const angle = Math.random() * Math.PI * 2
+        const r     = 0.1 + Math.random() * 0.7
+        p.age    = 0; p.active = true
+        p.vx = Math.cos(angle) * r
+        p.vz = Math.sin(angle) * r
+        p.mesh.position.set(x + p.vx * 0.15, 0.06, z + p.vz * 0.15)
+        p.mesh.rotation.y = Math.random() * Math.PI * 2
+        p.mesh.scale.setScalar(0.5 + Math.random() * 1.1)
+        p.mesh.visible = true
+        p.mat.color.setHex(COLOURS[colourIdx % COLOURS.length]); colourIdx++
+        p.mat.opacity = 1.0
+      }
+    },
+    update(dt) {
+      for (const p of pool) {
+        if (!p.active) continue
+        p.age += dt
+        const prog = p.age / TRAIL_LIFE
+        if (prog >= 1) { p.active = false; p.mesh.visible = false; continue }
+        p.mesh.position.x += p.vx * dt * 2.2
+        p.mesh.position.z += p.vz * dt * 2.2
+        p.mesh.rotation.y += dt * 1.5   // spin as they fade
+        p.mat.opacity = Math.pow(1 - prog, 1.4)
+        p.mesh.scale.setScalar((0.5 + (1 - prog) * 1.1) * (1 - prog * 0.5))
+      }
+    },
+    dispose() {
+      for (const p of pool) { scene.remove(p.mesh); p.mesh.geometry.dispose(); p.mat.dispose() }
+      geoTemplates.forEach(g => g.dispose())
+    },
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 export default function Map({ onPinClick, activePage }: { onPinClick?: (page: string) => void; activePage?: string | null }) {
   const mountRef = useRef<HTMLDivElement>(null)
@@ -477,6 +566,12 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     const outlines: (() => void)[] = []
     const pinRings: (() => void)[] = []
 
+    // ── Character trail ───────────────────────────────────────────────────────
+    const trail          = createCharacterTrail(scene)
+    let   trailTimer     = 0
+    const TRAIL_INTERVAL = 0.09        // seconds between stamp bursts
+    let   lastTrailPos   = new THREE.Vector3()
+
     // ── Pin proximity interaction ──────────────────────────────────────────
     const INTERACT_RADIUS = 12  // world units — show prompt
     const AUTO_CLOSE_RADIUS = 20  // world units — auto-close page
@@ -549,6 +644,18 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
 
       if (charCtrl && inputCtrl && joystick)
         charCtrl.update(dt, inputCtrl, joystick.getInput())
+
+      // ── Trail: stamp when character moves, skip when still ────────────────
+      if (charCtrl) {
+        trailTimer += dt
+        const moved = charCtrl.position.distanceTo(lastTrailPos)
+        if (trailTimer >= TRAIL_INTERVAL && moved > 0.08) {
+          trail.stamp(charCtrl.position.x, charCtrl.position.z)
+          lastTrailPos.copy(charCtrl.position)
+          trailTimer = 0
+        }
+      }
+      trail.update(dt)
 
       // ── Pin proximity check ──────────────────────────────────────────────
       if (charCtrl && promptEl) {
@@ -720,6 +827,9 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         const spawnPos   = new THREE.Vector3(0, groundY, 0)
         console.log('[Spawn] groundY=', groundY)
 
+        // Seed trail position so the first movement delta is correct
+        lastTrailPos.copy(spawnPos)
+
         inputCtrl = new InputController()
         // Only create joystick on touch devices — pointer:coarse = touchscreen
         const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
@@ -772,6 +882,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
       sparkles.forEach(s => s.dispose())
       pinRings.forEach(d => d())
       bokeh.dispose()
+      trail.dispose()
       outlines.forEach(d => d())
       renderer.dispose()
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement)

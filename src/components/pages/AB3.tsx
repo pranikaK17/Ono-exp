@@ -12,78 +12,78 @@ interface Event {
 }
 
 const liveEvent: Event = {
-  title: 'Neon Nights — Battle of Bands',
+  title: 'Hackathon Finals — Demo Day',
   date: 'Mar 9, 2026',
   time: 'LIVE NOW',
-  venue: 'AB1 — Main Stage',
-  description: 'Electrifying live performances from 8 college bands competing for the crown.',
+  venue: 'AB3 — Innovation Hub · Main Floor',
+  description: 'Teams present their 24-hour builds to a panel of industry judges. Expect wild ideas and live demos.',
   image: '',
   link: '#',
 }
 
 const upcomingEvents: Event[] = [
   {
-    title: 'Stand-Up Showdown',
-    date: 'Mar 16, 2026',
-    time: '7:30 PM',
-    venue: 'AB1 — Auditorium',
-    description: 'An evening of laughs with the best campus comedians and a surprise guest.',
+    title: 'Robotics Showcase',
+    date: 'Mar 13, 2026',
+    time: '3:00 PM',
+    venue: 'AB3 — Engineering Atrium',
+    description: 'Student-built bots compete in obstacle courses and freestyle demos. Sparks guaranteed.',
     image: '',
   },
   {
-    title: 'Synth Wave DJ Night',
+    title: 'Startup Pitch Night',
     date: 'Mar 17, 2026',
-    time: '9:00 PM',
-    venue: 'AB1 — Open Arena',
-    description: 'Retro-futuristic beats under the neon sky. Glow sticks mandatory.',
+    time: '6:30 PM',
+    venue: 'AB3 — Seminar Hall A',
+    description: 'Five student startups. Five minutes each. One winner walks away with seed funding.',
     image: '',
   },
   {
-    title: 'Indie Film Screening',
-    date: 'Mar 18, 2026',
-    time: '6:00 PM',
-    venue: 'AB1 — Seminar Hall',
-    description: 'A curated selection of short films by student filmmakers.',
+    title: 'AI & Society Panel',
+    date: 'Mar 20, 2026',
+    time: '5:00 PM',
+    venue: 'AB3 — Lecture Theatre 2',
+    description: 'Faculty, founders, and students debate the ethics and impact of AI in everyday life.',
     image: '',
   },
 ]
 
 const pastEvents: Event[] = [
   {
-    title: 'Acoustic Unplugged',
-    date: 'Feb 20, 2026',
-    time: '5:00 PM',
-    venue: 'AB1 — Courtyard',
-    description: 'Soulful acoustic sets from indie artists — a mellow evening to remember.',
+    title: 'Circuit Bending Workshop',
+    date: 'Feb 24, 2026',
+    time: '2:00 PM',
+    venue: 'AB3 — Maker Lab',
+    description: 'Hands-on hacking of old electronics to create new sounds and visuals. Chaos in the best way.',
     image: '',
   },
   {
-    title: 'Poetry Slam',
-    date: 'Feb 18, 2026',
-    time: '4:00 PM',
-    venue: 'AB1 — Seminar Hall',
-    description: 'Words that hit hard. The best spoken word artists battled it out.',
+    title: 'CTF — Capture The Flag',
+    date: 'Feb 17, 2026',
+    time: '10:00 AM',
+    venue: 'AB3 — Computer Lab 3',
+    description: 'Teams raced to solve cybersecurity challenges across 6 hours of pure adrenaline.',
     image: '',
   },
   {
-    title: 'Open Mic Night',
-    date: 'Feb 10, 2026',
-    time: '7:00 PM',
-    venue: 'AB1 — Main Stage',
-    description: 'Raw talent, no filters. Singers, poets, comedians — anyone could take the stage.',
+    title: '3D Printing Sprint',
+    date: 'Feb 9, 2026',
+    time: '1:00 PM',
+    venue: 'AB3 — Fab Studio',
+    description: 'Design-to-print in under 2 hours. The fastest and most creative model won.',
     image: '',
   },
 ]
 
 type Tab = 'past' | 'live' | 'upcoming'
 
-/* ── Featured card (shown in center) ─────────────────────────────────────── */
+/* ── Featured card ───────────────────────────────────────────────────────── */
 function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column',
       background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(77,216,230,0.2)',
+      border: '1px solid rgba(255,180,50,0.25)',
       borderRadius: 16,
       overflow: 'hidden',
       height: '100%',
@@ -92,15 +92,15 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
         flex: 1, minHeight: 220,
         background: event.image
           ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(77,216,230,0.06), rgba(160,60,255,0.1))',
+          : 'linear-gradient(135deg, rgba(200,120,20,0.1), rgba(255,200,60,0.07))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
       }}>
-        {!event.image && <span style={{ fontSize: 72, color: 'rgba(255,255,255,0.06)' }}>♫</span>}
+        {!event.image && <span style={{ fontSize: 72, color: 'rgba(255,255,255,0.06)' }}>⬡</span>}
         {badge && (
           <div style={{
             position: 'absolute', top: 16, left: 16,
-            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(77,216,230,0.7)',
+            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(220,150,30,0.75)',
             color: '#fff', fontSize: '0.65rem', fontWeight: 700,
             fontFamily: "'Orbitron', sans-serif",
             padding: '4px 14px', borderRadius: 6,
@@ -111,20 +111,20 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
       </div>
       <div style={{
         padding: '24px 28px', background: 'rgba(0,0,0,0.3)',
-        borderTop: '1px solid rgba(77,216,230,0.1)',
+        borderTop: '1px solid rgba(255,180,50,0.1)',
       }}>
         <h2 style={{
           margin: 0, fontSize: '1.35rem', fontWeight: 700,
-          fontFamily: "'Orbitron', sans-serif", color: '#e0f0ff',
+          fontFamily: "'Orbitron', sans-serif", color: '#fff8e8',
         }}>{event.title}</h2>
         <div style={{
           display: 'flex', gap: 20, marginTop: 10,
           fontSize: '0.75rem', fontFamily: "'Exo 2', sans-serif",
           letterSpacing: '0.06em', textTransform: 'uppercase',
         }}>
-          <span style={{ color: 'rgba(77,216,230,0.8)' }}>{event.date}</span>
+          <span style={{ color: 'rgba(255,180,50,0.9)' }}>{event.date}</span>
           <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
-          <span style={{ color: event.time === 'LIVE NOW' ? '#ff6b6b' : '#4dd8e6', fontWeight: 600 }}>{event.time}</span>
+          <span style={{ color: event.time === 'LIVE NOW' ? '#ff6b6b' : '#ffb832', fontWeight: 600 }}>{event.time}</span>
         </div>
         <div style={{
           marginTop: 6, fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)',
@@ -142,8 +142,8 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
           }}>
             <a href="#" style={{
               padding: '8px 22px', borderRadius: 8,
-              background: 'rgba(77,216,230,0.15)', border: '1px solid rgba(77,216,230,0.3)',
-              color: '#4dd8e6', fontSize: '0.72rem', fontWeight: 600,
+              background: 'rgba(255,180,50,0.12)', border: '1px solid rgba(255,180,50,0.4)',
+              color: '#ffb832', fontSize: '0.72rem', fontWeight: 600,
               fontFamily: "'Orbitron', sans-serif", textDecoration: 'none',
               letterSpacing: '0.08em', textTransform: 'uppercase',
             }}>Details</a>
@@ -161,17 +161,17 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
       onClick={onClick}
       style={{
         background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(77,216,230,0.12)',
+        border: '1px solid rgba(255,180,50,0.15)',
         borderRadius: 10, overflow: 'hidden',
         transition: 'border-color 0.3s, transform 0.3s',
         cursor: 'pointer',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'rgba(77,216,230,0.35)'
+        e.currentTarget.style.borderColor = 'rgba(255,180,50,0.45)'
         e.currentTarget.style.transform = 'translateY(-2px)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = 'rgba(77,216,230,0.12)'
+        e.currentTarget.style.borderColor = 'rgba(255,180,50,0.15)'
         e.currentTarget.style.transform = 'translateY(0)'
       }}
     >
@@ -179,20 +179,20 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
         height: 80,
         background: event.image
           ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(77,216,230,0.08), rgba(160,60,255,0.08))',
+          : 'linear-gradient(135deg, rgba(200,120,20,0.1), rgba(255,200,60,0.07))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 24, color: 'rgba(255,255,255,0.12)',
       }}>
-        {!event.image && '♫'}
+        {!event.image && '⬡'}
       </div>
       <div style={{ padding: '10px 12px' }}>
         <h4 style={{
           margin: 0, fontSize: '0.78rem', fontWeight: 600,
-          fontFamily: "'Orbitron', sans-serif", color: '#d0e8f0', lineHeight: 1.3,
+          fontFamily: "'Orbitron', sans-serif", color: '#fff0cc', lineHeight: 1.3,
         }}>{event.title}</h4>
         <div style={{
           marginTop: 4, fontSize: '0.62rem',
-          color: 'rgba(77,216,230,0.65)', fontFamily: "'Exo 2', sans-serif",
+          color: 'rgba(255,180,50,0.75)', fontFamily: "'Exo 2', sans-serif",
           letterSpacing: '0.05em', textTransform: 'uppercase',
         }}>
           {event.date} · {event.time}
@@ -211,7 +211,7 @@ function SideColumn({ title, events, color, onClickEvent }: {
       display: 'flex', flexDirection: 'column', gap: 14,
       overflowY: 'auto', padding: '0 8px',
       scrollbarWidth: 'thin',
-      scrollbarColor: 'rgba(77,216,230,0.15) transparent',
+      scrollbarColor: 'rgba(255,180,50,0.15) transparent',
     }}>
       <h3 style={{
         margin: 0, fontSize: '0.7rem', fontWeight: 500,
@@ -229,9 +229,9 @@ function SideColumn({ title, events, color, onClickEvent }: {
 /* ── Tab button style ────────────────────────────────────────────────────── */
 const tabStyle = (active: boolean): React.CSSProperties => ({
   padding: '10px 24px', borderRadius: 8,
-  border: active ? '1px solid rgba(77,216,230,0.5)' : '1px solid rgba(255,255,255,0.1)',
-  background: active ? 'rgba(77,216,230,0.12)' : 'rgba(255,255,255,0.04)',
-  color: active ? '#4dd8e6' : 'rgba(255,255,255,0.45)',
+  border: active ? '1px solid rgba(255,180,50,0.6)' : '1px solid rgba(255,255,255,0.1)',
+  background: active ? 'rgba(255,180,50,0.12)' : 'rgba(255,255,255,0.04)',
+  color: active ? '#ffb832' : 'rgba(255,255,255,0.45)',
   fontFamily: "'Orbitron', sans-serif", fontSize: '0.72rem', fontWeight: 600,
   letterSpacing: '0.1em', textTransform: 'uppercase' as const,
   cursor: 'pointer', transition: 'all 0.25s', backdropFilter: 'blur(6px)',
@@ -241,20 +241,19 @@ const tabStyle = (active: boolean): React.CSSProperties => ({
 const arrowBtnStyle: React.CSSProperties = {
   position: 'absolute', top: '50%', transform: 'translateY(-50%)',
   zIndex: 10, width: 40, height: 40, borderRadius: '50%',
-  background: 'rgba(77,216,230,0.2)', border: '1px solid rgba(77,216,230,0.5)',
-  color: '#4dd8e6', fontSize: '1.4rem', fontWeight: 700,
+  background: 'rgba(255,180,50,0.15)', border: '1px solid rgba(255,180,50,0.5)',
+  color: '#ffb832', fontSize: '1.4rem', fontWeight: 700,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   backdropFilter: 'blur(8px)', transition: 'all 0.2s',
-  boxShadow: '0 0 14px rgba(77,216,230,0.25)',
+  boxShadow: '0 0 14px rgba(255,180,50,0.2)',
 }
 
 /* ── Main component ──────────────────────────────────────────────────────── */
-export default function AB1({ onClose }: { onClose: () => void }) {
+export default function AB3({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-  // Determine what's shown in center based on tab
   const centerEvent = tab === 'live'
     ? liveEvent
     : tab === 'upcoming'
@@ -267,14 +266,13 @@ export default function AB1({ onClose }: { onClose: () => void }) {
       ? 'UPCOMING'
       : 'PAST'
 
-  // Left & right column content adapts to which tab is active
   const leftTitle = tab === 'past' ? 'Happening Now' : 'Past Events'
   const leftEvents = tab === 'past' ? [liveEvent] : pastEvents
   const leftColor = tab === 'past' ? '#ff6b6b' : 'rgba(255,255,255,0.3)'
 
   const rightTitle = tab === 'upcoming' ? 'Happening Now' : 'Upcoming'
   const rightEvents = tab === 'upcoming' ? [liveEvent] : upcomingEvents
-  const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#4dd8e6'
+  const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#ffb832'
 
   return (
     <div
@@ -308,7 +306,7 @@ export default function AB1({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* ── Three-column layout ── */}
-        <div className="ab1-grid" style={{
+        <div className="ab3-grid" style={{
           display: 'grid',
           gridTemplateColumns: '1fr 2fr 1fr',
           gap: 24, flex: 1, minHeight: 0,
@@ -320,7 +318,7 @@ export default function AB1({ onClose }: { onClose: () => void }) {
             color={leftColor}
           />
 
-          {/* Center — animated swap with arrows */}
+          {/* Center */}
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             <div style={{ flex: 1, position: 'relative' }}>
               {tab !== 'live' && (
@@ -354,7 +352,7 @@ export default function AB1({ onClose }: { onClose: () => void }) {
                 key={tab + selectedIdx}
                 style={{
                   height: '100%',
-                  animation: 'ab1-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                  animation: 'ab3-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                 }}
               >
                 <FeaturedEventCard event={centerEvent} badge={centerBadge} />
@@ -373,7 +371,7 @@ export default function AB1({ onClose }: { onClose: () => void }) {
                     onClick={() => setSelectedIdx(i)}
                     style={{
                       width: 8, height: 8, borderRadius: '50%', border: 'none',
-                      background: i === selectedIdx ? '#4dd8e6' : 'rgba(255,255,255,0.15)',
+                      background: i === selectedIdx ? '#ffb832' : 'rgba(255,255,255,0.15)',
                       cursor: 'pointer', transition: 'background 0.2s, transform 0.2s',
                       transform: i === selectedIdx ? 'scale(1.4)' : 'scale(1)',
                     }}
@@ -398,38 +396,22 @@ export default function AB1({ onClose }: { onClose: () => void }) {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.6; }
         }
-        @keyframes ab1-center-in {
+        @keyframes ab3-center-in {
           from { opacity: 0; transform: scale(0.94) translateY(12px); }
           to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         /* ── Mobile: stack columns top-to-bottom ── */
         @media (max-width: 768px) {
-          .ab1-grid {
+          .ab3-grid {
             grid-template-columns: 1fr !important;
             overflow-y: auto;
             flex: unset !important;
             min-height: unset !important;
           }
 
-          /* On mobile the center column height is auto, not flex-fill */
-          .ab1-grid > div {
+          .ab3-grid > div {
             min-height: unset !important;
-          }
-
-          /* Tighten up tabs on small screens */
-          .ab1-tabs button {
-            padding: 8px 14px !important;
-            font-size: 0.62rem !important;
-            letter-spacing: 0.06em !important;
-          }
-
-          /* Arrow buttons: pull them inside the card so they don't overflow */
-          .ab1-grid .ab1-arrow-left {
-            left: 4px !important;
-          }
-          .ab1-grid .ab1-arrow-right {
-            right: 4px !important;
           }
         }
       `}</style>
