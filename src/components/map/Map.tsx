@@ -644,7 +644,6 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
       bokeh.update(t)
 
       if (charCtrl && inputCtrl && joystick) {
-        joystick.tick(dt)                          // ← MUST run every frame to unblock smoothDelta
         const jInput = joystick.getInput()
         // Merge hardware sprint button with joystick push-sprint
         charCtrl.update(dt, inputCtrl, { ...jInput, sprint: jInput.sprint || mobileSprint })
