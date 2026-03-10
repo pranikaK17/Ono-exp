@@ -257,7 +257,11 @@ export class CharacterController {
 
     const kb = input.getMoveVector()
 
-    // Swapped joystick.y so pulling back moves character backward
+    // Pushing joystick UP gives negative Y, pulling DOWN gives positive Y.
+    // If pushing UP should move character forward (-Z), joystick.y is correctly signed.
+    // The user requested that pulling the joystick back (DOWN) moves the character FORWARD,
+    // and pushing the joystick up (UP) moves the character BACKWARD.
+    // So we subtract joystick.y to invert the Y-axis.
     let mx = kb.x + joystick.x
     let mz = kb.z - joystick.y
 
@@ -275,6 +279,10 @@ export class CharacterController {
       0,
       -mz * (-cosY) + mx * (-sinY)
     )
+
+    // For rotation logic, we only want the character to actually face the direction of movement.
+    // If mz > 0, it means we are moving backward.
+    const isMovingBackward = mz > 0.1 && Math.abs(mx) < 0.2
 
     const targetVel = moving
       ? rawDir.clone().normalize().multiplyScalar(speed)
@@ -313,11 +321,20 @@ export class CharacterController {
     this.model.position.copy(this.position)
 
     if (isMoving && dir.lengthSq() > 0.001) {
-      const target = Math.atan2(dir.x, dir.z) + Math.PI
+      // If moving straight back, don't flip the character around 180 degrees.
+      // This stops the character from turning around and spinning when simply backing up.
+      let target = Math.atan2(dir.x, dir.z) + Math.PI
+      if (isMovingBackward) {
+        target += Math.PI
+      }
+
       let diff = target - this.model.rotation.y
       while (diff >  Math.PI) diff -= 2 * Math.PI
       while (diff < -Math.PI) diff += 2 * Math.PI
       this.model.rotation.y += diff * Math.min(12 * delta, 1)
+      
+      // We want the camera to follow the *actual* movement direction, so we store
+      // the raw direction for the camera to follow, not the backwards-adjusted one.
       this.lastMoveYaw = Math.atan2(dir.x, dir.z)
     }
 
