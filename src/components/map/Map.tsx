@@ -230,8 +230,11 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     const pinKeyHandler = (e: KeyboardEvent) => {
       if (e.code !== 'KeyE' && e.key !== 'e' && e.key !== 'E') return
       if (!onPinClick) return
-      if (activePageRef.current) { onPinClick(activePageRef.current); return }
-      if (nearbyPin) { const page = PIN_TO_PAGE[nearbyPin]; if (page) onPinClick(page) }
+      // Only open overlay if not already open
+      if (!activePageRef.current) {
+        if (nearbyPin) { const page = PIN_TO_PAGE[nearbyPin]; if (page) onPinClick(page) }
+      }
+      // Otherwise, do nothing (don't close immediately)
     }
     window.addEventListener('keydown', pinKeyHandler)
 

@@ -243,10 +243,10 @@ export default function GrandStairs({ onClose }: { onClose: () => void }) {
               {tab !== 'live' && (
                 <>
                   <button onClick={() => setSelectedIdx(i => Math.max(0, i - 1))} disabled={selectedIdx === 0}
-                    style={{ ...arrowBtnStyle, left: -18, opacity: selectedIdx === 0 ? 0.25 : 1, cursor: selectedIdx === 0 ? 'default' : 'pointer' }}>‹</button>
+                    style={{ ...arrowBtnStyle, left: 8, opacity: selectedIdx === 0 ? 0.25 : 1, cursor: selectedIdx === 0 ? 'default' : 'pointer' }}>‹</button>
                   <button onClick={() => { const max = (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1; setSelectedIdx(i => Math.min(max, i + 1)) }}
                     disabled={selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1}
-                    style={{ ...arrowBtnStyle, right: -18, opacity: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 0.25 : 1,
+                    style={{ ...arrowBtnStyle, right: 8, opacity: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 0.25 : 1,
                       cursor: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 'default' : 'pointer' }}>›</button>
                 </>
               )}
