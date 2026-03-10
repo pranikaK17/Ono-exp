@@ -256,6 +256,11 @@ export class CharacterController {
 
     const kb = input.getMoveVector()
 
+<<<<<<< HEAD
+=======
+    // Joystick input: Pushing Up (negative y) moves character forward (negative mz),
+    // Pushing Down (positive y) moves character backward (positive mz).
+>>>>>>> b2687dae22da152b28fd6608c1c45ab996699245
     let mx = kb.x + joystick.x
     let mz = kb.z + joystick.y
 
@@ -322,6 +327,11 @@ export class CharacterController {
       while (diff < -Math.PI) diff += 2 * Math.PI
       this.model.rotation.y += diff * Math.min(12 * delta, 1)
 
+<<<<<<< HEAD
+=======
+      // We want the camera to follow the *actual* movement direction, so we store
+      // the raw direction for the camera to follow, not the backwards-adjusted one.
+>>>>>>> b2687dae22da152b28fd6608c1c45ab996699245
       this.lastMoveYaw = Math.atan2(dir.x, dir.z)
     }
 
@@ -339,8 +349,16 @@ export class CharacterController {
     }
 
     // Always follow when moving (camera fixed at back)
+<<<<<<< HEAD
     if (!this.isManualOrbit && isMoving && this.lastMoveYaw !== null) {
 
+=======
+    // Only auto-follow if we are not moving backward (mz > 0) to avoid an infinite spin loop
+    // where the camera chases its own tail (since movement is relative to camera).
+    const isMovingBackward = mz > 0.1
+    if (!this.isManualOrbit && isMoving && !isMovingBackward && this.lastMoveYaw !== null) {
+      // Camera should sit behind the character's current movement direction.
+>>>>>>> b2687dae22da152b28fd6608c1c45ab996699245
       const targetYaw = this.lastMoveYaw + Math.PI
       let diff = targetYaw - this.yaw
       while (diff > Math.PI) diff -= 2 * Math.PI
