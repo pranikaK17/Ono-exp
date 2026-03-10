@@ -234,7 +234,8 @@ export default function GrandStairs({ onClose }: { onClose: () => void }) {
           <button style={tabStyle(tab === 'upcoming')} onClick={() => { setTab('upcoming'); setSelectedIdx(0) }}>Upcoming</button>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: 24, flex: 1, minHeight: 0 }}>
+        {/* ── Three-column layout ── */}
+        <div className="gs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: 24, flex: 1, minHeight: 0 }}>
           <SideColumn title={leftTitle} events={leftEvents} color={leftColor} />
 
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
@@ -249,7 +250,7 @@ export default function GrandStairs({ onClose }: { onClose: () => void }) {
                       cursor: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 'default' : 'pointer' }}>›</button>
                 </>
               )}
-              <div key={tab + selectedIdx} style={{ height: '100%', animation: 'ab1-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)' }}>
+              <div key={tab + selectedIdx} style={{ height: '100%', animation: 'gs-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)' }}>
                 <FeaturedEventCard event={centerEvent} badge={centerBadge} />
               </div>
             </div>
@@ -270,9 +271,24 @@ export default function GrandStairs({ onClose }: { onClose: () => void }) {
           <SideColumn title={rightTitle} events={rightEvents} color={rightColor} />
         </div>
       </div>
+
       <style>{`
         @keyframes pulse-live { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-        @keyframes ab1-center-in { from { opacity: 0; transform: scale(0.94) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        @keyframes gs-center-in { from { opacity: 0; transform: scale(0.94) translateY(12px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        /* ── Mobile: stack columns top-to-bottom ── */
+        @media (max-width: 768px) {
+          .gs-grid {
+            grid-template-columns: 1fr !important;
+            overflow-y: auto;
+            flex: unset !important;
+            min-height: unset !important;
+          }
+
+          .gs-grid > div {
+            min-height: unset !important;
+          }
+        }
       `}</style>
     </div>
   )
