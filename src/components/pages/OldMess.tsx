@@ -12,65 +12,65 @@ interface Event {
 }
 
 const liveEvent: Event = {
-  title: 'Hackathon Finals — Demo Day',
+  title: 'Street Food Fest — Live Cook-Off',
   date: 'Mar 9, 2026',
   time: 'LIVE NOW',
-  venue: 'AB3 — Innovation Hub · Main Floor',
-  description: 'Teams present their 24-hour builds to a panel of industry judges. Expect wild ideas and live demos.',
+  venue: 'Old Mess — Open Courtyard',
+  description: 'Campus chefs and food societies battle it out in a live cook-off. Taste, vote, and crown the best dish.',
   image: '',
   link: '#',
 }
 
 const upcomingEvents: Event[] = [
   {
-    title: 'Robotics Showcase',
-    date: 'Mar 13, 2026',
-    time: '3:00 PM',
-    venue: 'AB3 — Engineering Atrium',
-    description: 'Student-built bots compete in obstacle courses and freestyle demos. Sparks guaranteed.',
+    title: 'Midnight Chai Sessions',
+    date: 'Mar 14, 2026',
+    time: '11:00 PM',
+    venue: 'Old Mess — Main Dining Hall',
+    description: 'Late-night chai, snacks, and unfiltered conversations. Show up, sit down, talk to a stranger.',
     image: '',
   },
   {
-    title: 'Startup Pitch Night',
+    title: 'Regional Thali Showcase',
     date: 'Mar 17, 2026',
-    time: '6:30 PM',
-    venue: 'AB3 — Seminar Hall A',
-    description: 'Five student startups. Five minutes each. One winner walks away with seed funding.',
+    time: '1:00 PM',
+    venue: 'Old Mess — Banquet Wing',
+    description: 'Student groups serve up authentic regional thalis from across the country. One day, every flavour.',
     image: '',
   },
   {
-    title: 'AI & Society Panel',
-    date: 'Mar 20, 2026',
-    time: '5:00 PM',
-    venue: 'AB3 — Lecture Theatre 2',
-    description: 'Faculty, founders, and students debate the ethics and impact of AI in everyday life.',
+    title: 'Farm to Table Brunch',
+    date: 'Mar 21, 2026',
+    time: '10:00 AM',
+    venue: 'Old Mess — Garden Terrace',
+    description: 'A slow Sunday brunch made entirely from campus-grown produce. Local, fresh, and unrushed.',
     image: '',
   },
 ]
 
 const pastEvents: Event[] = [
   {
-    title: 'Circuit Bending Workshop',
-    date: 'Feb 24, 2026',
-    time: '2:00 PM',
-    venue: 'AB3 — Maker Lab',
-    description: 'Hands-on hacking of old electronics to create new sounds and visuals. Chaos in the best way.',
+    title: 'Bonfire & BBQ Night',
+    date: 'Feb 21, 2026',
+    time: '7:00 PM',
+    venue: 'Old Mess — Back Lawn',
+    description: 'Smoke, sizzle, and stories around the fire. The most attended night of the semester so far.',
     image: '',
   },
   {
-    title: 'CTF — Capture The Flag',
-    date: 'Feb 17, 2026',
-    time: '10:00 AM',
-    venue: 'AB3 — Computer Lab 3',
-    description: 'Teams raced to solve cybersecurity challenges across 6 hours of pure adrenaline.',
+    title: 'Blind Taste Challenge',
+    date: 'Feb 14, 2026',
+    time: '4:00 PM',
+    venue: 'Old Mess — Dining Hall B',
+    description: 'Participants guessed mystery dishes blindfolded. Chaos, laughter, and one very wrong answer.',
     image: '',
   },
   {
-    title: '3D Printing Sprint',
-    date: 'Feb 9, 2026',
-    time: '1:00 PM',
-    venue: 'AB3 — Fab Studio',
-    description: 'Design-to-print in under 2 hours. The fastest and most creative model won.',
+    title: 'Heritage Recipe Contest',
+    date: 'Feb 7, 2026',
+    time: '12:00 PM',
+    venue: 'Old Mess — Kitchen Lab',
+    description: `Students cooked their family's signature dish and shared the story behind it.`,
     image: '',
   },
 ]
@@ -83,7 +83,7 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
     <div style={{
       display: 'flex', flexDirection: 'column',
       background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(255,180,50,0.25)',
+      border: '1px solid rgba(52,211,153,0.25)',
       borderRadius: 16,
       overflow: 'hidden',
       height: '100%',
@@ -92,15 +92,15 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
         flex: 1, minHeight: 220,
         background: event.image
           ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(200,120,20,0.1), rgba(255,200,60,0.07))',
+          : 'linear-gradient(135deg, rgba(16,120,70,0.12), rgba(52,211,153,0.07))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
       }}>
-        {!event.image && <span style={{ fontSize: 72, color: 'rgba(255,255,255,0.06)' }}>⬡</span>}
+        {!event.image && <span style={{ fontSize: 72, color: 'rgba(255,255,255,0.06)' }}>◈</span>}
         {badge && (
           <div style={{
             position: 'absolute', top: 16, left: 16,
-            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(220,150,30,0.75)',
+            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(30,160,100,0.8)',
             color: '#fff', fontSize: '0.65rem', fontWeight: 700,
             fontFamily: "'Orbitron', sans-serif",
             padding: '4px 14px', borderRadius: 6,
@@ -111,20 +111,20 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
       </div>
       <div style={{
         padding: '24px 28px', background: 'rgba(0,0,0,0.3)',
-        borderTop: '1px solid rgba(255,180,50,0.1)',
+        borderTop: '1px solid rgba(52,211,153,0.1)',
       }}>
         <h2 style={{
           margin: 0, fontSize: '1.35rem', fontWeight: 700,
-          fontFamily: "'Orbitron', sans-serif", color: '#fff8e8',
+          fontFamily: "'Orbitron', sans-serif", color: '#e8fff4',
         }}>{event.title}</h2>
         <div style={{
           display: 'flex', gap: 20, marginTop: 10,
           fontSize: '0.75rem', fontFamily: "'Exo 2', sans-serif",
           letterSpacing: '0.06em', textTransform: 'uppercase',
         }}>
-          <span style={{ color: 'rgba(255,180,50,0.9)' }}>{event.date}</span>
+          <span style={{ color: 'rgba(52,211,153,0.9)' }}>{event.date}</span>
           <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
-          <span style={{ color: event.time === 'LIVE NOW' ? '#ff6b6b' : '#ffb832', fontWeight: 600 }}>{event.time}</span>
+          <span style={{ color: event.time === 'LIVE NOW' ? '#ff6b6b' : '#34d399', fontWeight: 600 }}>{event.time}</span>
         </div>
         <div style={{
           marginTop: 6, fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)',
@@ -142,8 +142,8 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
           }}>
             <a href="#" style={{
               padding: '8px 22px', borderRadius: 8,
-              background: 'rgba(255,180,50,0.12)', border: '1px solid rgba(255,180,50,0.4)',
-              color: '#ffb832', fontSize: '0.72rem', fontWeight: 600,
+              background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.4)',
+              color: '#34d399', fontSize: '0.72rem', fontWeight: 600,
               fontFamily: "'Orbitron', sans-serif", textDecoration: 'none',
               letterSpacing: '0.08em', textTransform: 'uppercase',
             }}>Details</a>
@@ -161,17 +161,17 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
       onClick={onClick}
       style={{
         background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,180,50,0.15)',
+        border: '1px solid rgba(52,211,153,0.15)',
         borderRadius: 10, overflow: 'hidden',
         transition: 'border-color 0.3s, transform 0.3s',
         cursor: 'pointer',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'rgba(255,180,50,0.45)'
+        e.currentTarget.style.borderColor = 'rgba(52,211,153,0.45)'
         e.currentTarget.style.transform = 'translateY(-2px)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = 'rgba(255,180,50,0.15)'
+        e.currentTarget.style.borderColor = 'rgba(52,211,153,0.15)'
         e.currentTarget.style.transform = 'translateY(0)'
       }}
     >
@@ -179,20 +179,20 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
         height: 80,
         background: event.image
           ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(200,120,20,0.1), rgba(255,200,60,0.07))',
+          : 'linear-gradient(135deg, rgba(16,120,70,0.12), rgba(52,211,153,0.07))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 24, color: 'rgba(255,255,255,0.12)',
       }}>
-        {!event.image && '⬡'}
+        {!event.image && '◈'}
       </div>
       <div style={{ padding: '10px 12px' }}>
         <h4 style={{
           margin: 0, fontSize: '0.78rem', fontWeight: 600,
-          fontFamily: "'Orbitron', sans-serif", color: '#fff0cc', lineHeight: 1.3,
+          fontFamily: "'Orbitron', sans-serif", color: '#ccfce8', lineHeight: 1.3,
         }}>{event.title}</h4>
         <div style={{
           marginTop: 4, fontSize: '0.62rem',
-          color: 'rgba(255,180,50,0.75)', fontFamily: "'Exo 2', sans-serif",
+          color: 'rgba(52,211,153,0.75)', fontFamily: "'Exo 2', sans-serif",
           letterSpacing: '0.05em', textTransform: 'uppercase',
         }}>
           {event.date} · {event.time}
@@ -211,7 +211,7 @@ function SideColumn({ title, events, color, onClickEvent }: {
       display: 'flex', flexDirection: 'column', gap: 14,
       overflowY: 'auto', padding: '0 8px',
       scrollbarWidth: 'thin',
-      scrollbarColor: 'rgba(255,180,50,0.15) transparent',
+      scrollbarColor: 'rgba(52,211,153,0.15) transparent',
     }}>
       <h3 style={{
         margin: 0, fontSize: '0.7rem', fontWeight: 500,
@@ -229,9 +229,9 @@ function SideColumn({ title, events, color, onClickEvent }: {
 /* ── Tab button style ────────────────────────────────────────────────────── */
 const tabStyle = (active: boolean): React.CSSProperties => ({
   padding: '10px 24px', borderRadius: 8,
-  border: active ? '1px solid rgba(255,180,50,0.6)' : '1px solid rgba(255,255,255,0.1)',
-  background: active ? 'rgba(255,180,50,0.12)' : 'rgba(255,255,255,0.04)',
-  color: active ? '#ffb832' : 'rgba(255,255,255,0.45)',
+  border: active ? '1px solid rgba(52,211,153,0.6)' : '1px solid rgba(255,255,255,0.1)',
+  background: active ? 'rgba(52,211,153,0.12)' : 'rgba(255,255,255,0.04)',
+  color: active ? '#34d399' : 'rgba(255,255,255,0.45)',
   fontFamily: "'Orbitron', sans-serif", fontSize: '0.72rem', fontWeight: 600,
   letterSpacing: '0.1em', textTransform: 'uppercase' as const,
   cursor: 'pointer', transition: 'all 0.25s', backdropFilter: 'blur(6px)',
@@ -241,15 +241,15 @@ const tabStyle = (active: boolean): React.CSSProperties => ({
 const arrowBtnStyle: React.CSSProperties = {
   position: 'absolute', top: '50%', transform: 'translateY(-50%)',
   zIndex: 10, width: 40, height: 40, borderRadius: '50%',
-  background: 'rgba(255,180,50,0.15)', border: '1px solid rgba(255,180,50,0.5)',
-  color: '#ffb832', fontSize: '1.4rem', fontWeight: 700,
+  background: 'rgba(52,211,153,0.15)', border: '1px solid rgba(52,211,153,0.5)',
+  color: '#34d399', fontSize: '1.4rem', fontWeight: 700,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   backdropFilter: 'blur(8px)', transition: 'all 0.2s',
-  boxShadow: '0 0 14px rgba(255,180,50,0.2)',
+  boxShadow: '0 0 14px rgba(52,211,153,0.2)',
 }
 
 /* ── Main component ──────────────────────────────────────────────────────── */
-export default function AB3({ onClose }: { onClose: () => void }) {
+export default function OldMess({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
@@ -272,7 +272,7 @@ export default function AB3({ onClose }: { onClose: () => void }) {
 
   const rightTitle = tab === 'upcoming' ? 'Happening Now' : 'Upcoming'
   const rightEvents = tab === 'upcoming' ? [liveEvent] : upcomingEvents
-  const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#ffb832'
+  const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#34d399'
 
   return (
     <div
@@ -306,7 +306,7 @@ export default function AB3({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* ── Three-column layout ── */}
-        <div className="ab3-grid" style={{
+        <div className="oldmess-grid" style={{
           display: 'grid',
           gridTemplateColumns: '1fr 2fr 1fr',
           gap: 24, flex: 1, minHeight: 0,
@@ -352,7 +352,7 @@ export default function AB3({ onClose }: { onClose: () => void }) {
                 key={tab + selectedIdx}
                 style={{
                   height: '100%',
-                  animation: 'ab3-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                  animation: 'oldmess-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                 }}
               >
                 <FeaturedEventCard event={centerEvent} badge={centerBadge} />
@@ -371,7 +371,7 @@ export default function AB3({ onClose }: { onClose: () => void }) {
                     onClick={() => setSelectedIdx(i)}
                     style={{
                       width: 8, height: 8, borderRadius: '50%', border: 'none',
-                      background: i === selectedIdx ? '#ffb832' : 'rgba(255,255,255,0.15)',
+                      background: i === selectedIdx ? '#34d399' : 'rgba(255,255,255,0.15)',
                       cursor: 'pointer', transition: 'background 0.2s, transform 0.2s',
                       transform: i === selectedIdx ? 'scale(1.4)' : 'scale(1)',
                     }}
@@ -396,21 +396,21 @@ export default function AB3({ onClose }: { onClose: () => void }) {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.6; }
         }
-        @keyframes ab3-center-in {
+        @keyframes oldmess-center-in {
           from { opacity: 0; transform: scale(0.94) translateY(12px); }
           to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         /* ── Mobile: stack columns top-to-bottom ── */
         @media (max-width: 768px) {
-          .ab3-grid {
+          .oldmess-grid {
             grid-template-columns: 1fr !important;
             overflow-y: auto;
             flex: unset !important;
             min-height: unset !important;
           }
 
-          .ab3-grid > div {
+          .oldmess-grid > div {
             min-height: unset !important;
           }
         }

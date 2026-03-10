@@ -18,6 +18,10 @@ const PIN_TO_PAGE: Record<string, string> = {
   'Pin007': 'FootballGround',
   'Pin01': 'GrandStairs',
   'Pin008': 'CricketGround',
+  'Pin002': 'AB2',
+  'Pin005': 'AB3',
+  'Pin006': 'LHC',
+  'Pin003': 'OldMess',
 }
 
 // Buildings to draw ground outlines around (exact node names)
