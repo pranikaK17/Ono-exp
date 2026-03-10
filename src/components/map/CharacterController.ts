@@ -171,20 +171,28 @@ export class CharacterController {
     }, { passive: false })
 
     window.addEventListener('touchstart', e => {
-      const touches = Array.from(e.touches)
-      if (touches.length >= 2) {
+      // If the touch started on the joystick zone, ignore it for camera
+      if ((e.target as HTMLElement).closest && (e.target as HTMLElement).closest('#joy-zone')) return
+
+      const targetTouches = Array.from(e.touches).filter(
+        t => !(t.target as HTMLElement)?.closest?.('#joy-zone')
+      )
+
+      if (targetTouches.length >= 2) {
         this._lookTouchId = null
         this._pinchActive = true
         this._pinchStart    = Math.hypot(
-          touches[0].clientX - touches[1].clientX,
-          touches[0].clientY - touches[1].clientY
+          targetTouches[0].clientX - targetTouches[1].clientX,
+          targetTouches[0].clientY - targetTouches[1].clientY
         )
         this._pinchCamDist    = this.distance
         this._pinchTargetDist = this.distance
         return
       }
+      
       const t = e.changedTouches[0]
-      if (this._lookTouchId === null && t.clientX > window.innerWidth * 0.42) {
+      // Only pan if we aren't already panning and it's not a pinch
+      if (this._lookTouchId === null && !this._pinchActive) {
         this._lookTouchId = t.identifier
         this._lookLastX   = t.clientX
         this._lookLastY   = t.clientY
@@ -192,11 +200,14 @@ export class CharacterController {
     }, { passive: true })
 
     window.addEventListener('touchmove', e => {
-      const touches = Array.from(e.touches)
-      if (this._pinchActive && touches.length >= 2) {
+      const targetTouches = Array.from(e.touches).filter(
+        t => !(t.target as HTMLElement)?.closest?.('#joy-zone')
+      )
+
+      if (this._pinchActive && targetTouches.length >= 2) {
         const cur = Math.hypot(
-          touches[0].clientX - touches[1].clientX,
-          touches[0].clientY - touches[1].clientY
+          targetTouches[0].clientX - targetTouches[1].clientX,
+          targetTouches[0].clientY - targetTouches[1].clientY
         )
         if (this._pinchStart > 0) {
           const ratio = this._pinchStart / cur
@@ -246,12 +257,9 @@ export class CharacterController {
 
     const kb = input.getMoveVector()
 
-    // FIX: was `kb.z + joystick.y` — joystick rawY is negative when pushed up
-    // (screen coords: up = smaller Y). We need stick-up → negative mz → forward.
-    // So joystick.y is already correct sign for mz — but the original had a
-    // sign error causing forward to move backward. Fix: subtract joystick.y.
+    // Swapped joystick.y so pulling back moves character backward
     let mx = kb.x + joystick.x
-    let mz = kb.z + joystick.y  // stick-up = negative rawY = forward (character faces -Z)
+    let mz = kb.z - joystick.y
 
     const len = Math.sqrt(mx * mx + mz * mz)
     if (len > 1) { mx /= len; mz /= len }
@@ -314,18 +322,26 @@ export class CharacterController {
     }
 
     if (this.isManualOrbit) {
-      this.orbitTimer += delta
-      if (this.orbitTimer > this.ORBIT_RESUME_DELAY) {
+      if (isMoving) {
         this.isManualOrbit = false
-        this.orbitTimer    = 0
+        this.orbitTimer = 0
+      } else {
+        this.orbitTimer += delta
+        if (this.orbitTimer > this.ORBIT_RESUME_DELAY) {
+          this.isManualOrbit = false
+          this.orbitTimer    = 0
+        }
       }
     }
+    
+    // Always follow when moving (camera fixed at back)
     if (!this.isManualOrbit && isMoving && this.lastMoveYaw !== null) {
       const targetYaw = this.lastMoveYaw + Math.PI
       let diff = targetYaw - this.yaw
       while (diff >  Math.PI) diff -= 2 * Math.PI
       while (diff < -Math.PI) diff += 2 * Math.PI
-      this.yaw += diff * Math.min(this.FOLLOW_SPEED * delta, 1)
+      // Using a stronger follow multiplier so it stays fixed to the back quicker
+      this.yaw += diff * Math.min(this.FOLLOW_SPEED * 3 * delta, 1)
     }
 
     if (this.mixer) {
