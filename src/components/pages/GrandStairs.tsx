@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import '../../App.css'
 
 interface Event {
@@ -8,64 +8,40 @@ interface Event {
   venue: string
   description: string
   image: string
+  // ISO format strings for automatic time sorting
+  startTime: string
+  endTime: string
 }
 
-const liveEvent: Event = {
-  title: 'Flash Mob — Neon Dance',
-  date: 'Mar 9, 2026',
-  time: 'LIVE NOW',
-  venue: 'Grand Stairs — Central Steps',
-  description: 'A surprise choreographed performance lighting up the iconic staircase with glow-in-the-dark costumes.',
+// 1. One Master List of Events
+const allEvents: Event[] = [
+  {
+    title: 'Nukkad Natak',
+    date: 'Mar 15, 2026',
+    time: '11:00 AM - 5:00 PM',
+    venue: 'In front of Grand Stairs',
+    description: 'Engaging street play performances bringing powerful stories and vibrant energy to life right in front of the stairs.',
+    image: "../../../public/majorEvents/nukkadnatak.webp",
+    startTime: '2026-03-15T11:00:00',
+    endTime: '2026-03-15T17:00:00',
+  },
+]
+
+// 2. Fallback for when there are no live events
+const noLiveEventFallback: Event = {
+  title: 'No Live Events Currently',
+  date: 'Check back later',
+  time: '—',
+  venue: 'Campus Wide',
+  description: 'There are no events happening right now. Browse our upcoming tabs to see what to look forward to!',
   image: '',
+  startTime: '',
+  endTime: '',
 }
-
-const upcomingEvents: Event[] = [
-  {
-    title: 'Fashion Walk — Retro Futurism',
-    date: 'Mar 14, 2026',
-    time: '7:00 PM',
-    venue: 'Grand Stairs — Runway',
-    description: 'Models descend the grand stairs in retro-futuristic outfits. Expect neon, chrome, and attitude.',
-    image: '',
-  },
-  {
-    title: 'Acoustic Sunset Session',
-    date: 'Mar 16, 2026',
-    time: '5:30 PM',
-    venue: 'Grand Stairs — Upper Terrace',
-    description: 'Intimate acoustic performances as the sun sets behind the campus skyline.',
-    image: '',
-  },
-  {
-    title: 'Art Installation Unveiling',
-    date: 'Mar 19, 2026',
-    time: '11:00 AM',
-    venue: 'Grand Stairs — Landing',
-    description: 'A massive interactive art installation spanning the entire staircase. Come be part of it.',
-    image: '',
-  },
-]
-
-const pastEvents: Event[] = [
-  {
-    title: 'Spoken Word Evening',
-    date: 'Feb 22, 2026',
-    time: '6:00 PM',
-    venue: 'Grand Stairs — Amphitheatre Zone',
-    description: 'Poets and storytellers captivated the crowd on the candlelit stairs.',
-    image: '',
-  },
-  {
-    title: 'Street Photography Exhibition',
-    date: 'Feb 15, 2026',
-    time: '10:00 AM',
-    venue: 'Grand Stairs — Gallery Wall',
-    description: 'A curated outdoor photo exhibition along the staircase railings.',
-    image: '',
-  },
-]
 
 type Tab = 'past' | 'live' | 'upcoming'
+
+// ─── Helper Components ────────────────────────────────────────────────────────
 
 function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
   return (
@@ -167,6 +143,8 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
 }
 
 function SideColumn({ title, events, color }: { title: string; events: Event[]; color: string }) {
+  if (events.length === 0) return null; // Gracefully hide column if empty
+
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 14, overflowY: 'auto', padding: '0 8px',
@@ -181,6 +159,8 @@ function SideColumn({ title, events, color }: { title: string; events: Event[]; 
     </div>
   )
 }
+
+// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const tabStyle = (active: boolean): React.CSSProperties => ({
   padding: '10px 24px', borderRadius: 8,
@@ -202,21 +182,51 @@ const arrowBtnStyle: React.CSSProperties = {
   boxShadow: '0 0 14px rgba(168,85,247,0.25)',
 }
 
+// ─── Main Component ───────────────────────────────────────────────────────────
+
 export default function GrandStairs({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
+  
+  // State to track current time
+  const [now, setNow] = useState(new Date())
+
+  // Update current time every 60 seconds to switch events automatically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date())
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Filter events based on time
+  const pastEvents = allEvents.filter(e => new Date(e.endTime) < now)
+  const upcomingEvents = allEvents.filter(e => new Date(e.startTime) > now)
+  const liveEvents = allEvents.filter(
+    e => new Date(e.startTime) <= now && new Date(e.endTime) >= now
+  )
+
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-  const centerEvent = tab === 'live' ? liveEvent
-    : tab === 'upcoming' ? upcomingEvents[selectedIdx] || upcomingEvents[0]
-    : pastEvents[selectedIdx] || pastEvents[0]
-  const centerBadge = tab === 'live' ? '● LIVE' : tab === 'upcoming' ? 'UPCOMING' : 'PAST'
+  // Assign the featured center event
+  const centerEvent = 
+    tab === 'live' 
+      ? (liveEvents.length > 0 ? liveEvents[0] : noLiveEventFallback)
+      : tab === 'upcoming' 
+        ? (upcomingEvents[selectedIdx] || upcomingEvents[0])
+        : (pastEvents[selectedIdx] || pastEvents[0])
+
+  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE' 
+                    : tab === 'live' ? 'OFFLINE' 
+                    : tab === 'upcoming' ? 'UPCOMING' 
+                    : 'PAST'
 
   const leftTitle = tab === 'past' ? 'Happening Now' : 'Past Events'
-  const leftEvents = tab === 'past' ? [liveEvent] : pastEvents
+  const leftEvents = tab === 'past' ? liveEvents : pastEvents
   const leftColor = tab === 'past' ? '#ff6b6b' : 'rgba(255,255,255,0.3)'
+  
   const rightTitle = tab === 'upcoming' ? 'Happening Now' : 'Upcoming'
-  const rightEvents = tab === 'upcoming' ? [liveEvent] : upcomingEvents
+  const rightEvents = tab === 'upcoming' ? liveEvents : upcomingEvents
   const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#a855f7'
 
   return (
@@ -234,13 +244,14 @@ export default function GrandStairs({ onClose }: { onClose: () => void }) {
           <button style={tabStyle(tab === 'upcoming')} onClick={() => { setTab('upcoming'); setSelectedIdx(0) }}>Upcoming</button>
         </div>
 
-        {/* ── Three-column layout ── */}
         <div className="gs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: 24, flex: 1, minHeight: 0 }}>
           <SideColumn title={leftTitle} events={leftEvents} color={leftColor} />
 
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             <div style={{ flex: 1, position: 'relative' }}>
-              {tab !== 'live' && (
+              
+              {/* Pagination Arrows */}
+              {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
                 <>
                   <button onClick={() => setSelectedIdx(i => Math.max(0, i - 1))} disabled={selectedIdx === 0}
                     style={{ ...arrowBtnStyle, left: 8, opacity: selectedIdx === 0 ? 0.25 : 1, cursor: selectedIdx === 0 ? 'default' : 'pointer' }}>‹</button>
@@ -250,11 +261,21 @@ export default function GrandStairs({ onClose }: { onClose: () => void }) {
                       cursor: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 'default' : 'pointer' }}>›</button>
                 </>
               )}
-              <div key={tab + selectedIdx} style={{ height: '100%', animation: 'gs-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)' }}>
-                <FeaturedEventCard event={centerEvent} badge={centerBadge} />
-              </div>
+              
+              {/* Featured Event Render */}
+              {centerEvent ? (
+                <div key={tab + selectedIdx} style={{ height: '100%', animation: 'gs-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)' }}>
+                  <FeaturedEventCard event={centerEvent} badge={centerBadge} />
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>
+                  No events found.
+                </div>
+              )}
             </div>
-            {tab !== 'live' && (
+            
+            {/* Pagination Dots */}
+            {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
               <div style={{ display: 'flex', justifyContent: 'center', gap: 10, marginTop: 16, flexShrink: 0 }}>
                 {(tab === 'upcoming' ? upcomingEvents : pastEvents).map((_, i) => (
                   <button key={i} onClick={() => setSelectedIdx(i)} style={{

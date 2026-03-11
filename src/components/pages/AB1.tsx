@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import '../../App.css'
 
 interface Event {
@@ -9,81 +9,37 @@ interface Event {
   description: string
   image: string
   link?: string
+  // ISO format strings for automatic time sorting
+  startTime: string
+  endTime: string
 }
 
-const liveEvent: Event = {
-  title: 'Neon Nights — Battle of Bands',
-  date: 'Mar 9, 2026',
-  time: 'LIVE NOW',
-  venue: 'AB1 — Main Stage',
-  description: 'Electrifying live performances from 8 college bands competing for the crown.',
+// 1. Master List of Events (Currently Empty)
+const allEvents: Event[] = [
+  // Add your AB1 events here!
+]
+
+// 2. Fallback for when there are no live events
+const noLiveEventFallback: Event = {
+  title: 'No Live Events Currently',
+  date: 'Check back later',
+  time: '—',
+  venue: 'AB1',
+  description: 'There are no events happening right now in AB1. Browse our upcoming tabs to see what to look forward to!',
   image: '',
-  link: '#',
+  startTime: '',
+  endTime: '',
 }
-
-const upcomingEvents: Event[] = [
-  {
-    title: 'Stand-Up Showdown',
-    date: 'Mar 16, 2026',
-    time: '7:30 PM',
-    venue: 'AB1 — Auditorium',
-    description: 'An evening of laughs with the best campus comedians and a surprise guest.',
-    image: '',
-  },
-  {
-    title: 'Synth Wave DJ Night',
-    date: 'Mar 17, 2026',
-    time: '9:00 PM',
-    venue: 'AB1 — Open Arena',
-    description: 'Retro-futuristic beats under the neon sky. Glow sticks mandatory.',
-    image: '',
-  },
-  {
-    title: 'Indie Film Screening',
-    date: 'Mar 18, 2026',
-    time: '6:00 PM',
-    venue: 'AB1 — Seminar Hall',
-    description: 'A curated selection of short films by student filmmakers.',
-    image: '',
-  },
-]
-
-const pastEvents: Event[] = [
-  {
-    title: 'Acoustic Unplugged',
-    date: 'Feb 20, 2026',
-    time: '5:00 PM',
-    venue: 'AB1 — Courtyard',
-    description: 'Soulful acoustic sets from indie artists — a mellow evening to remember.',
-    image: '',
-  },
-  {
-    title: 'Poetry Slam',
-    date: 'Feb 18, 2026',
-    time: '4:00 PM',
-    venue: 'AB1 — Seminar Hall',
-    description: 'Words that hit hard. The best spoken word artists battled it out.',
-    image: '',
-  },
-  {
-    title: 'Open Mic Night',
-    date: 'Feb 10, 2026',
-    time: '7:00 PM',
-    venue: 'AB1 — Main Stage',
-    description: 'Raw talent, no filters. Singers, poets, comedians — anyone could take the stage.',
-    image: '',
-  },
-]
 
 type Tab = 'past' | 'live' | 'upcoming'
 
-/* ── Featured card (shown in center) ─────────────────────────────────────── */
+/* ── Featured card ───────────────────────────────────────────────────────── */
 function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column',
       background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(77,216,230,0.2)',
+      border: '1px solid rgba(40,200,120,0.25)', // Green border
       borderRadius: 16,
       overflow: 'hidden',
       height: '100%',
@@ -92,15 +48,15 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
         flex: 1, minHeight: 220,
         background: event.image
           ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(77,216,230,0.06), rgba(160,60,255,0.1))',
+          : 'linear-gradient(135deg, rgba(20,180,90,0.1), rgba(60,255,150,0.07))', // Green gradient
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
       }}>
-        {!event.image && <span style={{ fontSize: 72, color: 'rgba(255,255,255,0.06)' }}>♫</span>}
+        {!event.image && <span style={{ fontSize: 72, color: 'rgba(255,255,255,0.06)' }}>◈</span>}
         {badge && (
           <div style={{
             position: 'absolute', top: 16, left: 16,
-            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(77,216,230,0.7)',
+            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(30,180,100,0.75)', // Green badge
             color: '#fff', fontSize: '0.65rem', fontWeight: 700,
             fontFamily: "'Orbitron', sans-serif",
             padding: '4px 14px', borderRadius: 6,
@@ -111,20 +67,20 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
       </div>
       <div style={{
         padding: '24px 28px', background: 'rgba(0,0,0,0.3)',
-        borderTop: '1px solid rgba(77,216,230,0.1)',
+        borderTop: '1px solid rgba(40,200,120,0.1)',
       }}>
         <h2 style={{
           margin: 0, fontSize: '1.35rem', fontWeight: 700,
-          fontFamily: "'Orbitron', sans-serif", color: '#e0f0ff',
+          fontFamily: "'Orbitron', sans-serif", color: '#e8fff0',
         }}>{event.title}</h2>
         <div style={{
           display: 'flex', gap: 20, marginTop: 10,
           fontSize: '0.75rem', fontFamily: "'Exo 2', sans-serif",
           letterSpacing: '0.06em', textTransform: 'uppercase',
         }}>
-          <span style={{ color: 'rgba(77,216,230,0.8)' }}>{event.date}</span>
+          <span style={{ color: 'rgba(40,200,120,0.9)' }}>{event.date}</span>
           <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
-          <span style={{ color: event.time === 'LIVE NOW' ? '#ff6b6b' : '#4dd8e6', fontWeight: 600 }}>{event.time}</span>
+          <span style={{ color: event.time === 'LIVE NOW' ? '#ff6b6b' : '#32ff96', fontWeight: 600 }}>{event.time}</span>
         </div>
         <div style={{
           marginTop: 6, fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)',
@@ -140,10 +96,10 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
             borderTop: '1px solid rgba(255,255,255,0.06)',
             display: 'flex', gap: 12,
           }}>
-            <a href="#" style={{
+            <a href={event.link} style={{
               padding: '8px 22px', borderRadius: 8,
-              background: 'rgba(77,216,230,0.15)', border: '1px solid rgba(77,216,230,0.3)',
-              color: '#4dd8e6', fontSize: '0.72rem', fontWeight: 600,
+              background: 'rgba(40,200,120,0.12)', border: '1px solid rgba(40,200,120,0.4)',
+              color: '#32ff96', fontSize: '0.72rem', fontWeight: 600,
               fontFamily: "'Orbitron', sans-serif", textDecoration: 'none',
               letterSpacing: '0.08em', textTransform: 'uppercase',
             }}>Details</a>
@@ -161,17 +117,17 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
       onClick={onClick}
       style={{
         background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(77,216,230,0.12)',
+        border: '1px solid rgba(40,200,120,0.15)',
         borderRadius: 10, overflow: 'hidden',
         transition: 'border-color 0.3s, transform 0.3s',
         cursor: 'pointer',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'rgba(77,216,230,0.35)'
+        e.currentTarget.style.borderColor = 'rgba(40,200,120,0.45)'
         e.currentTarget.style.transform = 'translateY(-2px)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = 'rgba(77,216,230,0.12)'
+        e.currentTarget.style.borderColor = 'rgba(40,200,120,0.15)'
         e.currentTarget.style.transform = 'translateY(0)'
       }}
     >
@@ -179,20 +135,20 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
         height: 80,
         background: event.image
           ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(77,216,230,0.08), rgba(160,60,255,0.08))',
+          : 'linear-gradient(135deg, rgba(20,180,90,0.1), rgba(60,255,150,0.07))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 24, color: 'rgba(255,255,255,0.12)',
       }}>
-        {!event.image && '♫'}
+        {!event.image && '◈'}
       </div>
       <div style={{ padding: '10px 12px' }}>
         <h4 style={{
           margin: 0, fontSize: '0.78rem', fontWeight: 600,
-          fontFamily: "'Orbitron', sans-serif", color: '#d0e8f0', lineHeight: 1.3,
+          fontFamily: "'Orbitron', sans-serif", color: '#ccfff0', lineHeight: 1.3,
         }}>{event.title}</h4>
         <div style={{
           marginTop: 4, fontSize: '0.62rem',
-          color: 'rgba(77,216,230,0.65)', fontFamily: "'Exo 2', sans-serif",
+          color: 'rgba(40,200,120,0.75)', fontFamily: "'Exo 2', sans-serif",
           letterSpacing: '0.05em', textTransform: 'uppercase',
         }}>
           {event.date} · {event.time}
@@ -206,12 +162,14 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
 function SideColumn({ title, events, color, onClickEvent }: {
   title: string; events: Event[]; color: string; onClickEvent?: (i: number) => void
 }) {
+  if (events.length === 0) return null; // Gracefully hide if no events in this column
+  
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 14,
       overflowY: 'auto', padding: '0 8px',
       scrollbarWidth: 'thin',
-      scrollbarColor: 'rgba(77,216,230,0.15) transparent',
+      scrollbarColor: 'rgba(40,200,120,0.15) transparent',
     }}>
       <h3 style={{
         margin: 0, fontSize: '0.7rem', fontWeight: 500,
@@ -229,9 +187,9 @@ function SideColumn({ title, events, color, onClickEvent }: {
 /* ── Tab button style ────────────────────────────────────────────────────── */
 const tabStyle = (active: boolean): React.CSSProperties => ({
   padding: '10px 24px', borderRadius: 8,
-  border: active ? '1px solid rgba(77,216,230,0.5)' : '1px solid rgba(255,255,255,0.1)',
-  background: active ? 'rgba(77,216,230,0.12)' : 'rgba(255,255,255,0.04)',
-  color: active ? '#4dd8e6' : 'rgba(255,255,255,0.45)',
+  border: active ? '1px solid rgba(40,200,120,0.6)' : '1px solid rgba(255,255,255,0.1)',
+  background: active ? 'rgba(40,200,120,0.12)' : 'rgba(255,255,255,0.04)',
+  color: active ? '#32ff96' : 'rgba(255,255,255,0.45)',
   fontFamily: "'Orbitron', sans-serif", fontSize: '0.72rem', fontWeight: 600,
   letterSpacing: '0.1em', textTransform: 'uppercase' as const,
   cursor: 'pointer', transition: 'all 0.25s', backdropFilter: 'blur(6px)',
@@ -241,40 +199,57 @@ const tabStyle = (active: boolean): React.CSSProperties => ({
 const arrowBtnStyle: React.CSSProperties = {
   position: 'absolute', top: '50%', transform: 'translateY(-50%)',
   zIndex: 10, width: 40, height: 40, borderRadius: '50%',
-  background: 'rgba(77,216,230,0.2)', border: '1px solid rgba(77,216,230,0.5)',
-  color: '#4dd8e6', fontSize: '1.4rem', fontWeight: 700,
+  background: 'rgba(40,200,120,0.15)', border: '1px solid rgba(40,200,120,0.5)',
+  color: '#32ff96', fontSize: '1.4rem', fontWeight: 700,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   backdropFilter: 'blur(8px)', transition: 'all 0.2s',
-  boxShadow: '0 0 14px rgba(77,216,230,0.25)',
+  boxShadow: '0 0 14px rgba(40,200,120,0.2)',
 }
 
 /* ── Main component ──────────────────────────────────────────────────────── */
 export default function AB1({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
+  
+  // State to track current time
+  const [now, setNow] = useState(new Date())
+
+  // Update current time every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date())
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Filter events based on time
+  const pastEvents = allEvents.filter(e => new Date(e.endTime) < now)
+  const upcomingEvents = allEvents.filter(e => new Date(e.startTime) > now)
+  const liveEvents = allEvents.filter(
+    e => new Date(e.startTime) <= now && new Date(e.endTime) >= now
+  )
+
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-  // Determine what's shown in center based on tab
-  const centerEvent = tab === 'live'
-    ? liveEvent
-    : tab === 'upcoming'
-      ? upcomingEvents[selectedIdx] || upcomingEvents[0]
-      : pastEvents[selectedIdx] || pastEvents[0]
+  const centerEvent = 
+    tab === 'live' 
+      ? (liveEvents.length > 0 ? liveEvents[0] : noLiveEventFallback)
+      : tab === 'upcoming' 
+        ? (upcomingEvents[selectedIdx] || upcomingEvents[0])
+        : (pastEvents[selectedIdx] || pastEvents[0])
 
-  const centerBadge = tab === 'live'
-    ? '● LIVE'
-    : tab === 'upcoming'
-      ? 'UPCOMING'
-      : 'PAST'
+  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE' 
+                    : tab === 'live' ? 'OFFLINE' 
+                    : tab === 'upcoming' ? 'UPCOMING' 
+                    : 'PAST'
 
-  // Left & right column content adapts to which tab is active
   const leftTitle = tab === 'past' ? 'Happening Now' : 'Past Events'
-  const leftEvents = tab === 'past' ? [liveEvent] : pastEvents
+  const leftEvents = tab === 'past' ? liveEvents : pastEvents
   const leftColor = tab === 'past' ? '#ff6b6b' : 'rgba(255,255,255,0.3)'
 
   const rightTitle = tab === 'upcoming' ? 'Happening Now' : 'Upcoming'
-  const rightEvents = tab === 'upcoming' ? [liveEvent] : upcomingEvents
-  const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#4dd8e6'
+  const rightEvents = tab === 'upcoming' ? liveEvents : upcomingEvents
+  const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#32ff96'
 
   return (
     <div
@@ -323,7 +298,8 @@ export default function AB1({ onClose }: { onClose: () => void }) {
           {/* Center — animated swap with arrows */}
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             <div style={{ flex: 1, position: 'relative' }}>
-              {tab !== 'live' && (
+              {/* Pagination Arrows - Only show if there's more than 1 item */}
+              {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
                 <>
                   <button
                     onClick={() => setSelectedIdx(i => Math.max(0, i - 1))}
@@ -350,19 +326,27 @@ export default function AB1({ onClose }: { onClose: () => void }) {
                   >›</button>
                 </>
               )}
-              <div
-                key={tab + selectedIdx}
-                style={{
-                  height: '100%',
-                  animation: 'ab1-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
-                }}
-              >
-                <FeaturedEventCard event={centerEvent} badge={centerBadge} />
-              </div>
+              
+              {/* Featured Event Render */}
+              {centerEvent ? (
+                <div
+                  key={tab + selectedIdx}
+                  style={{
+                    height: '100%',
+                    animation: 'ab1-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                  }}
+                >
+                  <FeaturedEventCard event={centerEvent} badge={centerBadge} />
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>
+                  No events found.
+                </div>
+              )}
             </div>
 
-            {/* Dot indicators */}
-            {tab !== 'live' && (
+            {/* Dot indicators - Only show if there's more than 1 item */}
+            {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
               <div style={{
                 display: 'flex', justifyContent: 'center', gap: 10,
                 marginTop: 16, flexShrink: 0,
@@ -373,7 +357,7 @@ export default function AB1({ onClose }: { onClose: () => void }) {
                     onClick={() => setSelectedIdx(i)}
                     style={{
                       width: 8, height: 8, borderRadius: '50%', border: 'none',
-                      background: i === selectedIdx ? '#4dd8e6' : 'rgba(255,255,255,0.15)',
+                      background: i === selectedIdx ? '#32ff96' : 'rgba(255,255,255,0.15)',
                       cursor: 'pointer', transition: 'background 0.2s, transform 0.2s',
                       transform: i === selectedIdx ? 'scale(1.4)' : 'scale(1)',
                     }}
@@ -412,24 +396,8 @@ export default function AB1({ onClose }: { onClose: () => void }) {
             min-height: unset !important;
           }
 
-          /* On mobile the center column height is auto, not flex-fill */
           .ab1-grid > div {
             min-height: unset !important;
-          }
-
-          /* Tighten up tabs on small screens */
-          .ab1-tabs button {
-            padding: 8px 14px !important;
-            font-size: 0.62rem !important;
-            letter-spacing: 0.06em !important;
-          }
-
-          /* Arrow buttons: pull them inside the card so they don't overflow */
-          .ab1-grid .ab1-arrow-left {
-            left: 4px !important;
-          }
-          .ab1-grid .ab1-arrow-right {
-            right: 4px !important;
           }
         }
       `}</style>

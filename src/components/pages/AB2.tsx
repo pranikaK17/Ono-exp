@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import '../../App.css'
 
 interface Event {
@@ -9,71 +9,66 @@ interface Event {
   description: string
   image: string
   link?: string
+  // ISO format strings for automatic time sorting
+  startTime: string
+  endTime: string
 }
 
-const liveEvent: Event = {
-  title: 'Flash Mob — Neon Dance',
-  date: 'Mar 9, 2026',
-  time: 'LIVE NOW',
-  venue: 'AB2 — Grand Stairs · Central Steps',
-  description: 'A surprise choreographed performance lighting up the iconic staircase with glow-in-the-dark costumes.',
-  image: '',
-  link: '#',
-}
-
-const upcomingEvents: Event[] = [
+// 1. One Master List of Events for AB2
+const allEvents: Event[] = [
   {
-    title: 'Fashion Walk — Retro Futurism',
+    title: 'Opening Ceremony',
+    date: 'Mar 13, 2026',
+    time: '11:30 AM - 12:30 PM',
+    venue: 'Smt. Vasanti Pai Auditorium',
+    description: 'Join us for the grand kickoff of our event series, featuring welcome addresses, special performances, and the official lighting of the lamp.',
+    image: '../../../public/majorEvents/opening.webp',
+    startTime: '2026-03-13T11:30:00',
+    endTime: '2026-03-13T12:30:00',
+  },
+  {
+    title: 'Destival Prelims',
+    date: 'Mar 13, 2026',
+    time: '2:00 PM - 3:30 PM',
+    venue: 'Smt. Vasanti Pai Auditorium', // Change this if it's happening somewhere else!
+    description: 'A high-energy dance event where crews and soloists battle it out in the preliminary rounds. Expect incredible moves and unmatched hype.',
+    image: '../../../public/majorEvents/dest1.webp',
+    startTime: '2026-03-13T14:00:00',
+    endTime: '2026-03-13T15:30:00',
+  },
+  {
+    title: 'Battle of Bands Prelims',
     date: 'Mar 14, 2026',
-    time: '7:00 PM',
-    venue: 'AB2 — Main Corridor',
-    description: 'Student designers take over the corridor with avant-garde looks fusing 80s retrofuturism and cyberpunk.',
-    image: '',
+    time: '10:00 AM - 2:00 PM',
+    venue: 'Smt. Vasanti Pai Auditorium', // Update if needed
+    description: 'Bands go head-to-head in the preliminary rounds to secure their spot in the finals. Get ready for some high-voltage performances.',
+    image: '../../../public/majorEvents/bands1.webp',
+    startTime: '2026-03-14T10:00:00',
+    endTime: '2026-03-14T14:00:00',
   },
   {
-    title: 'Acoustic Sunset Session',
-    date: 'Mar 16, 2026',
-    time: '5:30 PM',
-    venue: 'AB2 — Rooftop Terrace',
-    description: 'Indie acoustic sets as the sun dips below the skyline. Bring a blanket, leave with a memory.',
-    image: '',
-  },
-  {
-    title: 'Art Installation Unveiling',
-    date: 'Mar 19, 2026',
-    time: '11:00 AM',
-    venue: 'AB2 — Central Atrium',
-    description: 'A large-scale interactive light-and-mirror installation created by the fine arts collective.',
-    image: '',
+    title: 'Cosmos Prelims',
+    date: 'Mar 14, 2026',
+    time: '2:00 PM - 4:00 PM',
+    venue: 'Smt. Vasanti Pai Auditorium', // Update if needed
+    description: 'The fashion show preliminaries where style meets the runway. Witness the creativity, elegance, and flair of our participants.',
+    image: '../../../public/majorEvents/cosmos1.webp',
+    startTime: '2026-03-14T14:00:00',
+    endTime: '2026-03-14T16:00:00',
   },
 ]
 
-const pastEvents: Event[] = [
-  {
-    title: 'Spoken Word Evening',
-    date: 'Feb 22, 2026',
-    time: '6:00 PM',
-    venue: 'AB2 — Black Box Theatre',
-    description: 'Intimate and raw — poets and storytellers bared their souls on an open stage.',
-    image: '',
-  },
-  {
-    title: 'Street Photography Exhibition',
-    date: 'Feb 15, 2026',
-    time: '10:00 AM',
-    venue: 'AB2 — Gallery Walk',
-    description: 'A student-curated collection of street photography shot across campus and the city.',
-    image: '',
-  },
-  {
-    title: 'Zine Making Workshop',
-    date: 'Feb 8, 2026',
-    time: '3:00 PM',
-    venue: 'AB2 — Studio Room 4',
-    description: 'Cut, paste, and create. Participants made their own zines from scratch in this hands-on session.',
-    image: '',
-  },
-]
+// 2. Fallback for when there are no live events
+const noLiveEventFallback: Event = {
+  title: 'No Live Events Currently',
+  date: 'Check back later',
+  time: '—',
+  venue: 'AB2',
+  description: 'There are no events happening right now in AB2. Browse our upcoming tabs to see what to look forward to!',
+  image: '',
+  startTime: '',
+  endTime: '',
+}
 
 type Tab = 'past' | 'live' | 'upcoming'
 
@@ -140,7 +135,7 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
             borderTop: '1px solid rgba(255,255,255,0.06)',
             display: 'flex', gap: 12,
           }}>
-            <a href="#" style={{
+            <a href={event.link} style={{
               padding: '8px 22px', borderRadius: 8,
               background: 'rgba(160,80,255,0.15)', border: '1px solid rgba(160,80,255,0.4)',
               color: '#b060ff', fontSize: '0.72rem', fontWeight: 600,
@@ -206,6 +201,8 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
 function SideColumn({ title, events, color, onClickEvent }: {
   title: string; events: Event[]; color: string; onClickEvent?: (i: number) => void
 }) {
+  if (events.length === 0) return null; // Gracefully hide if no events in this column
+  
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 14,
@@ -252,26 +249,45 @@ const arrowBtnStyle: React.CSSProperties = {
 export default function AB2({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
+  
+  // State to track current time
+  const [now, setNow] = useState(new Date())
+
+  // Update current time every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date())
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Filter events based on time
+  const pastEvents = allEvents.filter(e => new Date(e.endTime) < now)
+  const upcomingEvents = allEvents.filter(e => new Date(e.startTime) > now)
+  const liveEvents = allEvents.filter(
+    e => new Date(e.startTime) <= now && new Date(e.endTime) >= now
+  )
+
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-  const centerEvent = tab === 'live'
-    ? liveEvent
-    : tab === 'upcoming'
-      ? upcomingEvents[selectedIdx] || upcomingEvents[0]
-      : pastEvents[selectedIdx] || pastEvents[0]
+  const centerEvent = 
+    tab === 'live' 
+      ? (liveEvents.length > 0 ? liveEvents[0] : noLiveEventFallback)
+      : tab === 'upcoming' 
+        ? (upcomingEvents[selectedIdx] || upcomingEvents[0])
+        : (pastEvents[selectedIdx] || pastEvents[0])
 
-  const centerBadge = tab === 'live'
-    ? '● LIVE'
-    : tab === 'upcoming'
-      ? 'UPCOMING'
-      : 'PAST'
+  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE' 
+                    : tab === 'live' ? 'OFFLINE' 
+                    : tab === 'upcoming' ? 'UPCOMING' 
+                    : 'PAST'
 
   const leftTitle = tab === 'past' ? 'Happening Now' : 'Past Events'
-  const leftEvents = tab === 'past' ? [liveEvent] : pastEvents
+  const leftEvents = tab === 'past' ? liveEvents : pastEvents
   const leftColor = tab === 'past' ? '#ff6b6b' : 'rgba(255,255,255,0.3)'
 
   const rightTitle = tab === 'upcoming' ? 'Happening Now' : 'Upcoming'
-  const rightEvents = tab === 'upcoming' ? [liveEvent] : upcomingEvents
+  const rightEvents = tab === 'upcoming' ? liveEvents : upcomingEvents
   const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#b060ff'
 
   return (
@@ -321,7 +337,8 @@ export default function AB2({ onClose }: { onClose: () => void }) {
           {/* Center — animated swap with arrows */}
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             <div style={{ flex: 1, position: 'relative' }}>
-              {tab !== 'live' && (
+              {/* Pagination Arrows - Only show if there's more than 1 item */}
+              {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
                 <>
                   <button
                     onClick={() => setSelectedIdx(i => Math.max(0, i - 1))}
@@ -348,19 +365,27 @@ export default function AB2({ onClose }: { onClose: () => void }) {
                   >›</button>
                 </>
               )}
-              <div
-                key={tab + selectedIdx}
-                style={{
-                  height: '100%',
-                  animation: 'ab2-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
-                }}
-              >
-                <FeaturedEventCard event={centerEvent} badge={centerBadge} />
-              </div>
+              
+              {/* Featured Event Render */}
+              {centerEvent ? (
+                <div
+                  key={tab + selectedIdx}
+                  style={{
+                    height: '100%',
+                    animation: 'ab2-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                  }}
+                >
+                  <FeaturedEventCard event={centerEvent} badge={centerBadge} />
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>
+                  No events found.
+                </div>
+              )}
             </div>
 
-            {/* Dot indicators */}
-            {tab !== 'live' && (
+            {/* Dot indicators - Only show if there's more than 1 item */}
+            {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
               <div style={{
                 display: 'flex', justifyContent: 'center', gap: 10,
                 marginTop: 16, flexShrink: 0,

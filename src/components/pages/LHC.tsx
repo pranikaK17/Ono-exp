@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import '../../App.css'
 
 interface Event {
@@ -9,71 +9,27 @@ interface Event {
   description: string
   image: string
   link?: string
+  // ISO format strings for automatic time sorting
+  startTime: string
+  endTime: string
 }
 
-const liveEvent: Event = {
-  title: 'TEDx Campus — Main Stage',
-  date: 'Mar 9, 2026',
-  time: 'LIVE NOW',
-  venue: 'LHC — Lecture Hall 1',
-  description: 'Eight speakers. Eight ideas worth spreading. From climate grief to generative music — live on the main stage.',
+// 1. Master List of Events (Currently Empty)
+const allEvents: Event[] = [
+  // Add your LHC events here!
+]
+
+// 2. Fallback for when there are no live events
+const noLiveEventFallback: Event = {
+  title: 'No Live Events Currently',
+  date: 'Check back later',
+  time: '—',
+  venue: 'LHC',
+  description: 'There are no events happening right now in the LHC. Browse our upcoming tabs to see what to look forward to!',
   image: '',
-  link: '#',
+  startTime: '',
+  endTime: '',
 }
-
-const upcomingEvents: Event[] = [
-  {
-    title: 'Mock UN — Opening Session',
-    date: 'Mar 15, 2026',
-    time: '9:00 AM',
-    venue: 'LHC — Lecture Hall 3',
-    description: 'Delegates from 24 countries. One resolution on the table. Diplomacy starts here.',
-    image: '',
-  },
-  {
-    title: 'Debate Finals — Impromptu',
-    date: 'Mar 18, 2026',
-    time: '4:00 PM',
-    venue: 'LHC — Seminar Room B',
-    description: 'The sharpest minds on campus go head-to-head with no prep and no mercy.',
-    image: '',
-  },
-  {
-    title: 'Science Conclave',
-    date: 'Mar 22, 2026',
-    time: '11:00 AM',
-    venue: 'LHC — Lecture Hall 2',
-    description: 'Student researchers present original work across physics, biology, and environmental science.',
-    image: '',
-  },
-]
-
-const pastEvents: Event[] = [
-  {
-    title: 'Philosophy Slam',
-    date: 'Feb 23, 2026',
-    time: '5:00 PM',
-    venue: 'LHC — Seminar Room A',
-    description: `Five-minute arguments on life's biggest questions. No jargon, no slides — just ideas.`,
-    image: '',
-  },
-  {
-    title: 'Guest Lecture — Dr. Rao',
-    date: 'Feb 16, 2026',
-    time: '3:00 PM',
-    venue: 'LHC — Lecture Hall 1',
-    description: 'A riveting talk on neuroethics and the future of human consciousness by Dr. Priya Rao.',
-    image: '',
-  },
-  {
-    title: 'Quiz Championship — Finals',
-    date: 'Feb 8, 2026',
-    time: '2:00 PM',
-    venue: 'LHC — Lecture Hall 4',
-    description: 'Twelve teams. Six rounds. One winner took home the trophy and bragging rights for a year.',
-    image: '',
-  },
-]
 
 type Tab = 'past' | 'live' | 'upcoming'
 
@@ -140,7 +96,7 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
             borderTop: '1px solid rgba(255,255,255,0.06)',
             display: 'flex', gap: 12,
           }}>
-            <a href="#" style={{
+            <a href={event.link} style={{
               padding: '8px 22px', borderRadius: 8,
               background: 'rgba(251,113,133,0.12)', border: '1px solid rgba(251,113,133,0.4)',
               color: '#fb7185', fontSize: '0.72rem', fontWeight: 600,
@@ -206,6 +162,8 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
 function SideColumn({ title, events, color, onClickEvent }: {
   title: string; events: Event[]; color: string; onClickEvent?: (i: number) => void
 }) {
+  if (events.length === 0) return null; // Gracefully hide if no events in this column
+  
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', gap: 14,
@@ -252,26 +210,45 @@ const arrowBtnStyle: React.CSSProperties = {
 export default function LHC({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
+  
+  // State to track current time
+  const [now, setNow] = useState(new Date())
+
+  // Update current time every 60 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNow(new Date())
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Filter events based on time
+  const pastEvents = allEvents.filter(e => new Date(e.endTime) < now)
+  const upcomingEvents = allEvents.filter(e => new Date(e.startTime) > now)
+  const liveEvents = allEvents.filter(
+    e => new Date(e.startTime) <= now && new Date(e.endTime) >= now
+  )
+
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-  const centerEvent = tab === 'live'
-    ? liveEvent
-    : tab === 'upcoming'
-      ? upcomingEvents[selectedIdx] || upcomingEvents[0]
-      : pastEvents[selectedIdx] || pastEvents[0]
+  const centerEvent = 
+    tab === 'live' 
+      ? (liveEvents.length > 0 ? liveEvents[0] : noLiveEventFallback)
+      : tab === 'upcoming' 
+        ? (upcomingEvents[selectedIdx] || upcomingEvents[0])
+        : (pastEvents[selectedIdx] || pastEvents[0])
 
-  const centerBadge = tab === 'live'
-    ? '● LIVE'
-    : tab === 'upcoming'
-      ? 'UPCOMING'
-      : 'PAST'
+  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE' 
+                    : tab === 'live' ? 'OFFLINE' 
+                    : tab === 'upcoming' ? 'UPCOMING' 
+                    : 'PAST'
 
   const leftTitle = tab === 'past' ? 'Happening Now' : 'Past Events'
-  const leftEvents = tab === 'past' ? [liveEvent] : pastEvents
+  const leftEvents = tab === 'past' ? liveEvents : pastEvents
   const leftColor = tab === 'past' ? '#ff6b6b' : 'rgba(255,255,255,0.3)'
 
   const rightTitle = tab === 'upcoming' ? 'Happening Now' : 'Upcoming'
-  const rightEvents = tab === 'upcoming' ? [liveEvent] : upcomingEvents
+  const rightEvents = tab === 'upcoming' ? liveEvents : upcomingEvents
   const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#fb7185'
 
   return (
@@ -318,10 +295,11 @@ export default function LHC({ onClose }: { onClose: () => void }) {
             color={leftColor}
           />
 
-          {/* Center */}
+          {/* Center — animated swap with arrows */}
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
             <div style={{ flex: 1, position: 'relative' }}>
-              {tab !== 'live' && (
+              {/* Pagination Arrows - Only show if there's more than 1 item */}
+              {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
                 <>
                   <button
                     onClick={() => setSelectedIdx(i => Math.max(0, i - 1))}
@@ -348,19 +326,27 @@ export default function LHC({ onClose }: { onClose: () => void }) {
                   >›</button>
                 </>
               )}
-              <div
-                key={tab + selectedIdx}
-                style={{
-                  height: '100%',
-                  animation: 'lhc-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
-                }}
-              >
-                <FeaturedEventCard event={centerEvent} badge={centerBadge} />
-              </div>
+              
+              {/* Featured Event Render */}
+              {centerEvent ? (
+                <div
+                  key={tab + selectedIdx}
+                  style={{
+                    height: '100%',
+                    animation: 'lhc-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                  }}
+                >
+                  <FeaturedEventCard event={centerEvent} badge={centerBadge} />
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>
+                  No events found.
+                </div>
+              )}
             </div>
 
-            {/* Dot indicators */}
-            {tab !== 'live' && (
+            {/* Dot indicators - Only show if there's more than 1 item */}
+            {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
               <div style={{
                 display: 'flex', justifyContent: 'center', gap: 10,
                 marginTop: 16, flexShrink: 0,

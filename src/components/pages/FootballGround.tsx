@@ -14,9 +14,103 @@ interface Event {
   endTime: string
 }
 
-// 1. Master List of Events (Currently Empty)
+// 1. Master List of Events
 const allEvents: Event[] = [
-  // Add your AB3 events here!
+  // ─── DAY 1 (March 13) ───
+  {
+    title: 'Cake Cutting',
+    date: 'Mar 13, 2026',
+    time: '5:00 PM - 5:30 PM',
+    venue: 'Main Stage — Football Ground',
+    description: 'Join us to kick off the Main Stage events with a celebratory cake cutting ceremony.',
+    image: '',
+    startTime: '2026-03-13T17:00:00',
+    endTime: '2026-03-13T17:30:00',
+  },
+  {
+    title: 'Destival Finals (Top 6)',
+    date: 'Mar 13, 2026',
+    time: '5:30 PM - 7:30 PM',
+    venue: 'Main Stage — Football Ground',
+    description: 'The top 6 dance crews take the stage for the ultimate showdown. Who will take the crown?',
+    image: '../../../public/majorEvents/dest2.webp',
+    startTime: '2026-03-13T17:30:00',
+    endTime: '2026-03-13T19:30:00',
+  },
+  {
+    title: 'Minor Artist Performance',
+    date: 'Mar 13, 2026',
+    time: '7:30 PM Onwards',
+    venue: 'Main Stage — Football Ground',
+    description: 'An unforgettable evening of live music as our featured minor artist takes over the stage.',
+    image: '',
+    startTime: '2026-03-13T19:30:00',
+    endTime: '2026-03-13T23:00:00', // Auto-ends at 11 PM
+  },
+
+  // ─── DAY 2 (March 14) ───
+  {
+    title: 'Sound Check',
+    date: 'Mar 14, 2026',
+    time: '2:00 PM - 4:00 PM',
+    venue: 'Main Stage — Football Ground',
+    description: 'Main stage audio prep and sound check before the evening battles begin.',
+    image: '',
+    startTime: '2026-03-14T14:00:00',
+    endTime: '2026-03-14T16:00:00',
+  },
+  {
+    title: 'Battle of Bands Finals (Top 4)',
+    date: 'Mar 14, 2026',
+    time: '4:00 PM - 6:00 PM',
+    venue: 'Main Stage — Football Ground',
+    description: 'The final 4 bands unleash their best sets. Pure energy, loud amps, and massive crowds.',
+    image: '../../../public/majorEvents/bands2.webp',
+    startTime: '2026-03-14T16:00:00',
+    endTime: '2026-03-14T18:00:00',
+  },
+  {
+    title: 'Cosmos Finals (Top 4)',
+    date: 'Mar 14, 2026',
+    time: '6:00 PM - 7:30 PM',
+    venue: 'Main Stage — Football Ground',
+    description: 'The top 4 finalists of our premier fashion show hit the main stage runway.',
+    image: '../../../public/majorEvents/cosmos2.webp',
+    startTime: '2026-03-14T18:00:00',
+    endTime: '2026-03-14T19:30:00',
+  },
+  {
+    title: 'DJ Night',
+    date: 'Mar 14, 2026',
+    time: '7:30 PM Onwards',
+    venue: 'Main Stage — Football Ground',
+    description: 'End the second day jumping to the beats as our DJ turns the ground into a massive open-air club.',
+    image: '',
+    startTime: '2026-03-14T19:30:00',
+    endTime: '2026-03-14T23:00:00', // Auto-ends at 11 PM
+  },
+
+  // ─── DAY 3 (March 15) ───
+  {
+    title: 'Sound Check',
+    date: 'Mar 15, 2026',
+    time: '5:00 PM - 7:00 PM',
+    venue: 'Main Stage — Football Ground',
+    description: 'Final audio preparations for the headlining act of the festival.',
+    image: '',
+    startTime: '2026-03-15T17:00:00',
+    endTime: '2026-03-15T19:00:00',
+  },
+  {
+    title: 'Major Artist Performance',
+    date: 'Mar 15, 2026',
+    time: '7:00 PM Onwards',
+    venue: 'Main Stage — Football Ground',
+    description: 'The grand finale. A spectacular live concert by our headline artist to close out the fest.',
+    image: '',
+    startTime: '2026-03-15T19:00:00',
+    endTime: '2026-03-15T23:00:00', // Auto-ends at 11 PM
+  },
 ]
 
 // 2. Fallback for when there are no live events
@@ -24,8 +118,8 @@ const noLiveEventFallback: Event = {
   title: 'No Live Events Currently',
   date: 'Check back later',
   time: '—',
-  venue: 'AB3',
-  description: 'There are no events happening right now in AB3. Browse our upcoming tabs to see what to look forward to!',
+  venue: 'Football Ground',
+  description: 'There are no events happening right now at the Football Ground. Browse our upcoming tabs to see what to look forward to!',
   image: '',
   startTime: '',
   endTime: '',
@@ -33,13 +127,13 @@ const noLiveEventFallback: Event = {
 
 type Tab = 'past' | 'live' | 'upcoming'
 
-/* ── Featured card ───────────────────────────────────────────────────────── */
+/* ── Featured card (shown in center) ─────────────────────────────────────── */
 function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
   return (
     <div style={{
       display: 'flex', flexDirection: 'column',
       background: 'rgba(255,255,255,0.03)',
-      border: '1px solid rgba(255,180,50,0.25)',
+      border: '1px solid rgba(160,80,255,0.25)',
       borderRadius: 16,
       overflow: 'hidden',
       height: '100%',
@@ -48,15 +142,15 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
         flex: 1, minHeight: 220,
         background: event.image
           ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(200,120,20,0.1), rgba(255,200,60,0.07))',
+          : 'linear-gradient(135deg, rgba(120,40,220,0.1), rgba(200,80,255,0.08))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
       }}>
-        {!event.image && <span style={{ fontSize: 72, color: 'rgba(255,255,255,0.06)' }}>⬡</span>}
+        {!event.image && <span style={{ fontSize: 72, color: 'rgba(255,255,255,0.06)' }}>✦</span>}
         {badge && (
           <div style={{
             position: 'absolute', top: 16, left: 16,
-            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(220,150,30,0.75)',
+            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(160,80,255,0.7)',
             color: '#fff', fontSize: '0.65rem', fontWeight: 700,
             fontFamily: "'Orbitron', sans-serif",
             padding: '4px 14px', borderRadius: 6,
@@ -67,20 +161,20 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
       </div>
       <div style={{
         padding: '24px 28px', background: 'rgba(0,0,0,0.3)',
-        borderTop: '1px solid rgba(255,180,50,0.1)',
+        borderTop: '1px solid rgba(160,80,255,0.12)',
       }}>
         <h2 style={{
           margin: 0, fontSize: '1.35rem', fontWeight: 700,
-          fontFamily: "'Orbitron', sans-serif", color: '#fff8e8',
+          fontFamily: "'Orbitron', sans-serif", color: '#f0e8ff',
         }}>{event.title}</h2>
         <div style={{
           display: 'flex', gap: 20, marginTop: 10,
           fontSize: '0.75rem', fontFamily: "'Exo 2', sans-serif",
           letterSpacing: '0.06em', textTransform: 'uppercase',
         }}>
-          <span style={{ color: 'rgba(255,180,50,0.9)' }}>{event.date}</span>
+          <span style={{ color: 'rgba(160,80,255,0.9)' }}>{event.date}</span>
           <span style={{ color: 'rgba(255,255,255,0.2)' }}>|</span>
-          <span style={{ color: event.time === 'LIVE NOW' ? '#ff6b6b' : '#ffb832', fontWeight: 600 }}>{event.time}</span>
+          <span style={{ color: event.time === 'LIVE NOW' ? '#ff6b6b' : '#b060ff', fontWeight: 600 }}>{event.time}</span>
         </div>
         <div style={{
           marginTop: 6, fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)',
@@ -98,8 +192,8 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
           }}>
             <a href={event.link} style={{
               padding: '8px 22px', borderRadius: 8,
-              background: 'rgba(255,180,50,0.12)', border: '1px solid rgba(255,180,50,0.4)',
-              color: '#ffb832', fontSize: '0.72rem', fontWeight: 600,
+              background: 'rgba(160,80,255,0.15)', border: '1px solid rgba(160,80,255,0.4)',
+              color: '#b060ff', fontSize: '0.72rem', fontWeight: 600,
               fontFamily: "'Orbitron', sans-serif", textDecoration: 'none',
               letterSpacing: '0.08em', textTransform: 'uppercase',
             }}>Details</a>
@@ -117,17 +211,17 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
       onClick={onClick}
       style={{
         background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,180,50,0.15)',
+        border: '1px solid rgba(160,80,255,0.15)',
         borderRadius: 10, overflow: 'hidden',
         transition: 'border-color 0.3s, transform 0.3s',
         cursor: 'pointer',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = 'rgba(255,180,50,0.45)'
+        e.currentTarget.style.borderColor = 'rgba(160,80,255,0.4)'
         e.currentTarget.style.transform = 'translateY(-2px)'
       }}
       onMouseLeave={e => {
-        e.currentTarget.style.borderColor = 'rgba(255,180,50,0.15)'
+        e.currentTarget.style.borderColor = 'rgba(160,80,255,0.15)'
         e.currentTarget.style.transform = 'translateY(0)'
       }}
     >
@@ -135,20 +229,20 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
         height: 80,
         background: event.image
           ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(200,120,20,0.1), rgba(255,200,60,0.07))',
+          : 'linear-gradient(135deg, rgba(120,40,220,0.1), rgba(200,80,255,0.08))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 24, color: 'rgba(255,255,255,0.12)',
       }}>
-        {!event.image && '⬡'}
+        {!event.image && '✦'}
       </div>
       <div style={{ padding: '10px 12px' }}>
         <h4 style={{
           margin: 0, fontSize: '0.78rem', fontWeight: 600,
-          fontFamily: "'Orbitron', sans-serif", color: '#fff0cc', lineHeight: 1.3,
+          fontFamily: "'Orbitron', sans-serif", color: '#e8d8ff', lineHeight: 1.3,
         }}>{event.title}</h4>
         <div style={{
           marginTop: 4, fontSize: '0.62rem',
-          color: 'rgba(255,180,50,0.75)', fontFamily: "'Exo 2', sans-serif",
+          color: 'rgba(160,80,255,0.75)', fontFamily: "'Exo 2', sans-serif",
           letterSpacing: '0.05em', textTransform: 'uppercase',
         }}>
           {event.date} · {event.time}
@@ -169,7 +263,7 @@ function SideColumn({ title, events, color, onClickEvent }: {
       display: 'flex', flexDirection: 'column', gap: 14,
       overflowY: 'auto', padding: '0 8px',
       scrollbarWidth: 'thin',
-      scrollbarColor: 'rgba(255,180,50,0.15) transparent',
+      scrollbarColor: 'rgba(160,80,255,0.15) transparent',
     }}>
       <h3 style={{
         margin: 0, fontSize: '0.7rem', fontWeight: 500,
@@ -187,9 +281,9 @@ function SideColumn({ title, events, color, onClickEvent }: {
 /* ── Tab button style ────────────────────────────────────────────────────── */
 const tabStyle = (active: boolean): React.CSSProperties => ({
   padding: '10px 24px', borderRadius: 8,
-  border: active ? '1px solid rgba(255,180,50,0.6)' : '1px solid rgba(255,255,255,0.1)',
-  background: active ? 'rgba(255,180,50,0.12)' : 'rgba(255,255,255,0.04)',
-  color: active ? '#ffb832' : 'rgba(255,255,255,0.45)',
+  border: active ? '1px solid rgba(160,80,255,0.6)' : '1px solid rgba(255,255,255,0.1)',
+  background: active ? 'rgba(160,80,255,0.15)' : 'rgba(255,255,255,0.04)',
+  color: active ? '#b060ff' : 'rgba(255,255,255,0.45)',
   fontFamily: "'Orbitron', sans-serif", fontSize: '0.72rem', fontWeight: 600,
   letterSpacing: '0.1em', textTransform: 'uppercase' as const,
   cursor: 'pointer', transition: 'all 0.25s', backdropFilter: 'blur(6px)',
@@ -199,15 +293,15 @@ const tabStyle = (active: boolean): React.CSSProperties => ({
 const arrowBtnStyle: React.CSSProperties = {
   position: 'absolute', top: '50%', transform: 'translateY(-50%)',
   zIndex: 10, width: 40, height: 40, borderRadius: '50%',
-  background: 'rgba(255,180,50,0.15)', border: '1px solid rgba(255,180,50,0.5)',
-  color: '#ffb832', fontSize: '1.4rem', fontWeight: 700,
+  background: 'rgba(160,80,255,0.2)', border: '1px solid rgba(160,80,255,0.5)',
+  color: '#b060ff', fontSize: '1.4rem', fontWeight: 700,
   display: 'flex', alignItems: 'center', justifyContent: 'center',
   backdropFilter: 'blur(8px)', transition: 'all 0.2s',
-  boxShadow: '0 0 14px rgba(255,180,50,0.2)',
+  boxShadow: '0 0 14px rgba(160,80,255,0.25)',
 }
 
 /* ── Main component ──────────────────────────────────────────────────────── */
-export default function AB3({ onClose }: { onClose: () => void }) {
+export default function FootballGround({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
   
@@ -249,7 +343,7 @@ export default function AB3({ onClose }: { onClose: () => void }) {
 
   const rightTitle = tab === 'upcoming' ? 'Happening Now' : 'Upcoming'
   const rightEvents = tab === 'upcoming' ? liveEvents : upcomingEvents
-  const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#ffb832'
+  const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#b060ff'
 
   return (
     <div
@@ -283,7 +377,7 @@ export default function AB3({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* ── Three-column layout ── */}
-        <div className="ab3-grid" style={{
+        <div className="fg-grid" style={{
           display: 'grid',
           gridTemplateColumns: '1fr 2fr 1fr',
           gap: 24, flex: 1, minHeight: 0,
@@ -333,7 +427,7 @@ export default function AB3({ onClose }: { onClose: () => void }) {
                   key={tab + selectedIdx}
                   style={{
                     height: '100%',
-                    animation: 'ab3-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
+                    animation: 'fg-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
                   }}
                 >
                   <FeaturedEventCard event={centerEvent} badge={centerBadge} />
@@ -357,7 +451,7 @@ export default function AB3({ onClose }: { onClose: () => void }) {
                     onClick={() => setSelectedIdx(i)}
                     style={{
                       width: 8, height: 8, borderRadius: '50%', border: 'none',
-                      background: i === selectedIdx ? '#ffb832' : 'rgba(255,255,255,0.15)',
+                      background: i === selectedIdx ? '#b060ff' : 'rgba(255,255,255,0.15)',
                       cursor: 'pointer', transition: 'background 0.2s, transform 0.2s',
                       transform: i === selectedIdx ? 'scale(1.4)' : 'scale(1)',
                     }}
@@ -382,21 +476,21 @@ export default function AB3({ onClose }: { onClose: () => void }) {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.6; }
         }
-        @keyframes ab3-center-in {
+        @keyframes fg-center-in {
           from { opacity: 0; transform: scale(0.94) translateY(12px); }
           to   { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         /* ── Mobile: stack columns top-to-bottom ── */
         @media (max-width: 768px) {
-          .ab3-grid {
+          .fg-grid {
             grid-template-columns: 1fr !important;
             overflow-y: auto;
             flex: unset !important;
             min-height: unset !important;
           }
 
-          .ab3-grid > div {
+          .fg-grid > div {
             min-height: unset !important;
           }
         }
