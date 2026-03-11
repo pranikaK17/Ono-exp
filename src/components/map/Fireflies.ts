@@ -1,10 +1,6 @@
-// src/components/map/Fireflies.ts
 import * as THREE from 'three'
 
-/**
- * Creates a system of colorful, floating neon fireflies throughout the map.
- * Uses THREE.Points for high performance (GPU instancing).
- */
+
 export function createFireflies(
   scene: THREE.Scene
 ): { update(t: number): void; dispose(): void } {
@@ -28,18 +24,15 @@ export function createFireflies(
   ]
 
   for (let i = 0; i < COUNT; i++) {
-    // Random position within bounds
     positions[i * 3] = (Math.random() - 0.5) * SPREAD * 1.5
     positions[i * 3 + 1] = HEIGHT_MIN + Math.random() * (HEIGHT_MAX - HEIGHT_MIN)
     positions[i * 3 + 2] = (Math.random() - 0.5) * SPREAD * 1.5
 
-    // Random neon color
     const color = NEON_PALETTE[Math.floor(Math.random() * NEON_PALETTE.length)]
     colors[i * 3] = color.r
     colors[i * 3 + 1] = color.g
     colors[i * 3 + 2] = color.b
 
-    // Animation properties
     phases[i] = Math.random() * Math.PI * 2
     speeds[i] = 0.5 + Math.random() * 1.0
   }
@@ -65,12 +58,10 @@ export function createFireflies(
         vColor = color;
         vec3 pos = position;
         
-        // Gentle floating motion
         pos.y += sin(time * speed * 0.7 + phase) * 2.0;
         pos.x += cos(time * speed * 0.4 + phase) * 1.5;
         pos.z += sin(time * speed * 0.3 + phase) * 1.5;
         
-        // Flickering opacity
         vOpacity = 0.4 + 0.6 * (0.5 + 0.5 * sin(time * speed * 2.5 + phase));
         
         vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);

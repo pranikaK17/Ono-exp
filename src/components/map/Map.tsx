@@ -1,4 +1,3 @@
-// src/components/map/Map.tsx
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
@@ -245,11 +244,9 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     const pinKeyHandler = (e: KeyboardEvent) => {
       if (e.code !== 'KeyE' && e.key !== 'e' && e.key !== 'E') return
       if (!onPinClick) return
-      // Only open overlay if not already open
       if (!activePageRef.current) {
         if (nearbyPin) { const page = PIN_TO_PAGE[nearbyPin]; if (page) onPinClick(page) }
       }
-      // Otherwise, do nothing (don't close immediately)
     }
     window.addEventListener('keydown', pinKeyHandler)
 
@@ -423,10 +420,10 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           setProg(95, 'Planting trees…')
           const forest = await createInstancedForest(scene, gltfLoader)
           forestDispose = forest.dispose
-          
+
           setProg(97, 'Drawing path…')
           navPath = await createNavigationPath(scene)
-          
+
           fireflies = createFireflies(scene)
 
           setProg(100, 'Ready!')
@@ -616,7 +613,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           <div id="instructions-card">
             <h2 style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 200, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px' }}>Controls</h2>
             <p style={{ color: '#4dd8e6', fontSize: '0.7rem', letterSpacing: '0.4em', textTransform: 'uppercase', opacity: 0.8 }}>navigate the "ono experience"</p>
-            
+
             <div id="instructions-grid" style={{ gridTemplateColumns: isTouch ? '1fr' : '1fr 1fr' }}>
               {!isTouch ? (
                 <>
@@ -663,11 +660,11 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
             </div>
 
             {isTouch && (
-              <p style={{ 
-                color: 'rgba(255, 255, 255, 0.4)', 
-                fontSize: '0.6rem', 
-                letterSpacing: '0.2em', 
-                textTransform: 'uppercase', 
+              <p style={{
+                color: 'rgba(255, 255, 255, 0.4)',
+                fontSize: '0.6rem',
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
                 marginTop: '15px',
                 marginBottom: '-5px',
                 fontStyle: 'italic'

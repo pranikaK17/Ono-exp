@@ -1,17 +1,16 @@
-// src/components/map/collision.ts
 import * as THREE from 'three'
 
 export class CollisionSystem {
-  collidables:       THREE.Mesh[] = []
+  collidables: THREE.Mesh[] = []
   cameraCollidables: THREE.Mesh[] = []
   rc = new THREE.Raycaster()
 
   private bMin = new THREE.Vector2(-9999, -9999)
-  private bMax = new THREE.Vector2( 9999,  9999)
+  private bMax = new THREE.Vector2(9999, 9999)
 
   constructor(
     root: THREE.Object3D,
-    meshFilter?:   (name: string) => boolean,
+    meshFilter?: (name: string) => boolean,
     cameraFilter?: (name: string) => boolean
   ) {
     root.traverse(c => {
@@ -40,10 +39,10 @@ export class CollisionSystem {
    */
   getGroundY(pos: THREE.Vector3, _charHeight: number): number {
     const STEP_UP = 0.35          // max automatic step-up (tiny kerbs only)
-    const origin  = new THREE.Vector3(pos.x, pos.y + 4, pos.z)  // cast from just above feet
+    const origin = new THREE.Vector3(pos.x, pos.y + 4, pos.z)  // cast from just above feet
     this.rc.set(origin, new THREE.Vector3(0, -1, 0))
     this.rc.near = 0
-    this.rc.far  = 4 + STEP_UP + 0.5   // only reach surfaces within step-up band below feet
+    this.rc.far = 4 + STEP_UP + 0.5   // only reach surfaces within step-up band below feet
     const hits = this.rc.intersectObjects(this.collidables, false)
       .filter(h => h.point.y >= -0.2)
     if (!hits.length) return 0
@@ -57,10 +56,10 @@ export class CollisionSystem {
    */
   private checkWall(
     pos: THREE.Vector3, dir: THREE.Vector3,
-    radius: number,     charHeight: number
+    radius: number, charHeight: number
   ): boolean {
     if (dir.lengthSq() < 1e-6) return false
-    const d     = dir.clone().normalize()
+    const d = dir.clone().normalize()
     const PROBE = radius + 0.18
     // 5 height slices from ankle to head — full body coverage
     const heights = [0.12, 0.30, 0.55, 0.75, 0.95]
@@ -74,9 +73,9 @@ export class CollisionSystem {
   }
 
   resolveXZ(
-    pos:       THREE.Vector3,
-    delta:     THREE.Vector3,
-    radius:    number,
+    pos: THREE.Vector3,
+    delta: THREE.Vector3,
+    radius: number,
     charHeight: number
   ): THREE.Vector3 {
     const out = pos.clone()

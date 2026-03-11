@@ -1,9 +1,6 @@
-// src/components/map/NavigationPath.ts
 import * as THREE from 'three'
 
-/**
- * Creates a thick white rounded-rectangle navigation path on the floor from path_coords.json.
- */
+
 export async function createNavigationPath(
   scene: THREE.Scene
 ): Promise<{ update(t: number): void; dispose(): void }> {
@@ -12,7 +9,7 @@ export async function createNavigationPath(
   const coords = await resp.json() as { x: number; y: number; z: number }[]
 
   if (!coords || coords.length < 2) {
-    return { update: () => {}, dispose: () => {} }
+    return { update: () => { }, dispose: () => { } }
   }
 
   // 2. Identify bounds
@@ -41,7 +38,7 @@ export async function createNavigationPath(
   // 3. Material & Geometry
   const thickness = 0.35 // Significantly wider lines
   const geometry = new THREE.TubeGeometry(curve, 256, thickness, 8, true)
-  
+
   const material = new THREE.MeshBasicMaterial({
     color: 0xffffff,
     transparent: true,
@@ -57,7 +54,6 @@ export async function createNavigationPath(
 
   return {
     update(t: number) {
-      // Slow brightness pulse
       const pulse = 0.5 + 0.5 * Math.sin(t * 1.0)
       material.opacity = 0.3 + pulse * 0.7
     },

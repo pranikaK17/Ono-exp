@@ -1,6 +1,3 @@
-// src/components/map/InstancedForest.ts
-// GPU-instanced tree rendering — 4 tree types, 36 coordinates, 4 draw calls total.
-
 import * as THREE from 'three'
 import type { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
@@ -13,10 +10,6 @@ interface TreeInstance {
   scale: number      // uniform scale
 }
 
-// Load trees.glb + tree_coords.json, create 4 InstancedMesh groups,
-// and add them to the scene.
-//
-// Returns a dispose() function for cleanup.
 
 export async function createInstancedForest(
   scene: THREE.Scene,
@@ -49,23 +42,17 @@ export async function createInstancedForest(
   }
 
   const numTypes = treeMeshes.length || 1
-
-  // Prepare instance data: assign each coordinate a type, random rotation, random scale
   const instances: TreeInstance[] = coordsResp.map((pos, i) => ({
     position: [pos.x, pos.y, pos.z] as [number, number, number],
     type: i % numTypes,
     rotation: pseudoRandom(i * 137) * Math.PI * 2,
     scale: 0.8 + pseudoRandom(i * 251) * 0.4,
   }))
-
-  // Group instances by tree type
   const groups: Map<number, TreeInstance[]> = new Map()
   for (const inst of instances) {
     if (!groups.has(inst.type)) groups.set(inst.type, [])
     groups.get(inst.type)!.push(inst)
   }
-
-  // Create an InstancedMesh for each tree type
   const instancedMeshes: THREE.InstancedMesh[] = []
   const dummy = new THREE.Object3D()
 
@@ -104,7 +91,6 @@ export async function createInstancedForest(
   }
 }
 
-// Simple deterministic pseudo-random using a seed (returns 0–1).
 function pseudoRandom(seed: number): number {
   let x = Math.sin(seed * 9301 + 49297) * 233280
   return x - Math.floor(x)
