@@ -9,6 +9,9 @@ import { CharacterController } from './CharacterController'
 import { MAP_CONFIG } from './Config'
 import { NightSky } from './NightSky'
 import { createNeonGridMaterial } from './Neon'
+import { createInstancedForest } from './InstancedForest'
+import { createNavigationPath } from './NavigationPath'
+import { createFireflies } from './Fireflies'
 
 const PIN_NAMES = ['Pin008', 'Pin007', 'Pin004', 'Pin002', 'Pin005', 'Pin006', 'Pin01', 'Pin003']
 
@@ -157,10 +160,10 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
   const activePageRef = useRef(activePage)
   activePageRef.current = activePage
 
+  const isTouch = window.matchMedia('(pointer: coarse)').matches
+
   useEffect(() => {
     const mount = mountRef.current; if (!mount) return
-
-    const isTouch = window.matchMedia('(pointer: coarse)').matches
 
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' })
     renderer.setPixelRatio(isTouch ? 1 : Math.min(devicePixelRatio, 2))
@@ -215,6 +218,9 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     let inputCtrl: InputController | null = null
     let charCtrl: CharacterController | null = null
     let joystick: MobileJoystick | null = null
+    let forestDispose: (() => void) | null = null
+    let navPath: { update(t: number): void; dispose(): void } | null = null
+    let fireflies: { update(t: number): void; dispose(): void } | null = null
     const clock = new THREE.Clock(), nightSky = new NightSky(scene)
     type Sparkle = ReturnType<typeof createPinSparkles>
     type PinEntry = { obj: THREE.Object3D; baseY: number; phase: number; name: string }
@@ -255,7 +261,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
     const onPointerUp = (e: PointerEvent) => {
       const dist = Math.hypot(e.clientX - pointerDownPos.x, e.clientY - pointerDownPos.y)
       if (dist > 10) return // Was likely a drag, not a tap
-      if ((e.target as HTMLElement).closest?.('#joy-zone, #speed-indicator, #pin-prompt, #map-loading')) return
+      if ((e.target as HTMLElement).closest?.('#joy-zone, #pin-prompt, #map-loading')) return
 
       mouse.x = (e.clientX / innerWidth) * 2 - 1
       mouse.y = -(e.clientY / innerHeight) * 2 + 1
@@ -294,6 +300,8 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
       for (const p of pins) { p.obj.rotateOnWorldAxis(WORLD_Y, dt * .28); p.obj.position.y = p.baseY + Math.sin(t * 1.1 + p.phase) * .09 }
       for (const sp of sparkles) sp.update(t)
       bokeh.update(t)
+      navPath?.update(t)
+      fireflies?.update(t)
       if (charCtrl && inputCtrl && joystick)
         charCtrl.update(dt, inputCtrl, joystick.getInput())
       if (charCtrl) {
@@ -409,11 +417,18 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
             camera, collision, mapBounds: mapBox, spawnPos, charHeight,
             isMobile: isTouch,
           })
+          setProg(95, 'Planting trees…')
+          const forest = await createInstancedForest(scene, gltfLoader)
+          forestDispose = forest.dispose
+          
+          setProg(97, 'Drawing path…')
+          navPath = await createNavigationPath(scene)
+          
+          fireflies = createFireflies(scene)
+
           setProg(100, 'Ready!')
           const loadEl = document.getElementById('map-loading')
           if (loadEl) setTimeout(() => { loadEl.style.opacity = '0'; setTimeout(() => loadEl.remove(), 700) }, 300)
-          const hint = document.getElementById('map-hint')
-          setTimeout(() => { if (hint) hint.style.opacity = '0' }, 6000)
           tick()
         } catch (err) {
           console.error('[Map] load error:', err)
@@ -438,6 +453,9 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
       pinRings.forEach(d => d())
       bokeh.dispose()
       trail.dispose()
+      forestDispose?.()
+      navPath?.dispose()
+      fireflies?.dispose()
       outlines.forEach(d => d())
       renderer.dispose()
       if (mount.contains(renderer.domElement)) mount.removeChild(renderer.domElement)
@@ -466,11 +484,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         #map-bar-wrap{width:220px;height:1px;background:rgba(255,255,255,0.06);position:relative;overflow:hidden;}
         #map-bar{height:100%;width:0%;background:linear-gradient(90deg,#4dd8e6,#ff00ff);box-shadow:0 0 12px rgba(77,216,230,0.35);transition:width 0.5s cubic-bezier(0.1,0.8,0.2,1);}
         #map-text{margin-top:1.4rem;color:rgba(255,255,255,0.22);font-size:0.58rem;letter-spacing:0.3em;text-transform:uppercase;font-weight:300;}
-        #map-hint{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.10);border-radius:8px;padding:8px 22px;color:rgba(255,255,255,.72);font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;font-family:system-ui,sans-serif;pointer-events:none;transition:opacity 1.2s ease;z-index:100;white-space:nowrap;}
-        #speed-indicator{position:fixed;top:20px;right:20px;background:rgba(0,0,0,.55);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.10);border-radius:8px;padding:8px 14px;color:rgba(255,255,255,.6);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-family:system-ui,sans-serif;pointer-events:none;display:flex;align-items:center;gap:8px;opacity:0;transition:opacity .3s,color .3s,border-color .3s;z-index:100;}
-        #speed-indicator.sprinting{opacity:1;color:#ff6b35;border-color:rgba(255,107,53,.35)}
-        .spd-dot{width:6px;height:6px;border-radius:50%;background:currentColor;animation:sdp .6s ease-in-out infinite alternate}
-        @keyframes sdp{from{transform:scale(1);opacity:1}to{transform:scale(1.6);opacity:.4}}
+
 
         /* Mobile joystick — orange, no run button */
         #joy-zone { display: none }
@@ -531,7 +545,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         }
 
         @media (pointer: coarse) {
-          #map-hint, #speed-indicator { display: none !important; }
+
           #exit-btn { 
             left: 50%; transform: translateX(-50%); 
             top: 40px; width: fit-content; white-space: nowrap;
@@ -594,47 +608,76 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
             <div id="map-text">Awakening Nebula...</div>
           </div>
         </div>
-        <div id="map-hint">WASD · Space jump · Shift sprint · Drag to orbit</div>
-        <div id="speed-indicator"><span className="spd-dot" />Sprinting</div>
+
         <div id="instructions-overlay">
           <div id="instructions-card">
             <h2 style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 200, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px' }}>Controls</h2>
-            <p style={{ color: '#4dd8e6', fontSize: '0.7rem', letterSpacing: '0.4em', textTransform: 'uppercase', opacity: 0.8 }}>How to navigate the nebula</p>
+            <p style={{ color: '#4dd8e6', fontSize: '0.7rem', letterSpacing: '0.4em', textTransform: 'uppercase', opacity: 0.8 }}>navigate the "ono experience"</p>
             
-            <div id="instructions-grid">
-              <div className="inst-item">
-                <div className="inst-icon">
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
-                    <div /> <div className="key-sq">W</div> <div />
-                    <div className="key-sq">A</div> <div className="key-sq">S</div> <div className="key-sq">D</div>
+            <div id="instructions-grid" style={{ gridTemplateColumns: isTouch ? '1fr' : '1fr 1fr' }}>
+              {!isTouch ? (
+                <>
+                  <div className="inst-item">
+                    <div className="inst-icon">
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+                        <div /> <div className="key-sq">▲</div> <div />
+                        <div className="key-sq">◀</div> <div className="key-sq">▼</div> <div className="key-sq">▶</div>
+                      </div>
+                    </div>
+                    <div className="inst-label">Arrow keys to navigate</div>
                   </div>
-                </div>
-                <div className="inst-label">Move</div>
-              </div>
-              <div className="inst-item">
-                <div className="inst-icon">
-                  <div className="mouse-icon" />
-                </div>
-                <div className="inst-label">Look Orbit</div>
-              </div>
-              <div className="inst-item">
-                <div className="inst-icon">
-                  <div className="key-sq" style={{ width: '80px' }}>SPACE</div>
-                </div>
-                <div className="inst-label">Jump</div>
-              </div>
-              <div className="inst-item">
-                <div className="inst-icon">
-                  <div className="key-sq" style={{ width: '80px' }}>SHIFT</div>
-                </div>
-                <div className="inst-label">Sprint</div>
-              </div>
+                  <div className="inst-item">
+                    <div className="inst-icon">
+                      <div className="mouse-icon" />
+                    </div>
+                    <div className="inst-label">view orbit with mouse or trackpad</div>
+                  </div>
+                  <div className="inst-item" style={{ gridColumn: 'span 2' }}>
+                    <div className="inst-icon">
+                      <span style={{ fontSize: '1.2rem', color: '#4dd8e6', border: '1px solid currentColor', padding: '4px 12px', borderRadius: '4px' }}>LOCATION PINS</span>
+                    </div>
+                    <div className="inst-label">interact with location pins to view events</div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="inst-item">
+                    <div className="inst-icon">
+                      <div style={{ width: '60px', height: '60px', border: '2px dashed rgba(77,216,230,0.5)', borderRadius: '50%', position: 'relative' }}>
+                        <div style={{ position: 'absolute', inset: '15px', background: '#4dd8e6', borderRadius: '50%', boxShadow: '0 0 15px #4dd8e6' }} />
+                      </div>
+                    </div>
+                    <div className="inst-label">use joystick to move</div>
+                  </div>
+                  <div className="inst-item">
+                    <div className="inst-icon">
+                      <span style={{ fontSize: '1.2rem', color: '#4dd8e6', border: '1px solid currentColor', padding: '4px 12px', borderRadius: '4px' }}>LOCATION PINS</span>
+                    </div>
+                    <div className="inst-label">interact with location pins to view events</div>
+                  </div>
+                </>
+              )}
             </div>
+
+            {isTouch && (
+              <p style={{ 
+                color: 'rgba(255, 255, 255, 0.4)', 
+                fontSize: '0.6rem', 
+                letterSpacing: '0.2em', 
+                textTransform: 'uppercase', 
+                marginTop: '15px',
+                marginBottom: '-5px',
+                fontStyle: 'italic'
+              }}>
+                ✦ switch to landscape for a better experience ✦
+              </p>
+            )}
 
             <button id="lets-go-btn">Let's Go</button>
           </div>
         </div>
 
+        <div id="pin-prompt">Press <kbd>E</kbd> to interact</div>
         <div id="joy-zone"><div id="joy-base"><div id="joy-knob" /></div></div>
       </div>
     </>

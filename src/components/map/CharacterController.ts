@@ -22,7 +22,6 @@ export class CharacterController {
   private charHeight: number
   private verticalVel = 0
   private isGrounded = true
-  private jumpBuffer = false
   private isMobile = false
 
   private yaw: number
@@ -51,8 +50,6 @@ export class CharacterController {
   private readonly FOLLOW_SPEED = 4.5
   private lastMoveYaw: number | null = null
 
-  private speedEl: HTMLElement | null = null
-
   constructor(opts: {
     model: THREE.Object3D; mixer: THREE.AnimationMixer | null
     animations: THREE.AnimationClip[]; camera: THREE.PerspectiveCamera
@@ -75,15 +72,10 @@ export class CharacterController {
     this._smoothSafeDist = this.distance
     this._pinchTargetDist = this.distance
 
-    this.speedEl = document.getElementById('speed-indicator')
     this._setupAnimations(opts.animations)
     this.model.position.copy(this.position)
     this.model.rotation.y = 0
     this._bindControls()
-
-    window.addEventListener('keydown', e => {
-      if (e.code === 'Space') { e.preventDefault(); this.jumpBuffer = true }
-    })
   }
 
   private _setupAnimations(clips: THREE.AnimationClip[]) {
@@ -298,12 +290,6 @@ export class CharacterController {
       this.position, moveDelta, MAP_CONFIG.characterRadius, this.charHeight
     )
 
-    if (this.jumpBuffer && this.isGrounded) {
-      this.verticalVel = MAP_CONFIG.jumpSpeed ?? 14
-      this.isGrounded = false
-    }
-    this.jumpBuffer = false
-
     this.verticalVel += MAP_CONFIG.gravity * delta
     resolved.y = this.position.y + this.verticalVel * delta
 
@@ -372,7 +358,6 @@ export class CharacterController {
       this.camera.updateProjectionMatrix()
     }
 
-    this.speedEl?.classList.toggle('sprinting', isMoving && isSprinting)
   }
 
   private _updateCamera(delta: number) {
