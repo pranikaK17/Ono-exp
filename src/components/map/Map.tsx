@@ -581,9 +581,17 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           text-align: center; box-shadow: 0 0 50px rgba(255, 0, 255, 0.15);
         }
         #instructions-grid {
-          display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+          display: grid; grid-template-columns: 1fr; gap: 24px;
           margin: 32px 0;
         }
+        @media (min-width: 769px) {
+          #instructions-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (orientation: landscape) and (max-height: 500px) {
+          #instructions-grid { grid-template-columns: 1fr 1fr; }
+          #instructions-card { max-width: 700px; padding: 24px; }
+        }
+
         .inst-item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .inst-icon { 
           font-size: 1.8rem; color: #fff; 
@@ -626,12 +634,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
             <h2 style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 200, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px' }}>Controls</h2>
             <p style={{ color: '#4dd8e6', fontSize: '0.7rem', letterSpacing: '0.4em', textTransform: 'uppercase', opacity: 0.8 }}>navigate the "ono experience"</p>
 
-            <div id="instructions-grid" style={{ 
-              display: 'grid',
-              gap: '24px',
-              margin: '32px 0',
-              gridTemplateColumns: (!isTouch || (innerWidth > innerHeight)) ? '1fr 1fr' : '1fr' 
-            }}>
+            <div id="instructions-grid">
               {!isTouch ? (
                 <>
                   <div className="inst-item">
