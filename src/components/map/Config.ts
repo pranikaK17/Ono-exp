@@ -10,7 +10,7 @@ export const MAP_CONFIG = {
   cameraDistance: 18,
   cameraMinDistance: 3,
   cameraMaxDistance: 55,
-  cameraPitchDefault: 0.28,
+  cameraPitchDefault: 0,
   minPitch: -0.05,
   maxPitch: 1.15,
   mouseSensitivity: 0.003,

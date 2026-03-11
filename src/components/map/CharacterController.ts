@@ -46,7 +46,7 @@ export class CharacterController {
   private isManualOrbit = false
   private orbitTimer = 0
   private readonly ORBIT_RESUME_DELAY = 1.0
-  private readonly FOLLOW_SPEED = 4.5
+  private readonly FOLLOW_SPEED = 2.5
   private lastMoveYaw: number | null = null
 
   constructor(opts: {
