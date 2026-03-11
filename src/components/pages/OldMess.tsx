@@ -328,7 +328,7 @@ export default function OldMess({ onClose }: { onClose: () => void }) {
                     disabled={selectedIdx === 0}
                     style={{
                       ...arrowBtnStyle,
-                      left: -18,
+                      left: 8,
                       opacity: selectedIdx === 0 ? 0.25 : 1,
                       cursor: selectedIdx === 0 ? 'default' : 'pointer',
                     }}
@@ -341,7 +341,7 @@ export default function OldMess({ onClose }: { onClose: () => void }) {
                     disabled={selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1}
                     style={{
                       ...arrowBtnStyle,
-                      right: -18,
+                      right: 8,
                       opacity: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 0.25 : 1,
                       cursor: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 'default' : 'pointer',
                     }}
