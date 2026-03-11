@@ -2,8 +2,8 @@ export const MAP_CONFIG = {
   mapModelPath: '/map.glb',
   characterModelPath: '/character.glb',
 
-  walkSpeed: 22,
-  sprintSpeed: 40,
+  walkSpeed: 26,
+  sprintSpeed: 46,
   jumpSpeed: 14,
   gravity: -30,
 

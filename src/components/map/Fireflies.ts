@@ -65,7 +65,7 @@ export function createFireflies(
         vOpacity = 0.4 + 0.6 * (0.5 + 0.5 * sin(time * speed * 2.5 + phase));
         
         vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-        gl_PointSize = (6.0 + 5.0 * vOpacity) * (300.0 / -mvPosition.z);
+        gl_PointSize = (2.0 + 1.5 * vOpacity) * (300.0 / -mvPosition.z);
         gl_Position = projectionMatrix * mvPosition;
       }
     `,

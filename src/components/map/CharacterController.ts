@@ -22,7 +22,6 @@ export class CharacterController {
   private charHeight: number
   private verticalVel = 0
   private isGrounded = true
-  private isMobile = false
 
   private yaw: number
   private pitch: number
@@ -63,7 +62,7 @@ export class CharacterController {
     this.collision = opts.collision
     this.position = opts.spawnPos.clone()
     this.charHeight = opts.charHeight
-    this.isMobile = !!opts.isMobile
+    void opts.isMobile
     void opts.mapBounds
 
     this.yaw = Math.PI
@@ -263,7 +262,6 @@ export class CharacterController {
     const moving = len > 0.05
     const isSprinting = (input.isSprinting() || joystick.sprint) && moving
     let speed = isSprinting ? MAP_CONFIG.sprintSpeed : MAP_CONFIG.walkSpeed
-    if (isSprinting && this.isMobile) speed *= 0.8 // Reduce sprint speed on mobile
 
     const sinY = Math.sin(this.yaw)
     const cosY = Math.cos(this.yaw)

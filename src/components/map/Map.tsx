@@ -428,7 +428,18 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
 
           setProg(100, 'Ready!')
           const loadEl = document.getElementById('map-loading')
-          if (loadEl) setTimeout(() => { loadEl.style.opacity = '0'; setTimeout(() => loadEl.remove(), 700) }, 300)
+          if (loadEl) {
+            setTimeout(() => {
+              loadEl.style.opacity = '0'
+              setTimeout(() => {
+                loadEl.remove()
+                if (instructionsEl) {
+                  instructionsEl.style.display = 'flex'
+                  setTimeout(() => { instructionsEl.style.opacity = '1' }, 50)
+                }
+              }, 700)
+            }, 300)
+          }
           tick()
         } catch (err) {
           console.error('[Map] load error:', err)
@@ -558,14 +569,15 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
         #instructions-overlay {
           position: fixed; inset: 0; background: rgba(2, 2, 8, 0.85);
           backdrop-filter: blur(12px); z-index: 10000;
-          display: flex; align-items: center; justify-content: center;
-          transition: opacity 0.5s ease;
+          display: none; align-items: center; justify-content: center;
+          transition: opacity 0.5s ease; opacity: 0;
         }
         #instructions-card {
           background: rgba(20, 20, 35, 0.6);
           border: 1px solid rgba(255, 0, 255, 0.3);
           border-radius: 24px; padding: 40px;
           max-width: 500px; width: 90%;
+          max-height: 90vh; overflow-y: auto;
           text-align: center; box-shadow: 0 0 50px rgba(255, 0, 255, 0.15);
         }
         #instructions-grid {
@@ -614,7 +626,12 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
             <h2 style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 200, letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '10px' }}>Controls</h2>
             <p style={{ color: '#4dd8e6', fontSize: '0.7rem', letterSpacing: '0.4em', textTransform: 'uppercase', opacity: 0.8 }}>navigate the "ono experience"</p>
 
-            <div id="instructions-grid" style={{ gridTemplateColumns: isTouch ? '1fr' : '1fr 1fr' }}>
+            <div id="instructions-grid" style={{ 
+              display: 'grid',
+              gap: '24px',
+              margin: '32px 0',
+              gridTemplateColumns: (!isTouch || (innerWidth > innerHeight)) ? '1fr 1fr' : '1fr' 
+            }}>
               {!isTouch ? (
                 <>
                   <div className="inst-item">
@@ -654,6 +671,12 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
                       <span style={{ fontSize: '1.2rem', color: '#4dd8e6', border: '1px solid currentColor', padding: '4px 12px', borderRadius: '4px' }}>LOCATION PINS</span>
                     </div>
                     <div className="inst-label">interact with location pins to view events</div>
+                  </div>
+                  <div className="inst-item" style={{ gridColumn: 'span 2' }}>
+                    <div className="inst-icon">
+                      <span style={{ fontSize: '1.2rem', color: '#4dd8e6', border: '1px solid currentColor', padding: '4px 12px', borderRadius: '4px' }}>PINCH TO ZOOM</span>
+                    </div>
+                    <div className="inst-label">pinch with two fingers to zoom in / out</div>
                   </div>
                 </>
               )}
