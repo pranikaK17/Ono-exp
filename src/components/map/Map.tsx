@@ -357,6 +357,22 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
             }
             if (obj.isMesh) {
               obj.castShadow = obj.receiveShadow = true
+              if (obj.material) {
+                if (Array.isArray(obj.material)) {
+                  obj.material.forEach(m => m.side = THREE.DoubleSide)
+                } else {
+                  obj.material.side = THREE.DoubleSide
+                }
+              }
+              if (name.includes('FB')) {
+                const mat = obj.material as THREE.MeshStandardMaterial
+                if (mat) {
+                  mat.polygonOffset = true
+                  mat.polygonOffsetFactor = -5
+                  mat.polygonOffsetUnits = -5
+                  mat.needsUpdate = true
+                }
+              }
               for (const bn of OUTLINE_TARGETS) {
                 if (name === bn || nl === bn.toLowerCase()) {
                   obj.updateWorldMatrix(true, false)

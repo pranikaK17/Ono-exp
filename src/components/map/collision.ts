@@ -50,23 +50,36 @@ export class CollisionSystem {
   }
 
   /**
-   * Wall check — probes FULL character height (not just half) in 5 slices.
-   * This ensures buildings are blocked horizontally before the character's
-   * feet ever reach the building footprint.
+   * Wall check — probes FULL character height (not just half) in multiple slices.
+   * Dynamic PROBE distance ensures we don't tunnel through walls at high speeds.
    */
   private checkWall(
     pos: THREE.Vector3, dir: THREE.Vector3,
-    radius: number, charHeight: number
+    radius: number, charHeight: number,
+    moveDist: number
   ): boolean {
     if (dir.lengthSq() < 1e-6) return false
     const d = dir.clone().normalize()
-    const PROBE = radius + 0.18
-    // 5 height slices from ankle to head — full body coverage
-    const heights = [0.12, 0.30, 0.55, 0.75, 0.95]
-    for (const frac of heights) {
-      const h = frac * charHeight
-      this.rc.set(new THREE.Vector3(pos.x, pos.y + h, pos.z), d)
+    // Dynamic probe: radius + how far we move this frame + safety margin
+    const PROBE = radius + moveDist + 0.12
+    
+    // Side offset for "boxier" collision coverage
+    const side = new THREE.Vector3(-d.z, 0, d.x).multiplyScalar(radius * 0.7)
+    
+    const heights = [0.12, 0.35, 0.60, 0.85] // 4 slices is enough for full body
+    for (const hFrac of heights) {
+      const h = hFrac * charHeight
+      const pCenter = new THREE.Vector3(pos.x, pos.y + h, pos.z)
+      
+      // Test center ray
+      this.rc.set(pCenter, d)
       this.rc.near = 0; this.rc.far = PROBE
+      if (this.rc.intersectObjects(this.collidables, false).length > 0) return true
+      
+      // Test side rays for better coverage at angles
+      this.rc.set(pCenter.clone().add(side), d)
+      if (this.rc.intersectObjects(this.collidables, false).length > 0) return true
+      this.rc.set(pCenter.clone().sub(side), d)
       if (this.rc.intersectObjects(this.collidables, false).length > 0) return true
     }
     return false
@@ -79,7 +92,8 @@ export class CollisionSystem {
     charHeight: number
   ): THREE.Vector3 {
     const out = pos.clone()
-    if (delta.lengthSq() < 1e-8) return out
+    const dLen = delta.length()
+    if (dLen < 1e-8) return out
 
     // Hard boundary clamp first
     const nx = pos.x + delta.x
@@ -90,20 +104,21 @@ export class CollisionSystem {
     const cdz = cz - pos.z
 
     const move = new THREE.Vector3(cdx, 0, cdz)
-    if (move.lengthSq() < 1e-8) return out
+    const mLen = move.length()
+    if (mLen < 1e-8) return out
 
     // Try full diagonal
-    if (!this.checkWall(pos, move, radius, charHeight)) {
+    if (!this.checkWall(pos, move, radius, charHeight, mLen)) {
       out.x += move.x; out.z += move.z; return out
     }
     // Try X only
     const mx = new THREE.Vector3(move.x, 0, 0)
-    if (Math.abs(move.x) > 1e-4 && !this.checkWall(pos, mx, radius, charHeight)) {
+    if (Math.abs(move.x) > 1e-4 && !this.checkWall(pos, mx, radius, charHeight, Math.abs(move.x))) {
       out.x += move.x; return out
     }
     // Try Z only
     const mz = new THREE.Vector3(0, 0, move.z)
-    if (Math.abs(move.z) > 1e-4 && !this.checkWall(pos, mz, radius, charHeight)) {
+    if (Math.abs(move.z) > 1e-4 && !this.checkWall(pos, mz, radius, charHeight, Math.abs(move.z))) {
       out.z += move.z; return out
     }
     return out  // fully blocked

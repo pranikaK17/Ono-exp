@@ -8,6 +8,7 @@ const AB2 = lazy(() => import('./components/pages/AB2'))
 const AB3 = lazy(() => import('./components/pages/AB3'))
 const LHC = lazy(() => import('./components/pages/LHC'))
 const OldMess = lazy(() => import('./components/pages/OldMess'))
+const FootballGround = lazy(() => import('./components/pages/FootballGround'))
 
 export default function App() {
   const [page, setPage] = useState<string | null>(null)
@@ -26,6 +27,7 @@ export default function App() {
         {page === 'AB3' && <AB3 onClose={() => setPage(null)} />}
         {page === 'OldMess' && <OldMess onClose={() => setPage(null)} />}
         {page === 'LHC' && <LHC onClose={() => setPage(null)} />}
+        {page === 'FootballGround' && <FootballGround onClose={() => setPage(null)} />}
       </Suspense>
     </>
   )
