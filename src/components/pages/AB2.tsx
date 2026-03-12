@@ -18,43 +18,63 @@ interface Event {
 const allEvents: Event[] = [
   /* ── 13 MARCH EVENTS ── */
   {
-    title: 'Green Rooms – Nukkad Natak',
-    date: '13 March, 2026',
-    time: '9 am - 5 pm',
-    venue: 'AB2 028, 029, 030',
-    description: 'The backstage heart of Nukkad Natak. Performers gather, rehearse final lines, and psych up in three dedicated green rooms before hitting the streets.',
+    title: 'GOONJ (Kaun Banega Filmy Genius)',
+    date: 'Mar 13, 2026',
+    time: '12:30 PM – 5:00 PM',
+    venue: 'AB2 019, 020, 021',
+    description: 'Test your Bollywood knowledge in this fun and fast-paced film trivia competition. Who will be crowned the Filmy Genius?',
     image: '',
-    startTime: '2026-03-13T09:00:00',
+    startTime: '2026-03-13T12:30:00',
     endTime: '2026-03-13T17:00:00',
   },
   {
-    title: 'SHABD – Between the Lines (Lab)',
-    date: '13 March, 2026',
-    time: '9 am - 5 pm',
-    venue: 'AB2 213 (Lab)',
-    description: "SHABD's immersive literary lab — a space for experimental writing, spoken word sessions, and intimate storytelling in the quiet of the AB2 computer lab.",
+    title: 'De Artistry Club – Your Dreamscape & The 2:17 AM Incident',
+    date: 'Mar 13, 2026',
+    time: '12:30 PM – 4:00 PM',
+    venue: 'AB2 201, 202, 203, 204, 205',
+    description: 'An immersive art showcase where imagination runs wild. Includes "Your Dreamscape" and "The 2:17 AM Incident," exploring surreal works and the uncanny.',
     image: '',
-    startTime: '2026-03-13T09:00:00',
+    startTime: '2026-03-13T12:30:00',
+    endTime: '2026-03-13T16:00:00',
+  },
+  {
+    title: "Pitcher's Craft (Project Blackout)",
+    date: 'Mar 13, 2026',
+    time: '12:30 PM – 1:30 PM',
+    venue: 'AB2 213 (LAB)',
+    description: 'A business pitching competition where participants present their boldest ideas under the theme of Project Blackout. Pitch smart, pitch bold.',
+    image: '',
+    startTime: '2026-03-13T12:30:00',
+    endTime: '2026-03-13T13:30:00',
+  },
+  {
+    title: 'MARKSOC (Scavenger Hunt 4.0)',
+    date: 'Mar 13, 2026',
+    time: '12:30 PM – 5:00 PM',
+    venue: 'AB2 101, 102, 104, 108, 116–122',
+    description: 'The fourth edition of MARKSOC\'s legendary scavenger hunt. Race against the clock, solve clues, and outsmart the competition across the building.',
+    image: '',
+    startTime: '2026-03-13T12:30:00',
     endTime: '2026-03-13T17:00:00',
   },
   {
-    title: 'SHABD – Between the Lines',
-    date: '13 March, 2026',
-    time: '9 am - 5 pm',
-    venue: 'AB2 201, 242',
-    description: "SHABD's main event space celebrates the written and spoken word. Poetry slams, prose readings, and literary games across two rooms on AB2's second floor.",
+    title: 'Apex (Apex Metaverse)',
+    date: 'Mar 13, 2026',
+    time: '12:30 PM – 5:00 PM',
+    venue: 'AB2 Gallery',
+    description: '',
     image: '',
-    startTime: '2026-03-13T09:00:00',
+    startTime: '2026-03-13T12:30:00',
     endTime: '2026-03-13T17:00:00',
   },
   {
-    title: 'SHABD – Event Space',
+    title: 'SHABD – Main Event & Literary Lab',
     date: '13 March, 2026',
-    time: '9 am - 5 pm',
-    venue: 'AB2 001, 002, 004',
-    description: 'The ground floor hub of SHABD activities. Workshops, open mics, and literary installations fill three rooms — a full festival of words at the heart of AB2.',
+    time: '12:30 pm - 5 pm',
+    venue: 'AB2 001, 002, 004, 201, 242, 213 (Lab)',
+    description: "A full festival of words at the heart of AB2. Includes SHABD's immersive literary lab, experimental writing workshops, open mics, and literary installations across multiple rooms.",
     image: '',
-    startTime: '2026-03-13T09:00:00',
+    startTime: '2026-03-13T12:30:00',
     endTime: '2026-03-13T17:00:00',
   },
 
@@ -92,21 +112,11 @@ const allEvents: Event[] = [
 
   /* ── 15 MARCH EVENTS ── */
   {
-    title: 'MARKSOC – Scavenger Hunt 4.0 (HQ)',
-    date: '15 March, 2026',
-    time: '9 am - 5 pm',
-    venue: 'AB2 213',
-    description: "MARKSOC's Scavenger Hunt 4.0 command centre. Clues issued, scores tracked, teams managed — the nerve centre as the hunt plays out across AB2.",
-    image: '',
-    startTime: '2026-03-15T09:00:00',
-    endTime: '2026-03-15T17:00:00',
-  },
-  {
     title: 'MARKSOC – Scavenger Hunt 4.0',
     date: '15 March, 2026',
     time: '9 am - 5 pm',
-    venue: 'AB2 101, 102, 104, 108, 116, 118, 119, 120, 121, 122',
-    description: "The fourth and grandest edition of MARKSOC's legendary scavenger hunt. Race through ten rooms solving clues, cracking codes, and outwitting rivals.",
+    venue: 'AB2 213 (HQ) & 101, 102, 104, 108, 116, 118, 119, 120, 121, 122',
+    description: "The grandest edition of MARKSOC's legendary scavenger hunt. Race through multiple rooms solving clues, cracking codes, and outwitting rivals, with the command centre at AB2 213.",
     image: '',
     startTime: '2026-03-15T09:00:00',
     endTime: '2026-03-15T17:00:00',
@@ -306,7 +316,7 @@ const tabStyle = (active: boolean): React.CSSProperties => ({
 export default function AB2({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
-  
+
   // State to track current time
   const [now, setNow] = useState(new Date())
 
@@ -327,17 +337,17 @@ export default function AB2({ onClose }: { onClose: () => void }) {
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-  const centerEvent = 
-    tab === 'live' 
+  const centerEvent =
+    tab === 'live'
       ? (liveEvents.length > 0 ? liveEvents[0] : noLiveEventFallback)
-      : tab === 'upcoming' 
+      : tab === 'upcoming'
         ? (upcomingEvents[selectedIdx] || upcomingEvents[0])
         : (pastEvents[selectedIdx] || pastEvents[0])
 
-  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE' 
-                    : tab === 'live' ? 'OFFLINE' 
-                    : tab === 'upcoming' ? 'UPCOMING' 
-                    : 'PAST'
+  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE'
+    : tab === 'live' ? 'OFFLINE'
+      : tab === 'upcoming' ? 'UPCOMING'
+        : 'PAST'
 
   const leftTitle = tab === 'past' ? 'Happening Now' : 'Past Events'
   const leftEvents = tab === 'past' ? liveEvents : pastEvents
