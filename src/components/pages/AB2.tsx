@@ -16,16 +16,7 @@ interface Event {
 
 // 1. One Master List of Events for AB2
 const allEvents: Event[] = [
-  {
-    title: 'SHABD (Between The Lines)',
-    date: 'Mar 13, 2026',
-    time: '12:30 PM – 5:00 PM',
-    venue: 'AB2 001, 002, 004',
-    description: 'A literary event that celebrates the power of words, poetry, and storytelling. Step between the lines and discover meaning in every verse.',
-    image: '',
-    startTime: '2026-03-13T12:30:00',
-    endTime: '2026-03-13T17:00:00',
-  },
+  /* ── 13 MARCH EVENTS ── */
   {
     title: 'GOONJ (Kaun Banega Filmy Genius)',
     date: 'Mar 13, 2026',
@@ -37,21 +28,11 @@ const allEvents: Event[] = [
     endTime: '2026-03-13T17:00:00',
   },
   {
-    title: 'Your Dreamscape - De Artistry Club',
+    title: 'De Artistry Club – Your Dreamscape & The 2:17 AM Incident',
     date: 'Mar 13, 2026',
     time: '12:30 PM – 4:00 PM',
     venue: 'AB2 201, 202, 203, 204, 205',
-    description: 'An immersive art showcase where imagination runs wild. Explore surreal works and experience the uncanny.',
-    image: '',
-    startTime: '2026-03-13T12:30:00',
-    endTime: '2026-03-13T16:00:00',
-  },
-  {
-    title: 'The 2:17 AM Incident - De Artistry Club',
-    date: 'Mar 13, 2026',
-    time: '12:30 PM – 4:00 PM',
-    venue: 'AB2 201, 202, 203, 204, 205',
-    description: 'An immersive art showcase where imagination runs wild. Explore surreal works and experience the uncanny.',
+    description: 'An immersive art showcase where imagination runs wild. Includes "Your Dreamscape" and "The 2:17 AM Incident," exploring surreal works and the uncanny.',
     image: '',
     startTime: '2026-03-13T12:30:00',
     endTime: '2026-03-13T16:00:00',
@@ -85,6 +66,70 @@ const allEvents: Event[] = [
     image: '',
     startTime: '2026-03-13T12:30:00',
     endTime: '2026-03-13T17:00:00',
+  },
+  {
+    title: 'SHABD – Main Event & Literary Lab',
+    date: '13 March, 2026',
+    time: '12:30 pm - 5 pm',
+    venue: 'AB2 001, 002, 004, 201, 242, 213 (Lab)',
+    description: "A full festival of words at the heart of AB2. Includes SHABD's immersive literary lab, experimental writing workshops, open mics, and literary installations across multiple rooms.",
+    image: '',
+    startTime: '2026-03-13T12:30:00',
+    endTime: '2026-03-13T17:00:00',
+  },
+
+  /* ── 14 MARCH EVENTS ── */
+  {
+    title: 'GOONJ – Kaun Banega Filmy Genius',
+    date: '14 March, 2026',
+    time: '9 am - 5 pm',
+    venue: 'AB2 026',
+    description: 'Test your Bollywood IQ in this fast-paced film trivia quiz by GOONJ. Lights, camera, questions — who will be crowned the ultimate Filmy Genius?',
+    image: '',
+    startTime: '2026-03-14T09:00:00',
+    endTime: '2026-03-14T17:00:00',
+  },
+  {
+    title: 'Garuda Club – Operation Talaash',
+    date: '14 March, 2026',
+    time: '9 am - 5 pm',
+    venue: 'AB2 019, 020, 021',
+    description: 'Garuda Club launches a full-day investigative challenge. Track suspects, decode evidence, and crack Operation Talaash before the case goes cold.',
+    image: '',
+    startTime: '2026-03-14T09:00:00',
+    endTime: '2026-03-14T17:00:00',
+  },
+  {
+    title: "Pitcher's Craft – Project Blackout",
+    date: '14 March, 2026',
+    time: '9 am - 5 pm',
+    venue: 'AB2 201, 202, 203, 204, 205',
+    description: 'A high-stakes pitching competition under the theme of Project Blackout. Bold startup ideas presented across five rooms — pitch smart, pitch bold.',
+    image: '',
+    startTime: '2026-03-14T09:00:00',
+    endTime: '2026-03-14T17:00:00',
+  },
+
+  /* ── 15 MARCH EVENTS ── */
+  {
+    title: 'MARKSOC – Scavenger Hunt 4.0',
+    date: '15 March, 2026',
+    time: '9 am - 5 pm',
+    venue: 'AB2 213 (HQ) & 101, 102, 104, 108, 116, 118, 119, 120, 121, 122',
+    description: "The grandest edition of MARKSOC's legendary scavenger hunt. Race through multiple rooms solving clues, cracking codes, and outwitting rivals, with the command centre at AB2 213.",
+    image: '',
+    startTime: '2026-03-15T09:00:00',
+    endTime: '2026-03-15T17:00:00',
+  },
+  {
+    title: 'De Artistry Club – Your Dreamscape & The 2:17 AM Incident',
+    date: '15 March, 2026',
+    time: '9 am - 5 pm',
+    venue: 'AB2 201–205',
+    description: 'De Artistry Club closes Oneiros with a dual immersive art experience. Your Dreamscape blurs reality; The 2:17 AM Incident makes you question everything.',
+    image: '',
+    startTime: '2026-03-15T09:00:00',
+    endTime: '2026-03-15T17:00:00',
   },
 ]
 

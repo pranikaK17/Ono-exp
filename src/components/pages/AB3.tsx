@@ -18,14 +18,14 @@ const allEvents: Event[] = [
   /* ── 13 MARCH EVENTS ── */
   {
     title: "Destival Prelims – Coreo",
-    date: "13 March, 2026", time: "9 am - 10 am", venue: "AB3 010, 011, 012",
+    date: "13 March, 2026", time: "12:30 am - 5 pm", venue: "AB3 010, 011, 012",
     description: "Coreo's flagship festival kicks off with electrifying dance prelims. Watch teams compete to secure their spot in the final showdown.",
     image: "",
     startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T10:00:00",
   },
   {
     title: "Cosmos & Requiem Prelims – TMC & D Club",
-    date: "13 March, 2026", time: "10 am - 11 am", venue: "AB3 010, 011, 012",
+    date: "14 March, 2026", time: "9 am - 5 pm", venue: "AB3 010, 011, 012",
     description: "A dramatic collision of theatre and creative expression. TMC and D Club bring their visionary prelims to the stage — expect the unexpected.",
     image: "",
     startTime: "2026-03-13T10:00:00", endTime: "2026-03-13T11:00:00",
