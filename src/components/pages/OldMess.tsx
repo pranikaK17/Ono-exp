@@ -20,7 +20,7 @@ const allEvents: Event[] = [
   {
     title: "BEAD IT UP, PRESS AND PAINT / SCRIBBLES",
     date: "13 March, 2026", time: "12:30 pm - 4 pm", venue: "OLD MESS (AB1 ENTRY)",
-    description: "", image: "",
+    description: "A hands-on creative experience exploring beadwork, print-pressing, and painting to create your own custom art", image: "",
     startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T16:00:00",
   },
   {
@@ -32,13 +32,13 @@ const allEvents: Event[] = [
   {
     title: "Noodle vs Newton / Heritage Club",
     date: "13 March, 2026", time: "12:30 pm - 4 pm", venue: "OLD MESS (LEFT SIDE OF FOUNTAIN)",
-    description: "", image: "",
+    description: "Build the strongest bridge using only spaghetti.", image: "",
     startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T16:00:00",
   },
   {
     title: "Human Foosball 3.0 / Enactus MUJ",
     date: "13 March, 2026", time: "12:30 pm - 4 pm", venue: "OLD MESS (AB1 ENTRY LEFT SIDE)",
-    description: "", image: "",
+    description: "Experience foosball in real life. You are the players on the rod—work together to score!", image: "",
     startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T16:00:00",
   },
   {
@@ -50,13 +50,13 @@ const allEvents: Event[] = [
   {
     title: "The Kintsugi Experience: Art of Resilience / Teach for India",
     date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (AB2 ENTRY)",
-    description: "", image: "",
+    description: "Learn the art of Kintsugi by repairing ceramics with gold. Discover the beauty of imperfection and how challenges make us unique", image: "",
     startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
   },
   {
     title: "Student of The Year / Olympism Club",
     date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (AB2 ENTRY RIGHT SIDE)",
-    description: "", image: "",
+    description: "Compete in various challenges to prove you're the ultimate all-rounder", image: "",
     startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
   },
   {
@@ -74,25 +74,25 @@ const allEvents: Event[] = [
   {
     title: "CLUEMINATI-2.0 / LEARNIT",
     date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (FIRST FLOOR LEFT SIDE AB1)",
-    description: "", image: "",
+    description: "Assemble your team for a high-stakes treasure hunt. Solve puzzles, race across campus, and beat the clock to find the ultimate prize", image: "",
     startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
   },
   {
     title: "Campus Drop BGMI Gaming Event (Esports) / Centaurus Arena Club",
     date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (FIRST FLOOR RIGHT SIDE AB1)",
-    description: "", image: "",
+    description: "Drop in, loot up, and survive the circle. Battle it out in an intense BGMI tournament.", image: "",
     startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
   },
   {
     title: "Serpent And Spells, The Today's show, The Paint Whispers / CYPHER",
     date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (FIRST FLOOR RIGHT SIDE AB2)",
-    description: "", image: "",
+    description: "Step onto a giant Harry Potter-themed board as a human game piece. Navigate magical ladders, dodge serpents, and complete wizarding challenges to reach the finish line", image: "",
     startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
   },
   {
     title: "SCAVENGER HUNT 4.0 / MARKSOC",
     date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (FIRST FLOOR LEFT SIDE AB2)",
-    description: "", image: "",
+    description: "Break midnight loop at Hotel Chronos. Only few survive to the final showdown.", image: "",
     startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
   },
   {
@@ -106,7 +106,7 @@ const allEvents: Event[] = [
   {
     title: "BEAD IT UP, PRESS AND PAINT / SCRIBBLES",
     date: "14 March, 2026", time: "10 am - 4:30 pm", venue: "OLD MESS (AB1 ENTRY)",
-    description: "", image: "",
+    description: "A hands-on creative experience exploring beadwork, print-pressing, and painting to create your own custom art", image: "",
     startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T16:30:00",
   },
   {
@@ -118,25 +118,25 @@ const allEvents: Event[] = [
   {
     title: "Human Foosball 3.0 / Enactus MUJ",
     date: "14 March, 2026", time: "10 am - 4:30 pm", venue: "OLD MESS (AB1 ENTRY LEFT SIDE)",
-    description: "", image: "",
+    description: "Experience foosball in real life. You are the players on the rod—work together to score!", image: "",
     startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T16:30:00",
   },
   {
     title: "Serpent And Spells, The Today's show, The Paint Whispers / CYPHER",
     date: "14 March, 2026", time: "9 am - 5 pm", venue: "OLD MESS (RIGHT SIDE OF FOUNTAIN)",
-    description: "", image: "",
+    description: "Step onto a giant Harry Potter-themed board as a human game piece. Navigate magical ladders, dodge serpents, and complete wizarding challenges to reach the finish line", image: "",
     startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
   },
   {
     title: "The Kintsugi Experience: Art of Resilience / Teach for India",
     date: "14 March, 2026", time: "9 am - 5 pm", venue: "OLD MESS (AB2 ENTRY)",
-    description: "", image: "",
+    description: "Learn the art of Kintsugi by repairing ceramics with gold. Discover the beauty of imperfection and how challenges make us unique", image: "",
     startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
   },
   {
     title: "Student of The Year / Olympism Club",
     date: "14 March, 2026", time: "9 am - 5 pm", venue: "OLD MESS (AB2 ENTRY RIGHT SIDE)",
-    description: "", image: "",
+    description: "Compete in various challenges to prove you're the ultimate all-rounder", image: "",
     startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
   },
   {
@@ -156,7 +156,7 @@ const allEvents: Event[] = [
   {
     title: "The Kintsugi Experience: Art of Resilience / Teach for India",
     date: "15 March, 2026", time: "9 am - 5 pm", venue: "OLD MESS (AB2 ENTRY)",
-    description: "", image: "",
+    description: "Learn the art of Kintsugi by repairing ceramics with gold. Discover the beauty of imperfection and how challenges make us unique", image: "",
     startTime: "2026-03-15T09:00:00", endTime: "2026-03-15T17:00:00",
   },
   {
@@ -350,7 +350,7 @@ const tabStyle = (active: boolean): React.CSSProperties => ({
 export default function OldMess({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
-  
+
   // State to track current time
   const [now, setNow] = useState(new Date())
 
@@ -371,17 +371,17 @@ export default function OldMess({ onClose }: { onClose: () => void }) {
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-  const centerEvent = 
-    tab === 'live' 
+  const centerEvent =
+    tab === 'live'
       ? (liveEvents.length > 0 ? liveEvents[0] : noLiveEventFallback)
-      : tab === 'upcoming' 
+      : tab === 'upcoming'
         ? (upcomingEvents[selectedIdx] || upcomingEvents[0])
         : (pastEvents[selectedIdx] || pastEvents[0])
 
-  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE' 
-                    : tab === 'live' ? 'OFFLINE' 
-                    : tab === 'upcoming' ? 'UPCOMING' 
-                    : 'PAST'
+  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE'
+    : tab === 'live' ? 'OFFLINE'
+      : tab === 'upcoming' ? 'UPCOMING'
+        : 'PAST'
 
   const leftTitle = tab === 'past' ? 'Happening Now' : 'Past Events'
   const leftEvents = tab === 'past' ? liveEvents : pastEvents

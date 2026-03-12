@@ -18,7 +18,7 @@ interface Event {
 const allEvents: Event[] = [
   /* ── 13 MARCH EVENTS ── */
   {
-    title: "SkyRise / IEI Student Chapter",
+    title: "SkyRise / IEEE Student Chapter",
     date: "13 March, 2026",
     time: "3 pm - 5 pm",
     venue: "Grand Staircase (LAWN)",
@@ -30,7 +30,7 @@ const allEvents: Event[] = [
     date: "13 March, 2026",
     time: "12:30 pm - 5 pm",
     venue: "Grand Staircase Terrace",
-    description: "", image: "",
+    description: "Bachpan —a dedicated space to celebrate the innocence, the games, and the pure, unadulterated joy of our childhood", image: "",
     startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
   },
 
@@ -50,7 +50,7 @@ const allEvents: Event[] = [
     date: "15 March, 2026",
     time: "9 am - 5 pm",
     venue: "Grand Staircase (LAWN)",
-    description: "", image: "",
+    description: "Street Play Showdown ", image: "",
     startTime: "2026-03-15T09:00:00", endTime: "2026-03-15T17:00:00",
   }
 ]
@@ -224,7 +224,7 @@ const tabStyle = (active: boolean): React.CSSProperties => ({
 export default function GrandStairs({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
-  
+
   // State to track current time
   const [now, setNow] = useState(new Date())
 
@@ -245,17 +245,17 @@ export default function GrandStairs({ onClose }: { onClose: () => void }) {
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-  const centerEvent = 
-    tab === 'live' 
+  const centerEvent =
+    tab === 'live'
       ? (liveEvents.length > 0 ? liveEvents[0] : noLiveEventFallback)
-      : tab === 'upcoming' 
+      : tab === 'upcoming'
         ? (upcomingEvents[selectedIdx] || upcomingEvents[0])
         : (pastEvents[selectedIdx] || pastEvents[0])
 
-  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE' 
-                    : tab === 'live' ? 'OFFLINE' 
-                    : tab === 'upcoming' ? 'UPCOMING' 
-                    : 'PAST'
+  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE'
+    : tab === 'live' ? 'OFFLINE'
+      : tab === 'upcoming' ? 'UPCOMING'
+        : 'PAST'
 
   const leftTitle = tab === 'past' ? 'Happening Now' : 'Past Events'
   const leftEvents = tab === 'past' ? liveEvents : pastEvents
