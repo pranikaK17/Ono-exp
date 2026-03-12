@@ -49,35 +49,47 @@ const allEvents: Event[] = [
   },
 
   // ─── DAY 2 (March 14) ───
-  /* ── 14 MARCH EVENTS ── */
-{
-  title: "Media Room – Aperture",
-  date: "14 March, 2026", time: "10 am - 5 pm", venue: "LHC 001",
-  description: "Day 2 of Aperture's media operations — Artverse edition. The lens never sleeps, capturing the best moments of Oneiros as the festival hits its peak.",
-  image: "",
-  startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T17:00:00",
-},
-{
-  title: "Green Rooms – Requiem & Cosmos",
-  date: "14 March, 2026", time: "10 am - 5 pm", venue: "LHC 002, 003, 004",
-  description: "The green rooms shift to Requiem and Cosmos on Day 2. Performers and crews prepare across three rooms, ready to bring their dark and cosmic visions to life.",
-  image: "",
-  startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T17:00:00",
-},
-{
-  title: "LITMUS – BEHAS",
-  date: "14 March, 2026", time: "10 am - 5 pm", venue: "LHC 101, 102",
-  description: "Litmus brings BEHAS back for Day 2 — a full-day debate and discourse marathon. Sharp arguments, sharper comebacks, and ideas that refuse to stay quiet.",
-  image: "",
-  startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T17:00:00",
-},
-{
-  title: "Spot Photography – Aperture",
-  date: "14 March, 2026", time: "10 am - 5 pm", venue: "LHC 103",
-  description: "Day 2 of Spot Photography — a fresh theme, a fresh challenge. Aperture's photographers roam the campus hunting for the perfect frame against the clock.",
-  image: "",
-  startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T17:00:00",
-},
+  {
+    title: 'Sound Check',
+    date: 'Mar 14, 2026',
+    time: '2:00 PM - 4:00 PM',
+    venue: 'Main Stage — Football Ground',
+    description: 'Main stage audio prep and sound check before the evening battles begin.',
+    image: '',
+    startTime: '2026-03-14T14:00:00',
+    endTime: '2026-03-14T16:00:00',
+  },
+  {
+    title: 'Battle of Bands Finals (Top 4)',
+    date: 'Mar 14, 2026',
+    time: '4:00 PM - 6:00 PM',
+    venue: 'Main Stage — Football Ground',
+    description: 'The final 4 bands unleash their best sets. Pure energy, loud amps, and massive crowds.',
+    image: '../../../public/majorEvents/bands2.webp',
+    startTime: '2026-03-14T16:00:00',
+    endTime: '2026-03-14T18:00:00',
+  },
+  {
+    title: 'Cosmos Finals (Top 4)',
+    date: 'Mar 14, 2026',
+    time: '6:00 PM - 7:30 PM',
+    venue: 'Main Stage — Football Ground',
+    description: 'The top 4 finalists of our premier fashion show hit the main stage runway.',
+    image: '../../../public/majorEvents/cosmos2.webp',
+    startTime: '2026-03-14T18:00:00',
+    endTime: '2026-03-14T19:30:00',
+  },
+  {
+    title: 'DJ Night',
+    date: 'Mar 14, 2026',
+    time: '7:30 PM Onwards',
+    venue: 'Main Stage — Football Ground',
+    description: 'End the second day jumping to the beats as our DJ turns the ground into a massive open-air club.',
+    image: '',
+    startTime: '2026-03-14T19:30:00',
+    endTime: '2026-03-14T23:00:00', // Auto-ends at 11 PM
+  },
+
   // ─── DAY 3 (March 15) ───
   {
     title: 'Sound Check',
