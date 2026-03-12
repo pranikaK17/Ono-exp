@@ -17,44 +17,64 @@ interface Event {
 // 1. One Master List of Events for AB2
 const allEvents: Event[] = [
   {
-    title: 'Opening Ceremony',
+    title: 'SHABD (Between The Lines)',
     date: 'Mar 13, 2026',
-    time: '11:30 AM - 12:30 PM',
-    venue: 'Smt. Vasanti Pai Auditorium',
-    description: 'Join us for the grand kickoff of our event series, featuring welcome addresses, special performances, and the official lighting of the lamp.',
-    image: '../../../public/majorEvents/opening.webp',
-    startTime: '2026-03-13T11:30:00',
-    endTime: '2026-03-13T12:30:00',
+    time: '9:00 AM – 10:00 AM',
+    venue: 'AB2 001, 002, 004',
+    description: 'A literary event that celebrates the power of words, poetry, and storytelling. Step between the lines and discover meaning in every verse.',
+    image: '',
+    startTime: '2026-03-13T09:00:00',
+    endTime: '2026-03-13T10:00:00',
   },
   {
-    title: 'Destival Prelims',
+    title: 'GOONJ (Kaun Banega Filmy Genius)',
     date: 'Mar 13, 2026',
-    time: '2:00 PM - 3:30 PM',
-    venue: 'Smt. Vasanti Pai Auditorium', // Change this if it's happening somewhere else!
-    description: 'A high-energy dance event where crews and soloists battle it out in the preliminary rounds. Expect incredible moves and unmatched hype.',
-    image: '../../../public/majorEvents/dest1.webp',
+    time: '10:00 AM – 11:00 AM',
+    venue: 'AB2 019, 020, 021',
+    description: 'Test your Bollywood knowledge in this fun and fast-paced film trivia competition. Who will be crowned the Filmy Genius?',
+    image: '',
+    startTime: '2026-03-13T10:00:00',
+    endTime: '2026-03-13T11:00:00',
+  },
+  {
+    title: 'De Artistry Club',
+    date: 'Mar 13, 2026',
+    time: '11:00 AM – 12:00 PM',
+    venue: 'AB2 201, 202, 203, 204, 205',
+    description: 'Your Dreamscape & The 2:17 AM Incident — an immersive art showcase where imagination runs wild. Explore surreal works and experience the uncanny.',
+    image: '',
+    startTime: '2026-03-13T11:00:00',
+    endTime: '2026-03-13T12:00:00',
+  },
+  {
+    title: "Pitcher's Craft (Project Blackout)",
+    date: 'Mar 13, 2026',
+    time: '12:30 PM – 1:30 PM',
+    venue: 'AB2 213 (LAB)',
+    description: 'A business pitching competition where participants present their boldest ideas under the theme of Project Blackout. Pitch smart, pitch bold.',
+    image: '',
+    startTime: '2026-03-13T12:30:00',
+    endTime: '2026-03-13T13:30:00',
+  },
+  {
+    title: 'MARKSOC (Scavenger Hunt 4.0)',
+    date: 'Mar 13, 2026',
+    time: '2:00 PM – 3:00 PM',
+    venue: 'AB2 101, 102, 104, 108, 116–122',
+    description: 'The fourth edition of MARKSOC\'s legendary scavenger hunt. Race against the clock, solve clues, and outsmart the competition across the building.',
+    image: '',
     startTime: '2026-03-13T14:00:00',
-    endTime: '2026-03-13T15:30:00',
+    endTime: '2026-03-13T15:00:00',
   },
   {
-    title: 'Battle of Bands Prelims',
-    date: 'Mar 14, 2026',
-    time: '10:00 AM - 2:00 PM',
-    venue: 'Smt. Vasanti Pai Auditorium', // Update if needed
-    description: 'Bands go head-to-head in the preliminary rounds to secure their spot in the finals. Get ready for some high-voltage performances.',
-    image: '../../../public/majorEvents/bands1.webp',
-    startTime: '2026-03-14T10:00:00',
-    endTime: '2026-03-14T14:00:00',
-  },
-  {
-    title: 'Cosmos Prelims',
-    date: 'Mar 14, 2026',
-    time: '2:00 PM - 4:00 PM',
-    venue: 'Smt. Vasanti Pai Auditorium', // Update if needed
-    description: 'The fashion show preliminaries where style meets the runway. Witness the creativity, elegance, and flair of our participants.',
-    image: '../../../public/majorEvents/cosmos1.webp',
-    startTime: '2026-03-14T14:00:00',
-    endTime: '2026-03-14T16:00:00',
+    title: 'Cinefilia (Monologue Competition)',
+    date: 'Mar 13, 2026',
+    time: '3:30 PM – 5:00 PM',
+    venue: 'AB2 Gallery',
+    description: 'A solo performance competition where participants deliver powerful monologues that captivate and move the audience. Pure talent, one voice at a time.',
+    image: '',
+    startTime: '2026-03-13T15:30:00',
+    endTime: '2026-03-13T17:00:00',
   },
 ]
 
@@ -81,33 +101,58 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
       border: '1px solid rgba(160,80,255,0.25)',
       borderRadius: 16,
       overflow: 'hidden',
-      height: '100%',
     }}>
+      {/* Only render image area when an actual image exists */}
+      {event.image ? (
+        <div style={{
+          flex: 1, minHeight: 220,
+          background: `url(${event.image}) center/cover`,
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start',
+          position: 'relative',
+        }}>
+          {badge && (
+            <div style={{
+              position: 'absolute', top: 16, left: 16,
+              background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(160,80,255,0.7)',
+              color: '#fff', fontSize: '0.65rem', fontWeight: 700,
+              fontFamily: "'Orbitron', sans-serif",
+              padding: '4px 14px', borderRadius: 6,
+              letterSpacing: '0.12em', textTransform: 'uppercase',
+              animation: badge === '● LIVE' ? 'pulse-live 2s ease-in-out infinite' : undefined,
+            }}>{badge}</div>
+          )}
+        </div>
+      ) : (
+        /* No image: just a thin decorative top accent bar */
+        <div style={{
+          height: 6,
+          background: badge === '● LIVE'
+            ? 'linear-gradient(90deg, #ff3232, #ff6b6b)'
+            : 'linear-gradient(90deg, rgba(120,40,220,0.8), rgba(200,80,255,0.6))',
+        }} />
+      )}
+
       <div style={{
-        flex: 1, minHeight: 220,
-        background: event.image
-          ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(120,40,220,0.1), rgba(200,80,255,0.08))',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative',
+        padding: '28px 30px', background: 'rgba(0,0,0,0.3)',
+        borderTop: event.image ? '1px solid rgba(160,80,255,0.12)' : 'none',
+        flex: 1, display: 'flex', flexDirection: 'column',
       }}>
-        {!event.image && <span style={{ fontSize: 72, color: 'rgba(255,255,255,0.06)' }}>✦</span>}
-        {badge && (
+        {/* Badge inline when there's no image */}
+        {!event.image && badge && (
           <div style={{
-            position: 'absolute', top: 16, left: 16,
-            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(160,80,255,0.7)',
-            color: '#fff', fontSize: '0.65rem', fontWeight: 700,
+            display: 'inline-block', alignSelf: 'flex-start',
+            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(160,80,255,0.2)',
+            border: `1px solid ${badge === '● LIVE' ? 'rgba(255,80,80,0.6)' : 'rgba(160,80,255,0.5)'}`,
+            color: badge === '● LIVE' ? '#ff6b6b' : '#b060ff',
+            fontSize: '0.65rem', fontWeight: 700,
             fontFamily: "'Orbitron', sans-serif",
             padding: '4px 14px', borderRadius: 6,
             letterSpacing: '0.12em', textTransform: 'uppercase',
+            marginBottom: 16,
             animation: badge === '● LIVE' ? 'pulse-live 2s ease-in-out infinite' : undefined,
           }}>{badge}</div>
         )}
-      </div>
-      <div style={{
-        padding: '24px 28px', background: 'rgba(0,0,0,0.3)',
-        borderTop: '1px solid rgba(160,80,255,0.12)',
-      }}>
+
         <h2 style={{
           margin: 0, fontSize: '1.35rem', fontWeight: 700,
           fontFamily: "'Orbitron', sans-serif", color: '#f0e8ff',
@@ -170,55 +215,33 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
         e.currentTarget.style.transform = 'translateY(0)'
       }}
     >
-      <div style={{
-        height: 80,
-        background: event.image
-          ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(120,40,220,0.1), rgba(200,80,255,0.08))',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 24, color: 'rgba(255,255,255,0.12)',
-      }}>
-        {!event.image && '✦'}
-      </div>
-      <div style={{ padding: '10px 12px' }}>
+      {/* Only render image/thumbnail area when there's an actual image */}
+      {event.image && (
+        <div style={{
+          height: 80,
+          background: `url(${event.image}) center/cover`,
+        }} />
+      )}
+      <div style={{ padding: '12px 14px' }}>
         <h4 style={{
           margin: 0, fontSize: '0.78rem', fontWeight: 600,
           fontFamily: "'Orbitron', sans-serif", color: '#e8d8ff', lineHeight: 1.3,
         }}>{event.title}</h4>
         <div style={{
-          marginTop: 4, fontSize: '0.62rem',
+          marginTop: 5, fontSize: '0.62rem',
           color: 'rgba(160,80,255,0.75)', fontFamily: "'Exo 2', sans-serif",
           letterSpacing: '0.05em', textTransform: 'uppercase',
         }}>
-          {event.date} · {event.time}
+          {event.date}
+        </div>
+        <div style={{
+          marginTop: 2, fontSize: '0.65rem', fontWeight: 600,
+          color: '#b060ff', fontFamily: "'Exo 2', sans-serif",
+          letterSpacing: '0.04em',
+        }}>
+          {event.time}
         </div>
       </div>
-    </div>
-  )
-}
-
-/* ── Side column wrapper ─────────────────────────────────────────────────── */
-function SideColumn({ title, events, color, onClickEvent }: {
-  title: string; events: Event[]; color: string; onClickEvent?: (i: number) => void
-}) {
-  if (events.length === 0) return null; // Gracefully hide if no events in this column
-  
-  return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', gap: 14,
-      overflowY: 'auto', padding: '0 8px',
-      scrollbarWidth: 'thin',
-      scrollbarColor: 'rgba(160,80,255,0.15) transparent',
-    }}>
-      <h3 style={{
-        margin: 0, fontSize: '0.7rem', fontWeight: 500,
-        fontFamily: "'Orbitron', sans-serif", color,
-        letterSpacing: '0.12em', textTransform: 'uppercase',
-        paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.06)',
-      }}>{title}</h3>
-      {events.map((ev, i) => (
-        <SideCard key={i} event={ev} onClick={() => onClickEvent?.(i)} />
-      ))}
     </div>
   )
 }
@@ -233,17 +256,6 @@ const tabStyle = (active: boolean): React.CSSProperties => ({
   letterSpacing: '0.1em', textTransform: 'uppercase' as const,
   cursor: 'pointer', transition: 'all 0.25s', backdropFilter: 'blur(6px)',
 })
-
-/* ── Arrow button style ──────────────────────────────────────────────────── */
-const arrowBtnStyle: React.CSSProperties = {
-  position: 'absolute', top: '50%', transform: 'translateY(-50%)',
-  zIndex: 10, width: 40, height: 40, borderRadius: '50%',
-  background: 'rgba(160,80,255,0.2)', border: '1px solid rgba(160,80,255,0.5)',
-  color: '#b060ff', fontSize: '1.4rem', fontWeight: 700,
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  backdropFilter: 'blur(8px)', transition: 'all 0.2s',
-  boxShadow: '0 0 14px rgba(160,80,255,0.25)',
-}
 
 /* ── Main component ──────────────────────────────────────────────────────── */
 export default function AB2({ onClose }: { onClose: () => void }) {
@@ -286,9 +298,13 @@ export default function AB2({ onClose }: { onClose: () => void }) {
   const leftEvents = tab === 'past' ? liveEvents : pastEvents
   const leftColor = tab === 'past' ? '#ff6b6b' : 'rgba(255,255,255,0.3)'
 
-  const rightTitle = tab === 'upcoming' ? 'Happening Now' : 'Upcoming'
-  const rightEvents = tab === 'upcoming' ? liveEvents : upcomingEvents
-  const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#b060ff'
+  // For upcoming tab: right column shows all other upcoming events (not the selected one)
+  const rightTitle = tab === 'upcoming' ? 'All Events' : tab === 'live' ? 'Upcoming' : 'Upcoming'
+  const rightEvents = tab === 'upcoming'
+    ? upcomingEvents.filter((_, i) => i !== selectedIdx)
+    : upcomingEvents
+  const rightColor = '#b060ff'
+
 
   return (
     <div
@@ -321,99 +337,142 @@ export default function AB2({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        {/* ── Three-column layout ── */}
-        <div className="ab2-grid" style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 2fr 1fr',
-          gap: 24, flex: 1, minHeight: 0,
-        }}>
-          {/* Left */}
-          <SideColumn
-            title={leftTitle}
-            events={leftEvents}
-            color={leftColor}
-          />
+        {/* ── Vertical layout ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4 }}>
 
-          {/* Center — animated swap with arrows */}
-          <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div style={{ flex: 1, position: 'relative' }}>
-              {/* Pagination Arrows - Only show if there's more than 1 item */}
-              {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
-                <>
-                  <button
-                    onClick={() => setSelectedIdx(i => Math.max(0, i - 1))}
-                    disabled={selectedIdx === 0}
-                    style={{
-                      ...arrowBtnStyle,
-                      left: 8,
-                      opacity: selectedIdx === 0 ? 0.25 : 1,
-                      cursor: selectedIdx === 0 ? 'default' : 'pointer',
-                    }}
-                  >‹</button>
-                  <button
-                    onClick={() => {
-                      const max = (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1
-                      setSelectedIdx(i => Math.min(max, i + 1))
-                    }}
-                    disabled={selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1}
-                    style={{
-                      ...arrowBtnStyle,
-                      right: 8,
-                      opacity: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 0.25 : 1,
-                      cursor: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 'default' : 'pointer',
-                    }}
-                  >›</button>
-                </>
-              )}
-              
-              {/* Featured Event Render */}
-              {centerEvent ? (
-                <div
-                  key={tab + selectedIdx}
-                  style={{
-                    height: '100%',
-                    animation: 'ab2-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
-                  }}
-                >
-                  <FeaturedEventCard event={centerEvent} badge={centerBadge} />
-                </div>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>
-                  No events found.
-                </div>
-              )}
-            </div>
+          {/* Featured Event + navigation */}
+          {(() => {
+            const navList = tab === 'upcoming' ? upcomingEvents : tab === 'past' ? pastEvents : []
+            const showNav = tab !== 'live' && navList.length > 1
+            return (
+              <div style={{ flexShrink: 0 }}>
+                {/* Card with side arrows */}
+                <div style={{ position: 'relative' }}>
+                  {showNav && (
+                    <button
+                      onClick={() => setSelectedIdx(i => Math.max(0, i - 1))}
+                      disabled={selectedIdx === 0}
+                      style={{
+                        position: 'absolute', top: '50%', left: 10,
+                        transform: 'translateY(-50%)', zIndex: 10,
+                        width: 26, height: 26, borderRadius: '50%',
+                        background: 'rgba(160,80,255,0.18)',
+                        border: '1px solid rgba(160,80,255,0.45)',
+                        color: '#b060ff', fontSize: '1rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backdropFilter: 'blur(8px)', transition: 'all 0.2s',
+                        opacity: selectedIdx === 0 ? 0.2 : 1,
+                        cursor: selectedIdx === 0 ? 'default' : 'pointer',
+                      }}
+                    >‹</button>
+                  )}
 
-            {/* Dot indicators - Only show if there's more than 1 item */}
-            {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
-              <div style={{
-                display: 'flex', justifyContent: 'center', gap: 10,
-                marginTop: 16, flexShrink: 0,
-              }}>
-                {(tab === 'upcoming' ? upcomingEvents : pastEvents).map((_, i) => (
-                  <button
+                  <div
+                    key={tab + selectedIdx}
+                    style={{ animation: 'ab2-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)' }}
+                  >
+                    {centerEvent ? (
+                      <FeaturedEventCard event={centerEvent} badge={centerBadge} />
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>
+                        No events found.
+                      </div>
+                    )}
+                  </div>
+
+                  {showNav && (
+                    <button
+                      onClick={() => setSelectedIdx(i => Math.min(navList.length - 1, i + 1))}
+                      disabled={selectedIdx === navList.length - 1}
+                      style={{
+                        position: 'absolute', top: '50%', right: 10,
+                        transform: 'translateY(-50%)', zIndex: 10,
+                        width: 26, height: 26, borderRadius: '50%',
+                        background: 'rgba(160,80,255,0.18)',
+                        border: '1px solid rgba(160,80,255,0.45)',
+                        color: '#b060ff', fontSize: '1rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backdropFilter: 'blur(8px)', transition: 'all 0.2s',
+                        opacity: selectedIdx === navList.length - 1 ? 0.2 : 1,
+                        cursor: selectedIdx === navList.length - 1 ? 'default' : 'pointer',
+                      }}
+                    >›</button>
+                  )}
+                </div>
+
+                {/* Dot indicators */}
+                {showNav && (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 14 }}>
+                    {navList.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedIdx(i)}
+                        style={{
+                          width: 7, height: 7, borderRadius: '50%', border: 'none', padding: 0,
+                          background: i === selectedIdx ? '#b060ff' : 'rgba(255,255,255,0.18)',
+                          cursor: 'pointer', transition: 'background 0.2s, transform 0.2s',
+                          transform: i === selectedIdx ? 'scale(1.5)' : 'scale(1)',
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* Event list — past / upcoming / live siblings */}
+          {(leftEvents.length > 0 || rightEvents.length > 0) && (
+            <div style={{ flexShrink: 0 }}>
+              {/* Section header */}
+              {rightEvents.length > 0 && (
+                <h3 style={{
+                  margin: '0 0 12px', fontSize: '0.7rem', fontWeight: 500,
+                  fontFamily: "'Orbitron', sans-serif", color: rightColor,
+                  letterSpacing: '0.12em', textTransform: 'uppercase',
+                  paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.06)',
+                }}>{rightTitle}</h3>
+              )}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {rightEvents.map((ev, i) => (
+                  <SideCard
                     key={i}
-                    onClick={() => setSelectedIdx(i)}
-                    style={{
-                      width: 8, height: 8, borderRadius: '50%', border: 'none',
-                      background: i === selectedIdx ? '#b060ff' : 'rgba(255,255,255,0.15)',
-                      cursor: 'pointer', transition: 'background 0.2s, transform 0.2s',
-                      transform: i === selectedIdx ? 'scale(1.4)' : 'scale(1)',
+                    event={ev}
+                    onClick={() => {
+                      const realIdx = upcomingEvents.indexOf(ev)
+                      if (realIdx !== -1) setSelectedIdx(realIdx)
                     }}
                   />
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Right */}
-          <SideColumn
-            title={rightTitle}
-            events={rightEvents}
-            color={rightColor}
-            onClickEvent={tab === 'live' ? undefined : undefined}
-          />
+          {/* Left side events (past / live when on past tab) */}
+          {leftEvents.length > 0 && (
+            <div style={{ flexShrink: 0 }}>
+              <h3 style={{
+                margin: '0 0 12px', fontSize: '0.7rem', fontWeight: 500,
+                fontFamily: "'Orbitron', sans-serif", color: leftColor,
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.06)',
+              }}>{leftTitle}</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {leftEvents.map((ev, i) => (
+                  <SideCard
+                    key={i}
+                    event={ev}
+                    onClick={() => {
+                      const realIdx = pastEvents.indexOf(ev)
+                      if (realIdx !== -1) setSelectedIdx(realIdx)
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
+
       </div>
 
       <style>{`
