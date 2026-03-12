@@ -16,7 +16,155 @@ interface Event {
 
 // 1. Master List of Events (Currently Empty)
 const allEvents: Event[] = [
-  // Add your Old Mess events here!
+  /* ── 13 MARCH EVENTS (OLD MESS) ── */
+  {
+    title: "BEAD IT UP, PRESS AND PAINT / SCRIBBLES",
+    date: "13 March, 2026", time: "12:30 pm - 4 pm", venue: "OLD MESS (AB1 ENTRY)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T16:00:00",
+  },
+  {
+    title: "Ludo Clash / Convergence",
+    date: "13 March, 2026", time: "12:30 pm - 4 pm", venue: "OLD MESS (AB2 ENTRY LEFT SIDE)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T16:00:00",
+  },
+  {
+    title: "Noodle vs Newton / Heritage Club",
+    date: "13 March, 2026", time: "12:30 pm - 4 pm", venue: "OLD MESS (LEFT SIDE OF FOUNTAIN)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T16:00:00",
+  },
+  {
+    title: "Human Foosball 3.0 / Enactus MUJ",
+    date: "13 March, 2026", time: "12:30 pm - 4 pm", venue: "OLD MESS (AB1 ENTRY LEFT SIDE)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T16:00:00",
+  },
+  {
+    title: "Craft & Connect / D club",
+    date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (RIGHT SIDE OF FOUNTAIN)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "The Kintsugi Experience: Art of Resilience / Teach for India",
+    date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (AB2 ENTRY)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "Student of The Year / Olympism Club",
+    date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (AB2 ENTRY RIGHT SIDE)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "Game Corner / Earth Club",
+    date: "13 March, 2026", time: "12:30 pm - 3 pm", venue: "OLD MESS (AB1 ENTRY RIGHT SIDE)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T15:00:00",
+  },
+  {
+    title: "CONSUMER PROTECTION CELL",
+    date: "13 March, 2026", time: "3 pm - 5 pm", venue: "OLD MESS (AB1 ENTRY RIGHT SIDE)",
+    description: "", image: "",
+    startTime: "2026-03-13T15:00:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "CLUEMINATI-2.0 / LEARNIT",
+    date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (FIRST FLOOR LEFT SIDE AB1)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "Campus Drop BGMI Gaming Event (Esports) / Centaurus Arena Club",
+    date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (FIRST FLOOR RIGHT SIDE AB1)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "Serpent And Spells, The Today's show, The Paint Whispers / CYPHER",
+    date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (FIRST FLOOR RIGHT SIDE AB2)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "SCAVENGER HUNT 4.0 / MARKSOC",
+    date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (FIRST FLOOR LEFT SIDE AB2)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "ARTVERSE / APERTURE",
+    date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "OLD MESS (FOUNTAIN AREA)",
+    description: "", image: "",
+    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+  },
+
+  /* ── 14 MARCH EVENTS (OLD MESS) ── */
+  {
+    title: "BEAD IT UP, PRESS AND PAINT / SCRIBBLES",
+    date: "14 March, 2026", time: "10 am - 4:30 pm", venue: "OLD MESS (AB1 ENTRY)",
+    description: "", image: "",
+    startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T16:30:00",
+  },
+  {
+    title: "Ludo Clash / Convergence",
+    date: "14 March, 2026", time: "9 am - 4:30 pm", venue: "OLD MESS (AB2 ENTRY LEFT SIDE)",
+    description: "", image: "",
+    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T16:30:00",
+  },
+  {
+    title: "Human Foosball 3.0 / Enactus MUJ",
+    date: "14 March, 2026", time: "10 am - 4:30 pm", venue: "OLD MESS (AB1 ENTRY LEFT SIDE)",
+    description: "", image: "",
+    startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T16:30:00",
+  },
+  {
+    title: "Serpent And Spells, The Today's show, The Paint Whispers / CYPHER",
+    date: "14 March, 2026", time: "9 am - 5 pm", venue: "OLD MESS (RIGHT SIDE OF FOUNTAIN)",
+    description: "", image: "",
+    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
+  },
+  {
+    title: "The Kintsugi Experience: Art of Resilience / Teach for India",
+    date: "14 March, 2026", time: "9 am - 5 pm", venue: "OLD MESS (AB2 ENTRY)",
+    description: "", image: "",
+    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
+  },
+  {
+    title: "Student of The Year / Olympism Club",
+    date: "14 March, 2026", time: "9 am - 5 pm", venue: "OLD MESS (AB2 ENTRY RIGHT SIDE)",
+    description: "", image: "",
+    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
+  },
+  {
+    title: "FASHMOB / CACTUS",
+    date: "14 March, 2026", time: "1 pm - 4 pm", venue: "OLD MESS (AB1 ENTRY RIGHT SIDE)",
+    description: "", image: "",
+    startTime: "2026-03-14T13:00:00", endTime: "2026-03-14T16:00:00",
+  },
+  {
+    title: "ARTVERSE / APERTURE",
+    date: "14 March, 2026", time: "9 am - 5 pm", venue: "OLD MESS (FOUNTAIN AREA)",
+    description: "", image: "",
+    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
+  },
+
+  /* ── 15 MARCH EVENTS (OLD MESS) ── */
+  {
+    title: "The Kintsugi Experience: Art of Resilience / Teach for India",
+    date: "15 March, 2026", time: "9 am - 5 pm", venue: "OLD MESS (AB2 ENTRY)",
+    description: "", image: "",
+    startTime: "2026-03-15T09:00:00", endTime: "2026-03-15T17:00:00",
+  },
+  {
+    title: "ARTVERSE / APERTURE",
+    date: "15 March, 2026", time: "9 am - 5 pm", venue: "OLD MESS (FOUNTAIN AREA)",
+    description: "", image: "",
+    startTime: "2026-03-15T09:00:00", endTime: "2026-03-15T17:00:00",
+  }
 ]
 
 // 2. Fallback for when there are no live events
