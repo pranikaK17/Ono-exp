@@ -9,14 +9,101 @@ interface Event {
   description: string
   image: string
   link?: string
-  // ISO format strings for automatic time sorting
   startTime: string
   endTime: string
 }
 
-// 1. Master List of Events (Currently Empty)
+// 1. Master List of Events
 const allEvents: Event[] = [
-  // Add your LHC events here!
+  /* ── 13 MARCH EVENTS ── */
+  {
+    title: "Media Room – Aperture",
+    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 001",
+    description: "Aperture sets up its dedicated media hub in LHC 001. Behind-the-scenes documentation, content creation, and the visual heartbeat of Oneiros — all in one room.",
+    image: "",
+    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "Green Rooms – Destival",
+    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 002, 003, 004",
+    description: "Destival's backstage nerve centre. Artists prep, costumes get finalised, and performers warm up across three green rooms — the calm before the storm.",
+    image: "",
+    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "BEHAS – Litmus",
+    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 101, 102",
+    description: "Litmus brings BEHAS to the LHC floors — a full-day debate and discourse marathon. Sharp arguments, sharper comebacks, and ideas that refuse to stay quiet.",
+    image: "",
+    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "Spot Photography – Aperture",
+    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 103",
+    description: "Aperture's Spot Photography challenge puts your instincts to the test. A theme is revealed — you have hours to shoot, frame, and submit your best work.",
+    image: "",
+    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "SkyRise – IEI / Nukkad Nattak – Pratishodh",
+    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 104",
+    description: "A shared stage for two distinct visions: IEI's SkyRise brings structural innovation, while Pratishodh's Nukkad Nattak delivers raw street theatre with social impact.",
+    image: "",
+    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
+  },
+  {
+    title: "The Captain's Secret Hunt – ISA MUJ",
+    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 201, 202",
+    description: "ISA MUJ launches a full-day mystery hunt across the LHC. Decode clues, follow the trail of the Captain, and race to uncover the secret before the day ends.",
+    image: "",
+    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
+  },
+
+  /* ── 14 MARCH EVENTS ── */
+  {
+    title: "Media Room – Aperture",
+    date: "14 March, 2026", time: "9 am - 5 pm", venue: "LHC 001",
+    description: "Day 2 of Aperture's media operations. The lens never sleeps — capturing the best moments of Oneiros as the festival hits its peak.",
+    image: "",
+    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
+  },
+  {
+    title: "Green Rooms – Requiem & Cosmos",
+    date: "14 March, 2026", time: "9 am - 5 pm", venue: "LHC 002, 003, 004",
+    description: "The green rooms shift to Requiem and Cosmos on Day 2. Their performers and crews prepare across three rooms, ready to bring their dark and cosmic visions to life.",
+    image: "",
+    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
+  },
+  {
+    title: "Spot Photography – Aperture",
+    date: "14 March, 2026", time: "9 am - 5 pm", venue: "LHC 103",
+    description: "Day 2 of Spot Photography — a fresh theme, a fresh challenge. Aperture's photographers roam the campus hunting for the perfect frame against the clock.",
+    image: "",
+    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
+  },
+
+  /* ── 15 MARCH EVENTS ── */
+  {
+    title: "Media Room – Aperture",
+    date: "15 March, 2026", time: "9 am - 5 pm", venue: "LHC 001",
+    description: "The final day of Aperture's media coverage. The team works overtime to capture the closing performances and moments of Oneiros 2026.",
+    image: "",
+    startTime: "2026-03-15T09:00:00", endTime: "2026-03-15T17:00:00",
+  },
+  {
+    title: "Green Rooms – Requiem & Cosmos",
+    date: "15 March, 2026", time: "9 am - 5 pm", venue: "LHC 002, 003, 004",
+    description: "The final round of Requiem and Cosmos prepares backstage. Performers take their last moments in the green rooms before the curtain rises one final time.",
+    image: "",
+    startTime: "2026-03-15T09:00:00", endTime: "2026-03-15T17:00:00",
+  },
+  {
+    title: "Spot Photography – Aperture",
+    date: "15 March, 2026", time: "9 am - 5 pm", venue: "LHC 103",
+    description: "The closing edition of Spot Photography. Submissions are reviewed, winners announced, and Aperture celebrates three days of extraordinary visual storytelling.",
+    image: "",
+    startTime: "2026-03-15T09:00:00", endTime: "2026-03-15T17:00:00",
+  },
 ]
 
 // 2. Fallback for when there are no live events
@@ -42,33 +129,55 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
       border: '1px solid rgba(251,113,133,0.25)',
       borderRadius: 16,
       overflow: 'hidden',
-      height: '100%',
     }}>
+      {event.image ? (
+        <div style={{
+          flex: 1, minHeight: 220,
+          background: `url(${event.image}) center/cover`,
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-start',
+          position: 'relative',
+        }}>
+          {badge && (
+            <div style={{
+              position: 'absolute', top: 16, left: 16,
+              background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(220,50,80,0.78)',
+              color: '#fff', fontSize: '0.65rem', fontWeight: 700,
+              fontFamily: "'Orbitron', sans-serif",
+              padding: '4px 14px', borderRadius: 6,
+              letterSpacing: '0.12em', textTransform: 'uppercase',
+              animation: badge === '● LIVE' ? 'pulse-live 2s ease-in-out infinite' : undefined,
+            }}>{badge}</div>
+          )}
+        </div>
+      ) : (
+        <div style={{
+          height: 6,
+          background: badge === '● LIVE'
+            ? 'linear-gradient(90deg, #ff3232, #ff6b6b)'
+            : 'linear-gradient(90deg, rgba(220,50,80,0.8), rgba(251,113,133,0.6))',
+        }} />
+      )}
+
       <div style={{
-        flex: 1, minHeight: 220,
-        background: event.image
-          ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(190,30,60,0.1), rgba(251,113,133,0.07))',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        position: 'relative',
+        padding: '28px 50px', background: 'rgba(0,0,0,0.3)',
+        borderTop: event.image ? '1px solid rgba(251,113,133,0.1)' : 'none',
+        flex: 1, display: 'flex', flexDirection: 'column',
       }}>
-        {!event.image && <span style={{ fontSize: 72, color: 'rgba(255,255,255,0.06)' }}>◬</span>}
-        {badge && (
+        {!event.image && badge && (
           <div style={{
-            position: 'absolute', top: 16, left: 16,
-            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(220,50,80,0.78)',
-            color: '#fff', fontSize: '0.65rem', fontWeight: 700,
+            display: 'inline-block', alignSelf: 'flex-start',
+            background: badge === '● LIVE' ? 'rgba(255,50,50,0.85)' : 'rgba(251,113,133,0.2)',
+            border: `1px solid ${badge === '● LIVE' ? 'rgba(255,80,80,0.6)' : 'rgba(251,113,133,0.5)'}`,
+            color: badge === '● LIVE' ? '#ff6b6b' : '#fb7185',
+            fontSize: '0.65rem', fontWeight: 700,
             fontFamily: "'Orbitron', sans-serif",
             padding: '4px 14px', borderRadius: 6,
             letterSpacing: '0.12em', textTransform: 'uppercase',
+            marginBottom: 16,
             animation: badge === '● LIVE' ? 'pulse-live 2s ease-in-out infinite' : undefined,
           }}>{badge}</div>
         )}
-      </div>
-      <div style={{
-        padding: '24px 28px', background: 'rgba(0,0,0,0.3)',
-        borderTop: '1px solid rgba(251,113,133,0.1)',
-      }}>
+
         <h2 style={{
           margin: 0, fontSize: '1.35rem', fontWeight: 700,
           fontFamily: "'Orbitron', sans-serif", color: '#fff0f2',
@@ -131,55 +240,25 @@ function SideCard({ event, onClick }: { event: Event; onClick?: () => void }) {
         e.currentTarget.style.transform = 'translateY(0)'
       }}
     >
-      <div style={{
-        height: 80,
-        background: event.image
-          ? `url(${event.image}) center/cover`
-          : 'linear-gradient(135deg, rgba(190,30,60,0.1), rgba(251,113,133,0.07))',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 24, color: 'rgba(255,255,255,0.12)',
-      }}>
-        {!event.image && '◬'}
-      </div>
-      <div style={{ padding: '10px 12px' }}>
+      {event.image && (
+        <div style={{ height: 80, background: `url(${event.image}) center/cover` }} />
+      )}
+      <div style={{ padding: '12px 14px' }}>
         <h4 style={{
           margin: 0, fontSize: '0.78rem', fontWeight: 600,
           fontFamily: "'Orbitron', sans-serif", color: '#ffd6dc', lineHeight: 1.3,
         }}>{event.title}</h4>
         <div style={{
-          marginTop: 4, fontSize: '0.62rem',
+          marginTop: 5, fontSize: '0.62rem',
           color: 'rgba(251,113,133,0.75)', fontFamily: "'Exo 2', sans-serif",
           letterSpacing: '0.05em', textTransform: 'uppercase',
-        }}>
-          {event.date} · {event.time}
-        </div>
+        }}>{event.date}</div>
+        <div style={{
+          marginTop: 2, fontSize: '0.65rem', fontWeight: 600,
+          color: '#fb7185', fontFamily: "'Exo 2', sans-serif",
+          letterSpacing: '0.04em',
+        }}>{event.time}</div>
       </div>
-    </div>
-  )
-}
-
-/* ── Side column wrapper ─────────────────────────────────────────────────── */
-function SideColumn({ title, events, color, onClickEvent }: {
-  title: string; events: Event[]; color: string; onClickEvent?: (i: number) => void
-}) {
-  if (events.length === 0) return null; // Gracefully hide if no events in this column
-  
-  return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', gap: 14,
-      overflowY: 'auto', padding: '0 8px',
-      scrollbarWidth: 'thin',
-      scrollbarColor: 'rgba(251,113,133,0.15) transparent',
-    }}>
-      <h3 style={{
-        margin: 0, fontSize: '0.7rem', fontWeight: 500,
-        fontFamily: "'Orbitron', sans-serif", color,
-        letterSpacing: '0.12em', textTransform: 'uppercase',
-        paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.06)',
-      }}>{title}</h3>
-      {events.map((ev, i) => (
-        <SideCard key={i} event={ev} onClick={() => onClickEvent?.(i)} />
-      ))}
     </div>
   )
 }
@@ -195,34 +274,17 @@ const tabStyle = (active: boolean): React.CSSProperties => ({
   cursor: 'pointer', transition: 'all 0.25s', backdropFilter: 'blur(6px)',
 })
 
-/* ── Arrow button style ──────────────────────────────────────────────────── */
-const arrowBtnStyle: React.CSSProperties = {
-  position: 'absolute', top: '50%', transform: 'translateY(-50%)',
-  zIndex: 10, width: 40, height: 40, borderRadius: '50%',
-  background: 'rgba(251,113,133,0.15)', border: '1px solid rgba(251,113,133,0.5)',
-  color: '#fb7185', fontSize: '1.4rem', fontWeight: 700,
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  backdropFilter: 'blur(8px)', transition: 'all 0.2s',
-  boxShadow: '0 0 14px rgba(251,113,133,0.2)',
-}
-
 /* ── Main component ──────────────────────────────────────────────────────── */
 export default function LHC({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
-  
-  // State to track current time
   const [now, setNow] = useState(new Date())
 
-  // Update current time every 60 seconds
   useEffect(() => {
-    const interval = setInterval(() => {
-      setNow(new Date())
-    }, 60000)
+    const interval = setInterval(() => setNow(new Date()), 60000)
     return () => clearInterval(interval)
   }, [])
 
-  // Filter events based on time
   const pastEvents = allEvents.filter(e => new Date(e.endTime) < now)
   const upcomingEvents = allEvents.filter(e => new Date(e.startTime) > now)
   const liveEvents = allEvents.filter(
@@ -231,25 +293,27 @@ export default function LHC({ onClose }: { onClose: () => void }) {
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-  const centerEvent = 
-    tab === 'live' 
+  const centerEvent =
+    tab === 'live'
       ? (liveEvents.length > 0 ? liveEvents[0] : noLiveEventFallback)
-      : tab === 'upcoming' 
+      : tab === 'upcoming'
         ? (upcomingEvents[selectedIdx] || upcomingEvents[0])
         : (pastEvents[selectedIdx] || pastEvents[0])
 
-  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE' 
-                    : tab === 'live' ? 'OFFLINE' 
-                    : tab === 'upcoming' ? 'UPCOMING' 
+  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE'
+                    : tab === 'live' ? 'OFFLINE'
+                    : tab === 'upcoming' ? 'UPCOMING'
                     : 'PAST'
 
   const leftTitle = tab === 'past' ? 'Happening Now' : 'Past Events'
   const leftEvents = tab === 'past' ? liveEvents : pastEvents
   const leftColor = tab === 'past' ? '#ff6b6b' : 'rgba(255,255,255,0.3)'
 
-  const rightTitle = tab === 'upcoming' ? 'Happening Now' : 'Upcoming'
-  const rightEvents = tab === 'upcoming' ? liveEvents : upcomingEvents
-  const rightColor = tab === 'upcoming' ? '#ff6b6b' : '#fb7185'
+  const rightTitle = tab === 'upcoming' ? 'All Events' : 'Upcoming'
+  const rightEvents = tab === 'upcoming'
+    ? upcomingEvents.filter((_, i) => i !== selectedIdx)
+    : upcomingEvents
+  const rightColor = '#fb7185'
 
   return (
     <div
@@ -282,98 +346,136 @@ export default function LHC({ onClose }: { onClose: () => void }) {
           </button>
         </div>
 
-        {/* ── Three-column layout ── */}
-        <div className="lhc-grid" style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 2fr 1fr',
-          gap: 24, flex: 1, minHeight: 0,
-        }}>
-          {/* Left */}
-          <SideColumn
-            title={leftTitle}
-            events={leftEvents}
-            color={leftColor}
-          />
+        {/* ── Vertical layout ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, flex: 1, minHeight: 0, overflowY: 'auto', paddingRight: 4 }}>
 
-          {/* Center — animated swap with arrows */}
-          <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-            <div style={{ flex: 1, position: 'relative' }}>
-              {/* Pagination Arrows - Only show if there's more than 1 item */}
-              {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
-                <>
-                  <button
-                    onClick={() => setSelectedIdx(i => Math.max(0, i - 1))}
-                    disabled={selectedIdx === 0}
-                    style={{
-                      ...arrowBtnStyle,
-                      left: 8,
-                      opacity: selectedIdx === 0 ? 0.25 : 1,
-                      cursor: selectedIdx === 0 ? 'default' : 'pointer',
-                    }}
-                  >‹</button>
-                  <button
-                    onClick={() => {
-                      const max = (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1
-                      setSelectedIdx(i => Math.min(max, i + 1))
-                    }}
-                    disabled={selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1}
-                    style={{
-                      ...arrowBtnStyle,
-                      right: 8,
-                      opacity: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 0.25 : 1,
-                      cursor: selectedIdx === (tab === 'upcoming' ? upcomingEvents : pastEvents).length - 1 ? 'default' : 'pointer',
-                    }}
-                  >›</button>
-                </>
-              )}
-              
-              {/* Featured Event Render */}
-              {centerEvent ? (
-                <div
-                  key={tab + selectedIdx}
-                  style={{
-                    height: '100%',
-                    animation: 'lhc-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)',
-                  }}
-                >
-                  <FeaturedEventCard event={centerEvent} badge={centerBadge} />
-                </div>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>
-                  No events found.
-                </div>
-              )}
-            </div>
+          {/* Featured Event + navigation */}
+          {(() => {
+            const navList = tab === 'upcoming' ? upcomingEvents : tab === 'past' ? pastEvents : []
+            const showNav = tab !== 'live' && navList.length > 1
+            return (
+              <div style={{ flexShrink: 0 }}>
+                <div style={{ position: 'relative' }}>
+                  {showNav && (
+                    <button
+                      onClick={() => setSelectedIdx(i => Math.max(0, i - 1))}
+                      disabled={selectedIdx === 0}
+                      style={{
+                        position: 'absolute', top: '50%', left: 10,
+                        transform: 'translateY(-50%)', zIndex: 10,
+                        width: 26, height: 26, borderRadius: '50%',
+                        background: 'rgba(251,113,133,0.18)',
+                        border: '1px solid rgba(251,113,133,0.45)',
+                        color: '#fb7185', fontSize: '1rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backdropFilter: 'blur(8px)', transition: 'all 0.2s',
+                        opacity: selectedIdx === 0 ? 0.2 : 1,
+                        cursor: selectedIdx === 0 ? 'default' : 'pointer',
+                      }}
+                    >‹</button>
+                  )}
 
-            {/* Dot indicators - Only show if there's more than 1 item */}
-            {tab !== 'live' && (tab === 'upcoming' ? upcomingEvents : pastEvents).length > 1 && (
-              <div style={{
-                display: 'flex', justifyContent: 'center', gap: 10,
-                marginTop: 16, flexShrink: 0,
-              }}>
-                {(tab === 'upcoming' ? upcomingEvents : pastEvents).map((_, i) => (
-                  <button
+                  <div
+                    key={tab + selectedIdx}
+                    style={{ animation: 'lhc-center-in 0.4s cubic-bezier(0.22, 1, 0.36, 1)' }}
+                  >
+                    {centerEvent ? (
+                      <FeaturedEventCard event={centerEvent} badge={centerBadge} />
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 40, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>
+                        No events found.
+                      </div>
+                    )}
+                  </div>
+
+                  {showNav && (
+                    <button
+                      onClick={() => setSelectedIdx(i => Math.min(navList.length - 1, i + 1))}
+                      disabled={selectedIdx === navList.length - 1}
+                      style={{
+                        position: 'absolute', top: '50%', right: 10,
+                        transform: 'translateY(-50%)', zIndex: 10,
+                        width: 26, height: 26, borderRadius: '50%',
+                        background: 'rgba(251,113,133,0.18)',
+                        border: '1px solid rgba(251,113,133,0.45)',
+                        color: '#fb7185', fontSize: '1rem',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backdropFilter: 'blur(8px)', transition: 'all 0.2s',
+                        opacity: selectedIdx === navList.length - 1 ? 0.2 : 1,
+                        cursor: selectedIdx === navList.length - 1 ? 'default' : 'pointer',
+                      }}
+                    >›</button>
+                  )}
+                </div>
+
+                {/* Dot indicators */}
+                {showNav && (
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 14 }}>
+                    {navList.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedIdx(i)}
+                        style={{
+                          width: 7, height: 7, borderRadius: '50%', border: 'none', padding: 0,
+                          background: i === selectedIdx ? '#fb7185' : 'rgba(255,255,255,0.18)',
+                          cursor: 'pointer', transition: 'background 0.2s, transform 0.2s',
+                          transform: i === selectedIdx ? 'scale(1.5)' : 'scale(1)',
+                        }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })()}
+
+          {/* Other upcoming events list */}
+          {rightEvents.length > 0 && (
+            <div style={{ flexShrink: 0 }}>
+              <h3 style={{
+                margin: '0 0 12px', fontSize: '0.7rem', fontWeight: 500,
+                fontFamily: "'Orbitron', sans-serif", color: rightColor,
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.06)',
+              }}>{rightTitle}</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {rightEvents.map((ev, i) => (
+                  <SideCard
                     key={i}
-                    onClick={() => setSelectedIdx(i)}
-                    style={{
-                      width: 8, height: 8, borderRadius: '50%', border: 'none',
-                      background: i === selectedIdx ? '#fb7185' : 'rgba(255,255,255,0.15)',
-                      cursor: 'pointer', transition: 'background 0.2s, transform 0.2s',
-                      transform: i === selectedIdx ? 'scale(1.4)' : 'scale(1)',
+                    event={ev}
+                    onClick={() => {
+                      const realIdx = upcomingEvents.indexOf(ev)
+                      if (realIdx !== -1) setSelectedIdx(realIdx)
                     }}
                   />
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Right */}
-          <SideColumn
-            title={rightTitle}
-            events={rightEvents}
-            color={rightColor}
-            onClickEvent={tab === 'live' ? undefined : undefined}
-          />
+          {/* Past / live sibling events */}
+          {leftEvents.length > 0 && (
+            <div style={{ flexShrink: 0 }}>
+              <h3 style={{
+                margin: '0 0 12px', fontSize: '0.7rem', fontWeight: 500,
+                fontFamily: "'Orbitron', sans-serif", color: leftColor,
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.06)',
+              }}>{leftTitle}</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {leftEvents.map((ev, i) => (
+                  <SideCard
+                    key={i}
+                    event={ev}
+                    onClick={() => {
+                      const realIdx = pastEvents.indexOf(ev)
+                      if (realIdx !== -1) setSelectedIdx(realIdx)
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -386,19 +488,9 @@ export default function LHC({ onClose }: { onClose: () => void }) {
           from { opacity: 0; transform: scale(0.94) translateY(12px); }
           to   { opacity: 1; transform: scale(1) translateY(0); }
         }
-
-        /* ── Mobile: stack columns top-to-bottom ── */
         @media (max-width: 768px) {
-          .lhc-grid {
-            grid-template-columns: 1fr !important;
-            overflow-y: auto;
-            flex: unset !important;
-            min-height: unset !important;
-          }
-
-          .lhc-grid > div {
-            min-height: unset !important;
-          }
+          .lhc-grid { grid-template-columns: 1fr !important; overflow-y: auto; flex: unset !important; min-height: unset !important; }
+          .lhc-grid > div { min-height: unset !important; }
         }
       `}</style>
     </div>
