@@ -16,94 +16,81 @@ interface Event {
 // 1. Master List of Events
 const allEvents: Event[] = [
   /* ── 13 MARCH EVENTS ── */
-  {
-    title: "Media Room – Aperture",
-    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 001",
-    description: "Aperture sets up its dedicated media hub in LHC 001. Behind-the-scenes documentation, content creation, and the visual heartbeat of Oneiros — all in one room.",
-    image: "",
-    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
-  },
-  {
-    title: "Green Rooms – Destival",
-    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 002, 003, 004",
-    description: "Destival's backstage nerve centre. Artists prep, costumes get finalised, and performers warm up across three green rooms — the calm before the storm.",
-    image: "",
-    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
-  },
-  {
-    title: "BEHAS – Litmus",
-    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 101, 102",
-    description: "Litmus brings BEHAS to the LHC floors — a full-day debate and discourse marathon. Sharp arguments, sharper comebacks, and ideas that refuse to stay quiet.",
-    image: "",
-    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
-  },
-  {
-    title: "Spot Photography – Aperture",
-    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 103",
-    description: "Aperture's Spot Photography challenge puts your instincts to the test. A theme is revealed — you have hours to shoot, frame, and submit your best work.",
-    image: "",
-    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
-  },
-  {
-    title: "SkyRise – IEI / Nukkad Nattak – Pratishodh",
-    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 104",
-    description: "A shared stage for two distinct visions: IEI's SkyRise brings structural innovation, while Pratishodh's Nukkad Nattak delivers raw street theatre with social impact.",
-    image: "",
-    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
-  },
-  {
-    title: "The Captain's Secret Hunt – ISA MUJ",
-    date: "13 March, 2026", time: "9 am - 5 pm", venue: "LHC 201, 202",
-    description: "ISA MUJ launches a full-day mystery hunt across the LHC. Decode clues, follow the trail of the Captain, and race to uncover the secret before the day ends.",
-    image: "",
-    startTime: "2026-03-13T09:00:00", endTime: "2026-03-13T17:00:00",
-  },
+{
+  title: "Media Room – Aperture",
+  date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "LHC 001",
+  description: "Aperture sets up its dedicated media hub in LHC 001. Behind-the-scenes documentation, content creation, and the visual heartbeat of Oneiros — all in one room.",
+  image: "",
+  startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+},
+{
+  title: "Green Rooms – Destival",
+  date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "LHC 002, 003, 004",
+  description: "Destival's backstage nerve centre. Artists prep, costumes get finalised, and performers warm up across three green rooms — the calm before the storm.",
+  image: "",
+  startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+},
+{
+  title: "The Captain's Secret Hunt – ISA MUJ",
+  date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "LHC 201, 202",
+  description: "ISA MUJ launches a full-day mystery hunt across the LHC. Decode clues, follow the trail of the Captain, and race to uncover the secret before the day ends.",
+  image: "",
+  startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+},
+{
+  title: "Spot Photography – Aperture",
+  date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "LHC 103",
+  description: "Aperture's Spot Photography challenge puts your instincts to the test. A theme is revealed — you have hours to shoot, frame, and submit your best work.",
+  image: "",
+  startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
+},
 
   /* ── 14 MARCH EVENTS ── */
-  {
-    title: "Media Room – Aperture",
-    date: "14 March, 2026", time: "9 am - 5 pm", venue: "LHC 001",
-    description: "Day 2 of Aperture's media operations. The lens never sleeps — capturing the best moments of Oneiros as the festival hits its peak.",
-    image: "",
-    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
-  },
-  {
-    title: "Green Rooms – Requiem & Cosmos",
-    date: "14 March, 2026", time: "9 am - 5 pm", venue: "LHC 002, 003, 004",
-    description: "The green rooms shift to Requiem and Cosmos on Day 2. Their performers and crews prepare across three rooms, ready to bring their dark and cosmic visions to life.",
-    image: "",
-    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
-  },
-  {
-    title: "Spot Photography – Aperture",
-    date: "14 March, 2026", time: "9 am - 5 pm", venue: "LHC 103",
-    description: "Day 2 of Spot Photography — a fresh theme, a fresh challenge. Aperture's photographers roam the campus hunting for the perfect frame against the clock.",
-    image: "",
-    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
-  },
+{
+  title: "Media Room – Aperture",
+  date: "14 March, 2026", time: "10 am - 5 pm", venue: "LHC 001",
+  description: "Day 2 of Aperture's media operations — Artverse edition. The lens never sleeps, capturing the best moments of Oneiros as the festival hits its peak.",
+  image: "",
+  startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T17:00:00",
+},
+{
+  title: "Green Rooms – Requiem & Cosmos",
+  date: "14 March, 2026", time: "10 am - 5 pm", venue: "LHC 002, 003, 004",
+  description: "The green rooms shift to Requiem and Cosmos on Day 2. Performers and crews prepare across three rooms, ready to bring their dark and cosmic visions to life.",
+  image: "",
+  startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T17:00:00",
+},
+{
+  title: "LITMUS – BEHAS",
+  date: "14 March, 2026", time: "10 am - 5 pm", venue: "LHC 101, 102",
+  description: "Litmus brings BEHAS back for Day 2 — a full-day debate and discourse marathon. Sharp arguments, sharper comebacks, and ideas that refuse to stay quiet.",
+  image: "",
+  startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T17:00:00",
+},
+{
+  title: "Spot Photography – Aperture",
+  date: "14 March, 2026", time: "10 am - 5 pm", venue: "LHC 103",
+  description: "Day 2 of Spot Photography — a fresh theme, a fresh challenge. Aperture's photographers roam the campus hunting for the perfect frame against the clock.",
+  image: "",
+  startTime: "2026-03-14T10:00:00", endTime: "2026-03-14T17:00:00",
+},
 
   /* ── 15 MARCH EVENTS ── */
-  {
-    title: "Media Room – Aperture",
-    date: "15 March, 2026", time: "9 am - 5 pm", venue: "LHC 001",
-    description: "The final day of Aperture's media coverage. The team works overtime to capture the closing performances and moments of Oneiros 2026.",
-    image: "",
-    startTime: "2026-03-15T09:00:00", endTime: "2026-03-15T17:00:00",
-  },
-  {
-    title: "Green Rooms – Requiem & Cosmos",
-    date: "15 March, 2026", time: "9 am - 5 pm", venue: "LHC 002, 003, 004",
-    description: "The final round of Requiem and Cosmos prepares backstage. Performers take their last moments in the green rooms before the curtain rises one final time.",
-    image: "",
-    startTime: "2026-03-15T09:00:00", endTime: "2026-03-15T17:00:00",
-  },
-  {
-    title: "Spot Photography – Aperture",
-    date: "15 March, 2026", time: "9 am - 5 pm", venue: "LHC 103",
-    description: "The closing edition of Spot Photography. Submissions are reviewed, winners announced, and Aperture celebrates three days of extraordinary visual storytelling.",
-    image: "",
-    startTime: "2026-03-15T09:00:00", endTime: "2026-03-15T17:00:00",
-  },
+  /* ── 15 MARCH EVENTS ── */
+{
+  title: "Media Room – Aperture",
+  date: "15 March, 2026", time: "9 am - 5 pm", venue: "LHC 001",
+  description: "The final day of Aperture's media coverage. The team works overtime to capture the closing performances and moments of Oneiros 2026.",
+  image: "",
+  startTime: "2026-03-15T10:00:00", endTime: "2026-03-15T17:00:00",
+},
+{
+  title: "Spot Photography – Aperture",
+  date: "15 March, 2026", time: "9 am - 5 pm", venue: "LHC 103",
+  description: "The closing edition of Spot Photography. Submissions are reviewed, winners announced, and Aperture celebrates three days of extraordinary visual storytelling.",
+  image: "",
+  startTime: "2026-03-15T10:00:00", endTime: "2026-03-15T17:00:00",
+},
 ]
 
 // 2. Fallback for when there are no live events

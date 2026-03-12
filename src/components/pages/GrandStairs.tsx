@@ -18,31 +18,13 @@ interface Event {
 const allEvents: Event[] = [
   /* ── 13 MARCH EVENTS ── */
   {
-    title: "SkyRise / IEEE Student Chapter",
-    date: "13 March, 2026",
-    time: "3 pm - 5 pm",
-    venue: "Grand Staircase (LAWN)",
-    description: "", image: "",
-    startTime: "2026-03-13T15:00:00", endTime: "2026-03-13T17:00:00",
-  },
-  {
-    title: "Bachpan / Managia",
-    date: "13 March, 2026",
-    time: "12:30 pm - 5 pm",
-    venue: "Grand Staircase Terrace",
-    description: "Bachpan —a dedicated space to celebrate the innocence, the games, and the pure, unadulterated joy of our childhood", image: "",
-    startTime: "2026-03-13T12:30:00", endTime: "2026-03-13T17:00:00",
-  },
+  title: "SkyRise – IEI Student Chapter",
+  date: "13 March, 2026", time: "12:30 pm - 5 pm", venue: "Grand Staircase (Lawn)",
+  description: "IEI Student Chapter brings SkyRise to the Grand Staircase — a showcase of structural innovation and engineering creativity out in the open.",
+  image: "",
+  startTime: "2026-03-13T15:00:00", endTime: "2026-03-13T17:00:00",
+},
 
-  /* ── 14 MARCH EVENTS ── */
-  {
-    title: "Rajputana Royals / CACTUS",
-    date: "14 March, 2026",
-    time: "9 am - 5 pm",
-    venue: "Grand Staircase Terrace",
-    description: "", image: "",
-    startTime: "2026-03-14T09:00:00", endTime: "2026-03-14T17:00:00",
-  },
 
   /* ── 15 MARCH EVENTS ── */
   {
