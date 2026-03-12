@@ -19,32 +19,42 @@ const allEvents: Event[] = [
   {
     title: 'SHABD (Between The Lines)',
     date: 'Mar 13, 2026',
-    time: '9:00 AM – 10:00 AM',
+    time: '12:30 PM – 5:00 PM',
     venue: 'AB2 001, 002, 004',
     description: 'A literary event that celebrates the power of words, poetry, and storytelling. Step between the lines and discover meaning in every verse.',
     image: '',
-    startTime: '2026-03-13T09:00:00',
-    endTime: '2026-03-13T10:00:00',
+    startTime: '2026-03-13T12:30:00',
+    endTime: '2026-03-13T17:00:00',
   },
   {
     title: 'GOONJ (Kaun Banega Filmy Genius)',
     date: 'Mar 13, 2026',
-    time: '10:00 AM – 11:00 AM',
+    time: '12:30 PM – 5:00 PM',
     venue: 'AB2 019, 020, 021',
     description: 'Test your Bollywood knowledge in this fun and fast-paced film trivia competition. Who will be crowned the Filmy Genius?',
     image: '',
-    startTime: '2026-03-13T10:00:00',
-    endTime: '2026-03-13T11:00:00',
+    startTime: '2026-03-13T12:30:00',
+    endTime: '2026-03-13T17:00:00',
   },
   {
-    title: 'De Artistry Club',
+    title: 'Your Dreamscape - De Artistry Club',
     date: 'Mar 13, 2026',
-    time: '11:00 AM – 12:00 PM',
+    time: '12:30 PM – 4:00 PM',
     venue: 'AB2 201, 202, 203, 204, 205',
-    description: 'Your Dreamscape & The 2:17 AM Incident — an immersive art showcase where imagination runs wild. Explore surreal works and experience the uncanny.',
+    description: 'An immersive art showcase where imagination runs wild. Explore surreal works and experience the uncanny.',
     image: '',
-    startTime: '2026-03-13T11:00:00',
-    endTime: '2026-03-13T12:00:00',
+    startTime: '2026-03-13T12:30:00',
+    endTime: '2026-03-13T16:00:00',
+  },
+  {
+    title: 'The 2:17 AM Incident - De Artistry Club',
+    date: 'Mar 13, 2026',
+    time: '12:30 PM – 4:00 PM',
+    venue: 'AB2 201, 202, 203, 204, 205',
+    description: 'An immersive art showcase where imagination runs wild. Explore surreal works and experience the uncanny.',
+    image: '',
+    startTime: '2026-03-13T12:30:00',
+    endTime: '2026-03-13T16:00:00',
   },
   {
     title: "Pitcher's Craft (Project Blackout)",
@@ -59,21 +69,21 @@ const allEvents: Event[] = [
   {
     title: 'MARKSOC (Scavenger Hunt 4.0)',
     date: 'Mar 13, 2026',
-    time: '2:00 PM – 3:00 PM',
+    time: '12:30 PM – 5:00 PM',
     venue: 'AB2 101, 102, 104, 108, 116–122',
     description: 'The fourth edition of MARKSOC\'s legendary scavenger hunt. Race against the clock, solve clues, and outsmart the competition across the building.',
     image: '',
-    startTime: '2026-03-13T14:00:00',
-    endTime: '2026-03-13T15:00:00',
+    startTime: '2026-03-13T12:30:00',
+    endTime: '2026-03-13T17:00:00',
   },
   {
-    title: 'Cinefilia (Monologue Competition)',
+    title: 'Apex (Apex Metaverse)',
     date: 'Mar 13, 2026',
-    time: '3:30 PM – 5:00 PM',
+    time: '12:30 PM – 5:00 PM',
     venue: 'AB2 Gallery',
-    description: 'A solo performance competition where participants deliver powerful monologues that captivate and move the audience. Pure talent, one voice at a time.',
+    description: '',
     image: '',
-    startTime: '2026-03-13T15:30:00',
+    startTime: '2026-03-13T12:30:00',
     endTime: '2026-03-13T17:00:00',
   },
 ]
@@ -261,7 +271,7 @@ const tabStyle = (active: boolean): React.CSSProperties => ({
 export default function AB2({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<Tab>('live')
   const [selectedIdx, setSelectedIdx] = useState(0)
-  
+
   // State to track current time
   const [now, setNow] = useState(new Date())
 
@@ -282,17 +292,17 @@ export default function AB2({ onClose }: { onClose: () => void }) {
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
 
-  const centerEvent = 
-    tab === 'live' 
+  const centerEvent =
+    tab === 'live'
       ? (liveEvents.length > 0 ? liveEvents[0] : noLiveEventFallback)
-      : tab === 'upcoming' 
+      : tab === 'upcoming'
         ? (upcomingEvents[selectedIdx] || upcomingEvents[0])
         : (pastEvents[selectedIdx] || pastEvents[0])
 
-  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE' 
-                    : tab === 'live' ? 'OFFLINE' 
-                    : tab === 'upcoming' ? 'UPCOMING' 
-                    : 'PAST'
+  const centerBadge = tab === 'live' && liveEvents.length > 0 ? '● LIVE'
+    : tab === 'live' ? 'OFFLINE'
+      : tab === 'upcoming' ? 'UPCOMING'
+        : 'PAST'
 
   const leftTitle = tab === 'past' ? 'Happening Now' : 'Past Events'
   const leftEvents = tab === 'past' ? liveEvents : pastEvents
