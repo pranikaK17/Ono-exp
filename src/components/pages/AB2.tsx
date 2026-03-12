@@ -133,7 +133,7 @@ function FeaturedEventCard({ event, badge }: { event: Event; badge?: string }) {
       )}
 
       <div style={{
-        padding: '28px 30px', background: 'rgba(0,0,0,0.3)',
+        padding: '28px 50px', background: 'rgba(0,0,0,0.3)',
         borderTop: event.image ? '1px solid rgba(160,80,255,0.12)' : 'none',
         flex: 1, display: 'flex', flexDirection: 'column',
       }}>
