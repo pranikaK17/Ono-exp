@@ -565,6 +565,21 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           content: ''; width: 8px; height: 8px; background: #ff00ff; border-radius: 50%;
           box-shadow: 0 0 12px #ff00ff; animation: pulse-exit 1.5s infinite;
         }
+
+        #made-by {
+          position: fixed; bottom: 10px; left: 30px; z-index: 100;
+          padding: 12px 28px; background: rgba(0, 0, 0, 0.45);
+          border: 1px solid rgba(255, 0, 255, 0.45); border-radius: 50px;
+          color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em;
+          text-transform: uppercase;
+          backdrop-filter: blur(10px); display: flex; align-items: center; gap: 12px;
+          box-shadow: 0 0 20px rgba(255, 0, 255, 0.1);
+          user-select: none;
+        }
+        #made-by::before {
+          content: ''; width: 8px; height: 8px; background: #ff00ff; border-radius: 50%;
+          box-shadow: 0 0 12px #ff00ff; animation: pulse-exit 1.5s infinite;
+        }
         @keyframes pulse-exit {
           0% { transform: scale(1); opacity: 1; }
           50% { transform: scale(1.6); opacity: 0.5; }
@@ -579,6 +594,14 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
           }
           #exit-btn:hover {
             transform: translateX(-50%) scale(1.05);
+          }
+
+          #made-by {
+            bottom: 210px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: fit-content;
+            white-space: nowrap;
           }
         }
 
@@ -634,6 +657,7 @@ export default function Map({ onPinClick, activePage }: { onPinClick?: (page: st
 
       <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh' }}>
         <a href="https://mujoneiros.in" id="exit-btn">Exit Ono-experience</a>
+        <div id="made-by">Made With Love by MUJ ACM</div>
         <div ref={mountRef} style={{ width: '100%', height: '100%' }} />
         <div id="screentone" />
         <div id="map-loading">
